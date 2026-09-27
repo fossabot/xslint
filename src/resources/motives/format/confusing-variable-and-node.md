@@ -38,11 +38,17 @@ asked of another context node, so in
 `following-sibling::item[string(contrib) = $contrib]` the inner `contrib` is
 the child of each `item`, and no variable could stand in for it.
 
-A variable holding an atomic value is still worth the warning, but not the
-dollar sign. When its `select` is a string, a number or a call such as
-`string(contrib)`, or its `as` names an atomic type, `select="$contrib"` hands
-a string to an instruction that selects nodes, which is a type error. Rename
-the variable instead, or spell the child as `child::contrib`.
+A variable that may hold an atomic value is still worth the warning, but not
+the dollar sign. Only a few shapes are sure to yield nodes: a path or a step,
+another variable, a union, `intersect` or `except` of those, a filter over
+one, a `!` mapping onto one, and a call to `key`, `id`, `idref`,
+`element-with-id`, `document`, `doc`, `collection`, `root`, `outermost` or
+`innermost`. Anything else may not — a literal, `string(contrib)`,
+`upper-case(title)`, `count(part) + 1`, `@kind = 'x'`, `title/string()` — nor
+may a variable whose `as` names an atomic type. There `select="$contrib"`
+hands a string, a number or a boolean to an instruction that selects nodes,
+which is a type error. Rename the variable instead, or spell the child as
+`child::contrib`.
 
 A variable bound by *content* rather than by `select` is a different thing, and
 a bare name standing beside one is usually right. Its nodes form a tree of
