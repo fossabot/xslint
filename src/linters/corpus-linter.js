@@ -332,18 +332,22 @@ const readings = function(usage) {
  * to at the node spelling it and the local name, so `g:twice` calls `f:twice`
  * where both prefixes name one URI. An unprefixed name is a standard one, and
  * a prefix bound nowhere stays itself rather than meeting any other (#1008).
+ * A braced `Q{uri}local` names its namespace outright (#1073).
  * @param {Node} node - The node the name is spelled at
  * @param {string} spelled - The name as written
  * @return {string} - The expanded name, `{uri}local`
  */
 const expanded = function(node, spelled) {
   const colon = spelled.indexOf(':')
-  let uri = FUNCTIONS
-  if (colon > 0) {
+  let name = `{${FUNCTIONS}}${spelled.slice(colon + 1)}`
+  if (spelled.startsWith('Q{')) {
+    name = spelled.slice(1)
+  } else if (colon > 0) {
     const prefix = spelled.slice(0, colon)
-    uri = holding(node).lookupNamespaceURI(prefix) ?? `${prefix}:`
+    const uri = holding(node).lookupNamespaceURI(prefix) ?? `${prefix}:`
+    name = `{${uri}}${spelled.slice(colon + 1)}`
   }
-  return `{${uri}}${spelled.slice(colon + 1)}`
+  return name
 }
 
 /**
