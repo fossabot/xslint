@@ -407,6 +407,45 @@ const EXPECTS = /found\.(amount|positions|fixes|values)/
  */
 const READS = /dir: '([\w-]+-packs)'/g
 
+/**
+ * The most words a check's message may run to. Past it a message carries the
+ * derivation, which is the motive's job, and fills a terminal line four times
+ * over where the README quotes it (#1072).
+ * @type {number}
+ */
+const WORDS = 30
+
+/**
+ * Where one sentence of a message ends and the next opens: a stop, a gap, and
+ * a capital. A `.` standing alone as the context item, or inside `2.0` or a
+ * `(...)`, ends nothing, since no capital follows it.
+ * @type {RegExp}
+ */
+const STOP = /[.?!] (?=[A-Z])/g
+
+/**
+ * The shape of every check's message, each departure beside the question that
+ * finds it: two sentences, the fault and then the remedy, a period at the end,
+ * names bare rather than quoted, no dash, and no more than `WORDS` (#1072).
+ * @type {{[departure: string]: function(string): boolean}}
+ */
+const SHAPED = {
+  'is not two sentences': (message) => (message.match(STOP) ?? []).length !== 1,
+  'does not end with a period': (message) => !message.endsWith('.'),
+  'quotes a name': (message) => /'(xsl:|@)/.test(message),
+  'holds a dash': (message) => /[–—]| - /.test(message),
+  [`runs past ${WORDS} words`]: (message) => message.split(' ').length > WORDS,
+}
+
+/**
+ * Every way one message departs from `SHAPED`.
+ * @param {string} message - What a check tells the user
+ * @return {Array.<string>} - The departures, none for a message in shape
+ */
+const departures = function(message) {
+  return Object.keys(SHAPED).filter((departure) => SHAPED[departure](message))
+}
+
 describe('conformance', function() {
   it('keeps the generated checks abreast of the YAML that authors them', function() {
     assert.equal(
@@ -453,6 +492,44 @@ describe('conformance', function() {
       }
     }
   })
+  it('words every message as a fault and then its remedy', function() {
+    const found = {}
+    for (const kind of KINDS) {
+      for (const [name, check] of Object.entries(kinds[kind])) {
+        const departed = departures(check.message)
+        if (departed.length > 0) {
+          found[`${kind}/${name}`] = departed
+        }
+      }
+    }
+    assert.deepStrictEqual(
+      found, {},
+      [
+        'a check message departs from the one shape every message takes:',
+        'the fault, then the remedy, a period at the end, names bare, no',
+        `dash, and no more than ${WORDS} words, the derivation being the`,
+        'motive\'s to carry (#1072)',
+      ].join(' '),
+    )
+  })
+  for (const [message, departure] of [
+    ['A dot . stands for itself in 2.0 and later. Keep it.', undefined],
+    ['An xsl:if is empty. Fill it. Or drop it.', 'is not two sentences'],
+    ['An xsl:if is empty, so fill it or drop it.', 'is not two sentences'],
+    ['An xsl:if is empty. Fill it', 'does not end with a period'],
+    ['An \'xsl:if\' is empty. Fill it.', 'quotes a name'],
+    ['The \'@test\' is missing. Add it.', 'quotes a name'],
+    ['An xsl:if is empty — always. Fill it.', 'holds a dash'],
+    ['An xsl:if is empty - always. Fill it.', 'holds a dash'],
+    [`An xsl:if is${' very'.repeat(25)} empty. Fill it.`, `runs past ${WORDS} words`],
+  ]) {
+    it(`finds ${departure ?? 'nothing'} in "${message.slice(0, 40)}"`, function() {
+      assert.deepStrictEqual(
+        departures(message), [departure].filter(Boolean),
+        `the message gate does not read "${message}" as it should`,
+      )
+    })
+  }
   it('stands every nursery check on an open issue of its own', function() {
     assert.deepStrictEqual(
       nursed(), {},

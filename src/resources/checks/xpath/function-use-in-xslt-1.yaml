@@ -3,4 +3,4 @@
 ---
 xpath: "//xsl:function[xslint:version(.) < 2.0]"
 severity: error
-message: "'xsl:function' requires XSLT 2.0 or later, and the version in force here is below that. Use a named template, or raise that version to 2.0."
+message: "An xsl:function requires XSLT 2.0 or later, and the version in force here is below that. Use a named template, or raise that version to 2.0."

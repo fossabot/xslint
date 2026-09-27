@@ -504,7 +504,7 @@ Per-file rule — `src/resources/checks/xpath/<name>.yaml`:
 ```yaml
 xpath: <XPath selecting the violation nodes>
 severity: warning|error
-message: <one sentence, no trailing period>
+message: <the fault. The remedy.>
 fix: <optional safe|suggestion|[ safe, suggestion ]>
 ```
 
@@ -517,7 +517,7 @@ reference: <optional call|variable — the kind of reference to read>
 scoped: <optional true>
 reachable: <optional true>
 severity: warning|error
-message: <one sentence>
+message: <the fault. The remedy.>
 ```
 
 Without `reference`, a `declaration` is a defect when its `@name` matches no
@@ -535,9 +535,8 @@ or `scoped: true` (counts usage only within the declaration's subtree, or an
 importing file). Because usage is followed across files, a symbol defined in a
 `_funcs.xsl` library and used elsewhere is never flagged.
 
-Validator and format checks — `checks/{validation,format}/<name>.yaml` — carry
-only `severity` and `message`; their logic lives in code and the YAML just tunes
-those two.
+A validator or format YAML is `severity` and `message` alone. A message is
+two sentences, fault then remedy, in thirty words, names bare, no dash (#1072).
 
 A check of any kind may carry two more keys. `fix:` names the tier every fix it
 offers lands in — `safe`, `suggestion`, or both where the tier is the standing
