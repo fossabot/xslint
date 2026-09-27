@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: leaking-result-namespace
+# On a simplified root the unprefixed exclude-result-prefixes is a result
+# attribute, so the exclusion is written in the XSLT namespace, under the
+# prefix the document binds it to (#1040).
+found:
+  amount: 1
+  positions: [ [ 2, 54 ] ]
+  fixes: [ " tr:exclude-result-prefixes=\"xs\"" ]
+input: |-
+  <?xml version="1.0"?>
+  <out xmlns:tr="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" tr:version="2.0">
+    <tr:value-of select="7 cast as xs:integer"/>
+  </out>

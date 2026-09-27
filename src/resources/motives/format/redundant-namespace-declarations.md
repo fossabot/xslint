@@ -4,7 +4,9 @@ A namespace prefix declared on the `xsl:stylesheet` element but never used by
 any element name, attribute name, or qualified name inside an attribute value
 or a text value template is dead weight that misleads the reader and should be
 removed. A prefix is used where it qualifies a name, so the `i` of
-`xmlns:i` is not used by `tei:item`, whose prefix is `tei`.
+`xmlns:i` is not used by `tei:item`, whose prefix is `tei`, while
+`last()-tei:item` does use `tei`, the `-` subtracting rather than spelling part
+of a name. A prefix mentioned only inside an XPath comment qualifies nothing.
 
 Four attributes use a prefix without qualifying anything with it, and a prefix
 any of them names is in use:

@@ -392,6 +392,15 @@ const APPLIED = [
   },
   {
     name: [
+      'should exclude a leaking prefix of a simplified stylesheet in the XSLT',
+      'namespace with --fix-suggestions',
+    ].join(' '),
+    flag: '--fix-suggestions',
+    before: 'leaking-result-namespace-simplified.xsl',
+    after: 'leaking-result-namespace-simplified.fixed.xsl',
+  },
+  {
+    name: [
       'should rewrite a boolean-constant test to true()/false() with',
       '--fix-suggestions',
     ].join(' '),

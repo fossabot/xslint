@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: redundant-namespace-declarations
+found:
+  amount: 2
+  positions: [ [ 8, 3 ], [ 9, 3 ] ]
+  fixes: [ "", "" ]
+input: |-
+  <?xml version="1.0"?>
+  <xsl:stylesheet
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:tei="urn:tei"
+    xmlns:db="urn:db"
+    xmlns:ns="urn:ns"
+    xmlns:av="urn:av"
+    xmlns:mi="urn:mi"
+    xmlns:us="urn:us"
+    version="2.0">
+    <xsl:template match="/">
+      <xsl:value-of select="last()-tei:offset"/>
+      <xsl:value-of select="sum((1, 2)[. gt 5-db:n])"/>
+      <xsl:value-of select="count(*)-ns:* - 1"/>
+      <out at="{position()-av:x}" note="mi-{us-mi}"/>
+    </xsl:template>
+  </xsl:stylesheet>
