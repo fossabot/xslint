@@ -200,7 +200,7 @@
         "message": "The function contains more than 50 XSLT elements. Split it into smaller functions."
       },
       "function-template-is-not-child-of-stylesheet": {
-        "xpath": "(/xsl:stylesheet | /xsl:transform)/*//(xsl:function | xsl:template)[not(ancestor::xsl:override)]",
+        "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)/*//(xsl:function | xsl:template)[not(ancestor::xsl:override)]",
         "severity": "error",
         "message": "An xsl:function or xsl:template is nested inside another element. Move it up to the top level, as a child of the stylesheet element."
       },
@@ -221,7 +221,7 @@
         "message": "A declared version is not a decimal number, so it names no XSLT version and every check gated on one stays quiet. Declare it as a decimal, such as 2.0."
       },
       "missing-id-in-stylesheet": {
-        "xpath": "(/xsl:stylesheet | /xsl:transform)[not(@id) and not(@_id)]",
+        "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)[not(@id) and not(@_id)]",
         "severity": "warning",
         "message": "The stylesheet element has no @id attribute. Declare it to specify the unique identifier explicitly."
       },
@@ -253,9 +253,9 @@
         "message": "This XSLT 2.0 construct stands where the version in force is below 2.0, which a conformant 1.0 processor rejects. Use a 1.0 equivalent, or raise that version to 2.0."
       },
       "name-starts-with-numeric": {
-        "xpath": "//(xsl:variable | xsl:template)[matches(@name, '^[0-9]')] | //xsl:function[matches(@name, '^([^:]*:)?[0-9]')]",
-        "severity": "warning",
-        "message": "A variable, function, or template name starts with a digit, which is invalid in XPath. Rename it to start with a letter."
+        "xpath": "//(xsl:variable | xsl:param | xsl:template | xsl:function)[matches(@name, '^([^:]*:)?[0-9]')]",
+        "severity": "error",
+        "message": "A variable, parameter, function, or template name starts with a digit, so no processor loads this stylesheet. Rename it to start with a letter."
       },
       "not-creating-attribute-correctly": {
         "xpath": "//xsl:attribute[not(contains(@name, '{')) and not(@_name)][not(@namespace) and not(@_namespace)][parent::*[not(self::xsl:*)]][not(*) or (count(*) = 1 and (xsl:value-of[not(@separator) and not(@_separator)] or xsl:text[not(@disable-output-escaping) and not(@_disable-output-escaping)]))][not(preceding-sibling::*[not(self::xsl:variable) and not(self::xsl:attribute)])][not(preceding-sibling::xsl:attribute[@_name or not(@name) or contains(@name, '{')])][not(preceding-sibling::xsl:attribute/@name = @name)][not(some $held in ../@*[not(namespace-uri() = 'http://www.w3.org/1999/XSL/Transform')] satisfies local-name($held) = replace(xslint:attribute(., 'name'), '^.*:', ''))][not(@separator) and not(@_separator) and not(@type) and not(@_type) and not(@validation) and not(@_validation)][not(some $value in (. | .//@select | .//@_select) satisfies preceding-sibling::xsl:variable[contains($value, concat('$', xslint:attribute(., 'name')))])]",
@@ -314,7 +314,7 @@
         "fix": "suggestion"
       },
       "too-many-templates": {
-        "xpath": "(/xsl:stylesheet | /xsl:transform)[count(//xsl:template) >= 10]",
+        "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)[count(//xsl:template) >= 10]",
         "severity": "warning",
         "message": "The stylesheet declares 10 or more templates, too many to read in one file. Split it into imported modules."
       },
@@ -335,9 +335,9 @@
         "fix": "suggestion"
       },
       "using-not-outermost-stylesheet": {
-        "xpath": "(/xsl:stylesheet | /xsl:transform)//(xsl:stylesheet | xsl:transform)",
+        "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)//(xsl:stylesheet | xsl:transform | xsl:package)",
         "severity": "error",
-        "message": "xsl:stylesheet is nested inside another element. It must be the outermost element of the document."
+        "message": "An xsl:stylesheet, xsl:transform or xsl:package is nested inside another element. It must be the outermost element of the document."
       },
       "variable-or-param-with-select-and-content": {
         "xpath": "//(xsl:variable | xsl:param | xsl:with-param)[(@select or @_select) and (* or text()[xslint:normalize-space(.) or ancestor::*[@xml:space][1]/@xml:space = 'preserve'])]",

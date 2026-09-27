@@ -127,10 +127,12 @@
  * same twelve rounds. `name-starts-with-numeric` reads 4.03% at its
  * dearest, so half again to twice puts it at 7; it asks an XSD regex of
  * every candidate, which the walk cannot answer without taking a second
- * opinion about regex dialects. `too-many-templates` reads 2.09% and takes
- * 4; it is one of `UNINDEXED`'s four, anchored on the root and spending
- * everything it costs inside a predicate that descends the tree, so a bar
- * of 3 stood 1.43 times over a check nobody had touched.
+ * opinion about regex dialects. Taking `xsl:param` in reads 3.65% to 4.48%
+ * over five rounds, and 7 still stands between half again and twice the
+ * dearest (#969). `too-many-templates` reads 2.09% and takes 4; it is one
+ * of `UNINDEXED`'s four, anchored on the root and spending everything it
+ * costs inside a predicate that descends the tree, so a bar of 3 stood
+ * 1.43 times over a check nobody had touched.
  *
  * A third entry stood beside them and is gone, which is this table's
  * ratchet turning from the under side rather than a bar being relaxed.

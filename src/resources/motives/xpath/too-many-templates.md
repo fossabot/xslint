@@ -1,7 +1,8 @@
 # Too many templates
 
 A stylesheet that declares ten or more templates has grown too large to read
-in one file, whatever the size of each template. Split it into smaller modules
+in one file, whatever the size of each template, and an XSLT 3.0 package is
+held to the same bar as a stylesheet or a transform. Split it into smaller modules
 and pull them together with `xsl:import` or `xsl:include`, so each file holds a
 cohesive handful of templates.
 
