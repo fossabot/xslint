@@ -17,6 +17,25 @@ publication date only; detailed notes begin with the Unreleased section.
   now read in the XSLT namespace, as its excluded prefixes already were
   (#1086).
 
+- Judge only what a transformation emits in `leaking-result-namespace`. The
+  check took every element outside the XSLT namespace for a literal result
+  element, top-level data such as DocBook's `doc:*` documentation among them, so
+  a stylesheet emitting nothing under a prefix was told it leaked. On a
+  simplified stylesheet it reported the XSLT prefix itself, which is never
+  copied into a result, and its fix wrote a plain `exclude-result-prefixes`,
+  which on a literal result element is one more output attribute rather than an
+  instruction. Top-level data is now left out, the XSLT namespace is never
+  reported under any prefix, and a simplified root is read and fixed through
+  `xsl:exclude-result-prefixes` under whichever prefix it binds, or reported
+  with no fix where it binds none (#1006, #1040, #1075).
+
+- Anchor the root checks on `xsl:package` too. Four selectors named
+  `xsl:stylesheet` and `xsl:transform` alone, so a package with no `id`, one
+  holding too many templates, a nested root, or a template inside a template
+  drew no report, though Saxon refuses the last two with XTSE0010. All four now
+  name the third root, and `using-not-outermost-stylesheet` reports a package
+  nested in any of the three as readily as a stylesheet (#1017).
+
 - Report a parameter whose name starts with a digit, and a prefixed variable.
   `name-starts-with-numeric` read neither `xsl:param` nor the local part of a
   variable or template name, so `<xsl:param name="1top"/>` and
@@ -30,6 +49,79 @@ publication date only; detailed notes begin with the Unreleased section.
   open and no check carries a mark, so `--stable` reported the same run as
   none. The flag is now an unknown option, the key an unknown key, and a check
   carrying a `nursery:` mark fails the build as `mature:` does (#1070).
+
+- Count a prefix standing behind a minus sign as used.
+  `redundant-namespace-declarations` scanned each value as text and refused a
+  prefix with a name character in front of it, and `-` is one, so in
+  `select="last()-tei:offset"` the declaration of `tei` was reported redundant
+  and the safe fix deleted a binding the expression needs. Every expression is
+  now read off the tokens of its parse, a string literal naming the prefix still
+  counting, and only what no expression covers is read as text. A prefix named
+  only inside an XPath comment `(: tei:x :)` no longer counts as a use, since a
+  comment qualifies nothing (#1041).
+
+- Offer `$name` in `confusing-variable-and-node` only where the variable is
+  known to hold nodes. The fix was withheld only for a literal or one of twelve
+  atomic calls, so a variable bound to `upper-case(title)`, `count(part) + 1` or
+  `title/string()` was still offered, handing an atomic value to an instruction
+  that selects nodes. The fix is now offered only for the few shapes that yield
+  nodes: a step, a variable, a filter, union or path ending in one, and a call
+  to `key`, `id`, `doc`, `document`, `root` or their kin. Every other binding
+  keeps its report and loses the fix (#1043).
+
+- Stop `empty-variable` advising removal, and leave a typed variable alone where
+  no version is declared. The message told authors to remove the declaration,
+  while in five of its seven corpus reports the variable is a top-level
+  placeholder that other code reads or an importer overrides, so removing it
+  turns every `$name` into a static error; it now asks for `select="''"` or some
+  content. The `@as` exemption sat inside a `not()`, so a stylesheet declaring
+  no version, or a malformed one, had its typed variables judged as 1.0 and
+  reported; they now stay quiet, as every other version gate does
+  (#1013, #1062).
+
+- Match a function call by namespace URI and arity, and count one inside a text
+  value template. `unused-function` compared the prefixed name a function was
+  declared under, so `g:twice(1)` under another prefix bound to the same URI, or
+  a braced `Q{urn:f}thrice(1)`, left the function reported dead, while a
+  two-parameter `f:x` stayed alive on a one-argument call; a declaration named
+  `Q{urn:f}double` could meet no call at all, in `unreachable-function` too. A
+  call is now keyed by URI, local name and arity, `f:x#2` and the left side of
+  an arrow `=>` counting, and `unused-function` and `unused-variable` read the
+  braces of a 3.0 text value template as usages (#1008, #1073).
+
+- Hold every check message to two sentences, the fault and then the remedy.
+  Twenty-two of the sixty-nine messages broke that shape: four had no final
+  period, seven ran past thirty words, eleven quoted a name as `'xsl:if'`, and
+  two were ungrammatical. They are rewritten to fit, the long ones leaving their
+  derivation to the motive, so a `--suppress` or `.xslint.yml` entry is
+  unaffected, while a script matching the text of a message may need updating
+  (#1072).
+
+- Read braces only in the XSLT attributes the specification makes a template.
+  Every attribute of an XSLT element holding no XPath had its braces read as an
+  attribute value template, so `<xsl:param name="Q{}x"/>` and an `as` naming
+  `Q{http://www.w3.org/2001/XMLSchema}integer` drew `invalid-xpath-expression`,
+  though Saxon-HE compiles both. A plain attribute of an XSLT element now has
+  its braces read only where XSLT declares it a template, such as the `name` of
+  `xsl:element` or the keys of `xsl:sort`, while literal result elements and
+  shadow attributes read them as before (#1067).
+
+- Compare the names `duplicate-param-name` reads as expanded QNames, and excuse
+  a pair a `use-when` may keep apart. The check compared `@name` as text,
+  missing four pairs Saxon refuses with XTSE0580: `p:x` beside `q:x` under one
+  URI, `x` beside `Q{}x`, a padded name, and a shadow `_name`. It also reported
+  an `error` on two params a `use-when` keeps apart, which Saxon compiles. Names
+  are now compared as the expanded QName either spelling holds, and a pair is
+  excused where either param carries a `use-when` its version may read, the
+  condition itself being left to the processor (#1060, #1066).
+
+- Leave out what any literal false `use-when` removes, not only `false()`. A
+  condition is judged by its effective boolean value, so `0`, `0.0`, `()`, `''`
+  and `""` are as false as `false()` with nothing evaluated, and Saxon-HE drops
+  the element for each, while xslint went on judging it and reported
+  `empty-choose` as an `error` on every one. Those literals now prune as
+  `false()` does, and a condition built from operators or calls, `not(true())`
+  among them, is still the processor's to decide (#1057).
 
 - Call a directive unused only where the run ran what it covers.
   `--only`, `--suppress` and a rule turned `off` skip checks, and a directive
@@ -69,10 +161,34 @@ publication date only; detailed notes begin with the Unreleased section.
   calls is still reported alone, since a run may enter it with `-it:`, and what
   it calls counts as called (#1009).
 
+- Judge only an entry point in `not-using-output`, and resolve DITA-OT's
+  `plugin:` imports. The check reported every module of an import tree that
+  declared no output, so a library linted alone, such as DocBook's
+  `html/lists.xsl`, was reported though a run over the whole tree stays quiet,
+  and a `plugin:<id>:<path>` import named no file, leaving 91 DITA-OT modules
+  looking like nobody imports them. It now judges only a module nothing imports,
+  one of whose templates matches the document root or is an
+  `xsl:initial-template`, and reports it there; a `plugin:` URI resolves to
+  `<id>/<path>` in the corpus, and a named `xsl:output` no longer counts as the
+  output of the tree. The three corpora go from 19, 14 and 96 reports to 5, 3
+  and 3 (#1004).
+
 - Run only the checks named by `--only`, or by an `only:` list in
   `.xslint.yml`, matched by substring as `--suppress` is. A check the run
   suppresses or the config turns `off` stays off, and a name that also stands
   inside a longer one no longer lets the longer check through (#1030).
+
+- Advise inlining an `xsl:attribute` only where a literal attribute says the
+  same. `not-creating-attribute-correctly` asked nothing about what stood in
+  front of the instruction, so where an `xsl:copy-of` or `xsl:call-template`
+  ahead of it supplied the same attribute, the inline form it advised emitted
+  the old value instead of the new one. It also advised inlining where the
+  parent already carries that attribute, where a `separator`, `type` or
+  `validation` is set, or where the value reads a variable declared beside it,
+  which is out of scope on the start tag. Those are now left alone, only an
+  `xsl:variable` or a static `xsl:attribute` of another name may stand in front,
+  and a constant wrapped in `xsl:text` is reported as plain text is
+  (#950, #965, #1005).
 
 - Keep an absent node empty when advising the direct emptiness test.
   `string-length-compared-to-zero` rewrote `string-length(@x) = 0` as
@@ -81,6 +197,21 @@ publication date only; detailed notes begin with the Unreleased section.
   missing attribute. The empty direction now reads `string(@x) = ''` (or
   `eq ''` for a value comparison), exact on an absent node and on the first
   node XPath 1.0 measures; the non-empty `@x != ''` is unchanged (#1002).
+
+- Grade dropping a pattern's leading `//` as safe only where it changes nothing.
+  `starts-with-double-slash` offered a safe fix on every pattern outside
+  `xsl:template`, but from 2.0 on a pattern opening with `//` matches only in a
+  tree rooted at a document node, so dropping it widens an `xsl:number` count, a
+  `group-starting-with` or an accumulator rule to parentless trees. The fix is
+  now safe on an `xsl:key`, whose `key()` needs a document root anyway, and on a
+  1.0 pattern outside `xsl:template`, and a suggestion everywhere else (#1015).
+
+- Stop calling a nested `xsl:if` prohibited. `blank-nested-if` told each of its
+  69 corpus reports that the construct is prohibited, which no XSLT version
+  says. The message now calls it one condition stated in two places, and excepts
+  an outer test guarding the inner one: from XPath 2.0 on, `and` may evaluate
+  its operands in either order, so a `castable as` test joined to the cast it
+  guards no longer guards it (#1016).
 
 - Ask what XSLT sets as the context before advising a `self::` node test.
   `name-compared-to-string` read only the predicates inside an expression, so
@@ -94,6 +225,13 @@ publication date only; detailed notes begin with the Unreleased section.
   `self::` step asks for no namespace; `xpath-default-namespace` keeps the
   bare step, and 1.0, which has no wildcard, leaves the comparison as it is
   (#1000).
+
+- Report an `xsl:if` or `xsl:for-each` whose body holds only comments.
+  `empty-content-in-instructions` required every child to be text, and a
+  comment is a node that is not, so an instruction whose whole body was
+  commented out went unreported though it writes nothing, a processor
+  stripping comments from a stylesheet. Such a body now counts as empty, which
+  adds seven reports over DocBook and DITA-OT (#1014).
 
 - Read a namespace prefix where it qualifies a name, and where
   `xsl:namespace-alias` names it bare. `redundant-namespace-declarations`
@@ -116,6 +254,136 @@ publication date only; detailed notes begin with the Unreleased section.
   instruction and of each of its ancestors, a name inside a predicate is
   left alone, and a variable bound to a literal, an atomising call or an
   atomic `as` is still reported but offered no fix (#1001).
+
+- Leave a named `xsl:output` out of `output-method-xml`. A named output is only
+  the format an `xsl:result-document` asks for, so a stylesheet writing an XML
+  feed beside its HTML page was told to switch the feed to `method="html"`, and
+  `--fix-suggestions` would have done so. An `xsl:output` carrying a `name`, in
+  either spelling, is now skipped (#1003).
+
+- Report a variable whose body is one `xsl:value-of` only where a `select` can
+  say the same, and on parameters too. `setting-value-of-variable-incorrectly`
+  never looked inside the instruction, so it advised a `select` for a `value-of`
+  building its value from its content or carrying a `separator`, and it never
+  read `xsl:param` or `xsl:with-param`. The inner `value-of` must now carry a
+  `select` and no `separator`, in either spelling, and all three binding
+  elements are read, so the corpora gain 269 reports, every one a parameter, and
+  lose 28. The motive now advises `string(heading)` on 1.0 and
+  `string-join(heading, ' ')` on 2.0 and later, where a bare `select` turns one
+  string into a sequence (#1007).
+
+- Stop `stylesheet-has-no-templates` advising deletion, and read an
+  `xsl:package`. The message ended by offering to delete the file, while ten of
+  its twelve corpus reports are empty modules that another stylesheet imports or
+  includes as a customisation hook, where deleting one is a static error in its
+  importer. It now asks only for a declaration, and an empty `xsl:package`,
+  missed before, is reported too (#1012).
+
+- Name a caller never reached, rather than a cycle, in `unreachable-function`.
+  The message said every finding sat in a recursion cycle nobody enters, while
+  six of the seven corpus findings hold no cycle at all: they are helpers called
+  only from a function nothing calls. It now says the function is called only
+  from functions that are never reached, and detection is unchanged (#1011).
+
+- Withhold the fix of `using-disable-output-escaping` where deleting the
+  attribute changes the output, and read its shadow spelling. The fix deleted
+  the attribute, so an `xsl:text` holding `&lt;br/&gt;` emitted the escaped text
+  where it emitted `<br/>` before, a change no parser or processor notices. The
+  deletion is now offered only on an `xsl:text` whose content holds no `&`, `<`,
+  `>` or brace, and never on an `xsl:value-of`, which leaves it on 3 of 112
+  corpus reports. The check also reports `_disable-output-escaping="{'yes'}"`,
+  the 3.0 shadow spelling it read past, which Saxon honours even at
+  `version="1.0"` (#990, #992).
+
+- Withhold `name-compared-to-string` where no node test replaces the comparison,
+  and its fix where nothing binds the prefix. A 1.0 sheet was told to replace
+  `local-name() = 'x'` with a node test XPath 1.0 cannot spell, the `*:x`
+  wildcard being 2.0's, and `name() = ''` drew the same advice; neither is
+  reported now, which withdraws 302 of the check's 498 corpus reports, none of
+  them fixable. And `name() = 'ns:baz'` was offered `self::ns:baz` where nothing
+  declares `ns`, a node test no processor compiles; the report stands there and
+  the fix is withheld (#962, #991).
+
+- Keep what the fix of `text-outside-xsl-text` writes a stylesheet a parser
+  reads. It spelled its wrapper `xsl:text` whatever prefix the document binds,
+  so TEI's `simple/mapatts.xsl`, which binds `XSL`, came back under an
+  undeclared prefix; it spliced decoded text between the tags, so `&amp;` and
+  `&lt;` came back bare; and it read an element holding text beside a CDATA
+  section as one text node, so the run announced a fix and left the defect
+  standing. The wrapper now takes the prefix the document binds, or is withheld
+  where none is bound, the wrapped text is escaped, and an element holding a
+  CDATA section among its text is reported with no fix (#976, #982, #993).
+
+- Read an entity's replacement text as the markup it spells. The parser resolves
+  no entity, so a declared entity's text went into the document as characters:
+  DocBook-XSL's `&lf;`, an `xsl:text` holding a newline, drew nine reports as
+  loose text, each offered a fix wrapping the ampersand in one more `xsl:text`,
+  and an expression such an entity carried reached no check. The replacement is
+  now parsed as markup where the reference stands, a reference whose declaration
+  the run never read is dropped rather than reported as its own name, and a
+  defect in what an entity brought is placed at the reference and offered no fix
+  (#984).
+
+- Decode a numeric character reference when applying a fix. The walk that
+  verifies a fix against the source knew only the five entities XML predefines,
+  so a span spelling `&#105;` or `&#x74;` failed it, and the run declined the
+  fix, saying the source no longer matched after an edit nobody had made. Of the
+  484 fixes over the three corpora that went that way, 462 apply now (#983).
+
+- Escape a code-based check's replacement for the place it lands. A rewrite of
+  an expression holding `&lt;`, `&amp;` or the quote delimiting its attribute
+  spliced the decoded characters back as they stood, so
+  `--fix --fix-suggestions` turned TEI's `omml2mml.xsl` and DocBook's
+  `dbk2wp.xsl` into files no parser reads. A replacement is now re-encoded for
+  the attribute delimiter or the text node it lands in, and left as it is inside
+  a CDATA section (#957).
+
+- Rename `select-starts-with-double-slash` to `scans-whole-document`, and report
+  what an expression scans rather than where its slashes stand. The check read
+  only a `select` whose text opened with `//`, so the `test` of an `xsl:when`,
+  the `use` of an `xsl:key`, the braces of a literal result element and the
+  second scan in `distinct-values((//o/@name, //o/@local))` went unreported,
+  while a top-level `xsl:variable`, where the walk is paid once, was reported.
+  Every `//` opening a path of its own is reported now, wherever it stands,
+  except under a top-level binding or in a template matching `/` with no `name`
+  or `mode`, each of which runs once per transformation. A `--suppress` or
+  `.xslint.yml` entry naming the old check must name the new one (#958, #978).
+
+- Write the bare path where `count-compared-to-zero` stands in a truth context
+  on 1.0. The 1.0 fix wrote a `boolean()` call everywhere but a whole `@test`,
+  so `count($node/preceding-sibling::sect1) > 0` inside an `or` became a wrapper
+  that `redundant-boolean-call` reported on the next run, 49 of 172 fixes over
+  DocBook-XSL. It now asks where an effective boolean value alone is taken, as
+  `redundant-boolean-call` does, and writes the bare path there, keeping
+  `boolean()` inside a predicate, where a number is a position (#977).
+
+- Report only the `//` a pattern walks in `use-double-slash`. A `//` inside a
+  predicate was charged as a step of the pattern's own path, so
+  `match="nu[xi//omicron]"` drew advice to name a path the pattern had already
+  named; it now draws nothing. A `//` opening a path inside the brackets, as in
+  `item[//flag]`, walks the document once per candidate rather than widening the
+  pattern, and is reported by `scans-whole-document` instead (#948, #970).
+
+- Measure the local part of a name in `short-names`, and read `xsl:param` too.
+  The function arm stripped the prefix while the variable and template arm
+  measured the whole QName, so `my:k` was reported as a function and passed as a
+  variable, and a parameter called `f` was never reported. One selector now
+  measures the local part of every variable, parameter, template and function
+  name, which adds 59 reports over the three corpora, each a one-character
+  `xsl:param` (#964).
+
+- Report a leading `//` in a `select` without offering `.//` in its place. The
+  two name the same nodes only where the context is the document node, and there
+  `.//` walks the same tree, so the fix was never both sound and worth applying:
+  under Saxon a template matching `/object/metas` answers two nodes for `//o`
+  and none for `.//o`. The report stays and the fix is gone (#949).
+
+- Warn about an `exclude:` pattern that excluded nothing. A rule name matching
+  no check drew a warning, while a glob matching no path was counted by nobody,
+  so a directory renamed out from under a pattern read as a run still honouring
+  it. A run that walked a directory now warns that the exclusion excluded
+  nothing, a `dir/**` counting the directories it pruned as well as the files it
+  dropped, and a run handed only files stays quiet (#951).
 
 ## 0.2.0 - 2026-09-17
 
