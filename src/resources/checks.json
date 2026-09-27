@@ -200,9 +200,9 @@
         "message": "The function contains more than 50 XSLT elements. Split it into smaller functions."
       },
       "function-template-is-not-child-of-stylesheet": {
-        "xpath": "(/xsl:stylesheet | /xsl:transform)/*//(xsl:function | xsl:template)[not(ancestor::xsl:override)]",
+        "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)/*//(xsl:function | xsl:template)[not(ancestor::xsl:override)]",
         "severity": "error",
-        "message": "'xsl:function' or 'xsl:template' are used in the wrong places. Use 'xsl:function' and 'xsl:template' as child nodes of 'xsl:stylesheet'."
+        "message": "'xsl:function' or 'xsl:template' are used in the wrong places. Use 'xsl:function' and 'xsl:template' as child nodes of the root element of the stylesheet."
       },
       "function-use-in-xslt-1": {
         "xpath": "//xsl:function[xslint:version(.) < 2.0]",
@@ -221,9 +221,9 @@
         "message": "A declared version is not a number, so it names no XSLT version and no version gate under it clears its floor, leaving every check about a construct a later version introduced quiet rather than guessing. Declare it as a decimal, such as 2.0"
       },
       "missing-id-in-stylesheet": {
-        "xpath": "(/xsl:stylesheet | /xsl:transform)[not(@id) and not(@_id)]",
+        "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)[not(@id) and not(@_id)]",
         "severity": "warning",
-        "message": "The '@id' attribute is missing in the 'xsl:stylesheet' element. Declare it to specify the unique identifier explicitly."
+        "message": "The '@id' attribute is missing on the root element of the stylesheet. Declare it to specify the unique identifier explicitly."
       },
       "missing-or-empty-href": {
         "xpath": "//(xsl:import | xsl:include)[(not(@href) and not(@_href)) or @href = '']",
@@ -314,7 +314,7 @@
         "fix": "suggestion"
       },
       "too-many-templates": {
-        "xpath": "(/xsl:stylesheet | /xsl:transform)[count(//xsl:template) >= 10]",
+        "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)[count(//xsl:template) >= 10]",
         "severity": "warning",
         "message": "The stylesheet declares 10 or more templates, too many to read in one file. Split it into imported modules."
       },
@@ -335,9 +335,9 @@
         "fix": "suggestion"
       },
       "using-not-outermost-stylesheet": {
-        "xpath": "(/xsl:stylesheet | /xsl:transform)//(xsl:stylesheet | xsl:transform)",
+        "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)//(xsl:stylesheet | xsl:transform | xsl:package)",
         "severity": "error",
-        "message": "xsl:stylesheet is nested inside another element. It must be the outermost element of the document."
+        "message": "'xsl:stylesheet', 'xsl:transform' or 'xsl:package' is nested inside another element. It must be the outermost element of the document."
       },
       "variable-or-param-with-select-and-content": {
         "xpath": "//(xsl:variable | xsl:param | xsl:with-param)[(@select or @_select) and (* or text()[xslint:normalize-space(.) or ancestor::*[@xml:space][1]/@xml:space = 'preserve'])]",

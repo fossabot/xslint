@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
 # SPDX-License-Identifier: MIT
 ---
-xpath: (/xsl:stylesheet | /xsl:transform)[not(@id) and not(@_id)]
+xpath: (/xsl:stylesheet | /xsl:transform | /xsl:package)[not(@id) and not(@_id)]
 severity: warning
-message: The '@id' attribute is missing in the 'xsl:stylesheet' element. Declare it to specify the unique identifier explicitly.
+message: The '@id' attribute is missing on the root element of the stylesheet. Declare it to specify the unique identifier explicitly.

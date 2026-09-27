@@ -2,7 +2,7 @@
 
 An `xsl:function` or `xsl:template` declares a component of the stylesheet, and
 a component belongs where the processor looks for one: at the top level, as a
-child of `xsl:stylesheet` or `xsl:transform`. One buried inside another
+child of `xsl:stylesheet`, `xsl:transform` or `xsl:package`. One buried inside another
 instruction is never reached, because a template body is a sequence
 constructor and a declaration is not an instruction it can hold.
 
