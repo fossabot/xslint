@@ -226,6 +226,13 @@ publication date only; detailed notes begin with the Unreleased section.
   bare step, and 1.0, which has no wildcard, leaves the comparison as it is
   (#1000).
 
+- Report an `xsl:if` or `xsl:for-each` whose body holds only comments.
+  `empty-content-in-instructions` required every child to be text, and a
+  comment is a node that is not, so an instruction whose whole body was
+  commented out went unreported though it writes nothing, a processor
+  stripping comments from a stylesheet. Such a body now counts as empty, which
+  adds seven reports over DocBook and DITA-OT (#1014).
+
 - Read a namespace prefix where it qualifies a name, and where
   `xsl:namespace-alias` names it bare. `redundant-namespace-declarations`
   looked for the substring `prefix:` and counted `#all` as a use of every
