@@ -3,4 +3,4 @@
 ---
 xpath: (/xsl:stylesheet | /xsl:transform | /xsl:package)//(xsl:stylesheet | xsl:transform | xsl:package)
 severity: error
-message: "'xsl:stylesheet', 'xsl:transform' or 'xsl:package' is nested inside another element. It must be the outermost element of the document."
+message: An xsl:stylesheet, xsl:transform or xsl:package is nested inside another element. It must be the outermost element of the document.

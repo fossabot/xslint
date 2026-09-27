@@ -402,8 +402,8 @@ files and what their parameter entities name (#1010), calls `lint`, applies
 `process.exitCode`, a `no-restricted-syntax` selector banning the
 `process.exit` that ends the process where it stands and abandons every write
 the kernel has not taken (#767, #822). The package `main` re-exports `lint`
-and `fixed` so an embedder (the planned LSP server, #336) can lint a buffer
-without shelling out; the bin stays `src/index.mjs`.
+and `fixed` for the `xslint-lsp` server VS Code and `xslint-jetbrains` run on
+a live buffer (#336); the bin is `src/index.mjs`.
 
 `src/index.mjs` reaches `xslint.js` through a dynamic `import` inside the
 command action, not a top-level one, and so runs `program.parseAsync`. Importing
@@ -504,7 +504,7 @@ Per-file rule — `src/resources/checks/xpath/<name>.yaml`:
 ```yaml
 xpath: <XPath selecting the violation nodes>
 severity: warning|error
-message: <one sentence, no trailing period>
+message: <the fault. The remedy.>
 fix: <optional safe|suggestion|[ safe, suggestion ]>
 ```
 
@@ -517,7 +517,7 @@ reference: <optional call|variable — the kind of reference to read>
 scoped: <optional true>
 reachable: <optional true>
 severity: warning|error
-message: <one sentence>
+message: <the fault. The remedy.>
 ```
 
 Without `reference`, a `declaration` is a defect when its `@name` matches no
@@ -535,9 +535,8 @@ or `scoped: true` (counts usage only within the declaration's subtree, or an
 importing file). Because usage is followed across files, a symbol defined in a
 `_funcs.xsl` library and used elsewhere is never flagged.
 
-Validator and format checks — `checks/{validation,format}/<name>.yaml` — carry
-only `severity` and `message`; their logic lives in code and the YAML just tunes
-those two.
+A validator or format YAML is `severity` and `message` alone. A message is
+two sentences, fault then remedy, in thirty words, names bare, no dash (#1072).
 
 A check of any kind may carry two more keys. `fix:` names the tier every fix it
 offers lands in — `safe`, `suggestion`, or both where the tier is the standing

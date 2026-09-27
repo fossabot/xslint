@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: leaking-result-namespace
+# A root outside the XSLT namespace that binds no prefix to it has no name to
+# exclude a prefix under, so the leak is reported and no attribute is written
+# (#1040).
+found:
+  amount: 1
+  positions: [ [ 2, 7 ] ]
+  fixes: [ null ]
+input: |-
+  <?xml version="1.0"?>
+  <card xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xsl:value-of xmlns:xsl="http://www.w3.org/1999/XSL/Transform" select="5 cast as xs:integer"/>
+  </card>
