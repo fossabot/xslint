@@ -222,8 +222,8 @@ const exclusion = function(root, prefix, content) {
 /**
  * Lint the corpus for prefixes declared on the stylesheet, used only in its
  * logic, and copied into the output by a literal result element. A prefix
- * leaks when it is not the XSLT one, not excluded (nor `#all`), not an
- * extension prefix, absent from the serialized result, yet used somewhere.
+ * leaks when it binds no XSLT URI (#1075), is not excluded (nor `#all`), is no
+ * extension prefix, is absent from the result, yet is used somewhere.
  * Where it stands is asked of the source, by `standsAt` (#681).
  * @param {Array.<{file: string, content: string, xsl: Document}>} corpus -
  *  Parsed stylesheets
@@ -253,7 +253,7 @@ const lintByResultNamespace = function(corpus, suppressions = []) {
         output = outputs(elements, extension)
         leaking = Array.from(root.attributes).filter((attribute) => {
           const prefix = declared(attribute.name)
-          return prefix && prefix !== 'xml' && prefix !== root.prefix &&
+          return prefix && prefix !== 'xml' && attribute.value !== XSLT &&
             !excluded.has(prefix) && !extension.has(prefix) &&
             !output.has(prefix) && used(elements, prefix)
         })
