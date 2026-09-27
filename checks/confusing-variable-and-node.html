@@ -147,11 +147,17 @@ there names nothing:</p>
 asked of another context node, so in
 <code>following-sibling::item[string(contrib) = $contrib]</code> the inner <code>contrib</code> is
 the child of each <code>item</code>, and no variable could stand in for it.</p>
-<p>A variable holding an atomic value is still worth the warning, but not the
-dollar sign. When its <code>select</code> is a string, a number or a call such as
-<code>string(contrib)</code>, or its <code>as</code> names an atomic type, <code>select=&quot;$contrib&quot;</code> hands
-a string to an instruction that selects nodes, which is a type error. Rename
-the variable instead, or spell the child as <code>child::contrib</code>.</p>
+<p>A variable that may hold an atomic value is still worth the warning, but not
+the dollar sign. Only a few shapes are sure to yield nodes: a path or a step,
+another variable, a union, <code>intersect</code> or <code>except</code> of those, a filter over
+one, a <code>!</code> mapping onto one, and a call to <code>key</code>, <code>id</code>, <code>idref</code>,
+<code>element-with-id</code>, <code>document</code>, <code>doc</code>, <code>collection</code>, <code>root</code>, <code>outermost</code> or
+<code>innermost</code>. Anything else may not — a literal, <code>string(contrib)</code>,
+<code>upper-case(title)</code>, <code>count(part) + 1</code>, <code>@kind = &#39;x&#39;</code>, <code>title/string()</code> — nor
+may a variable whose <code>as</code> names an atomic type. There <code>select=&quot;$contrib&quot;</code>
+hands a string, a number or a boolean to an instruction that selects nodes,
+which is a type error. Rename the variable instead, or spell the child as
+<code>child::contrib</code>.</p>
 <p>A variable bound by <em>content</em> rather than by <code>select</code> is a different thing, and
 a bare name standing beside one is usually right. Its nodes form a tree of
 their own, parented by nothing in the source document, so they are members of

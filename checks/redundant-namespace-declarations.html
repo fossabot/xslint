@@ -123,7 +123,9 @@
 any element name, attribute name, or qualified name inside an attribute value
 or a text value template is dead weight that misleads the reader and should be
 removed. A prefix is used where it qualifies a name, so the <code>i</code> of
-<code>xmlns:i</code> is not used by <code>tei:item</code>, whose prefix is <code>tei</code>.</p>
+<code>xmlns:i</code> is not used by <code>tei:item</code>, whose prefix is <code>tei</code>, while
+<code>last()-tei:item</code> does use <code>tei</code>, the <code>-</code> subtracting rather than spelling part
+of a name. A prefix mentioned only inside an XPath comment qualifies nothing.</p>
 <p>Four attributes use a prefix without qualifying anything with it, and a prefix
 any of them names is in use:
 <code>exclude-result-prefixes</code> keeps the namespace out of the result tree,
