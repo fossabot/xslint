@@ -22,7 +22,9 @@ result element.
 A simplified stylesheet, whose root is itself a literal result element, spells
 the attribute in the XSLT namespace instead: `xsl:exclude-result-prefixes`. A
 plain `exclude-result-prefixes` there is one more attribute copied into the
-result, and excludes nothing.
+result, and excludes nothing. The same holds for the extension namespaces a
+root declares, which never reach the result: `extension-element-prefixes` on
+`xsl:stylesheet`, `xsl:extension-element-prefixes` on a simplified root.
 
 ```xsl
 <out xsl:version="2.0" xsl:exclude-result-prefixes="xs"

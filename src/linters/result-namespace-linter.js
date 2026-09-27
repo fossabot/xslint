@@ -180,15 +180,17 @@ const spelling = function(root) {
 }
 
 /**
- * The attribute a root excludes prefixes in, in the namespace `spelling`
- * forks on, or null where it excludes none (#1040).
+ * The attribute a root lists prefixes in under a name, in the namespace
+ * `spelling` forks on, or null where it lists none: the excluded prefixes
+ * (#1040) and the extension ones alike (#1086).
  * @param {Element} root - The stylesheet root
+ * @param {string} name - The local name of the attribute
  * @return {?Node} - The attribute, or null
  */
-const exclusions = function(root) {
-  let attribute = root.getAttributeNode('exclude-result-prefixes')
+const prefixes = function(root, name) {
+  let attribute = root.getAttributeNode(name)
   if (root.namespaceURI !== XSLT) {
-    attribute = root.getAttributeNodeNS(XSLT, 'exclude-result-prefixes')
+    attribute = root.getAttributeNodeNS(XSLT, name)
   }
   return attribute
 }
@@ -206,7 +208,7 @@ const exclusions = function(root) {
  *  replacement: string}} - The fix
  */
 const exclusion = function(root, prefix, content) {
-  const attribute = exclusions(root)
+  const attribute = prefixes(root, 'exclude-result-prefixes')
   let fix = {
     line: root.lineNumber,
     col: root.columnNumber + root.nodeName.length + 1,
@@ -239,10 +241,11 @@ const lintByResultNamespace = function(corpus, suppressions = []) {
       const root = xsl.documentElement
       const elements = Array.from(xsl.getElementsByTagName('*'))
       const extension = new Set(
-        (root.getAttribute('extension-element-prefixes') || '').split(GAPS),
+        (prefixes(root, 'extension-element-prefixes')?.value ?? '')
+          .split(GAPS),
       )
       const excluded = new Set(
-        (exclusions(root)?.value ?? '').split(GAPS),
+        (prefixes(root, 'exclude-result-prefixes')?.value ?? '').split(GAPS),
       )
       const leaks = !excluded.has('#all') &&
         !textual(elements) &&
