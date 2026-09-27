@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: with-param-use-in-invalid-parent-node
+found:
+  amount: 2
+  positions: [ [ 2, 1, missing-version-in-stylesheet ], [ 7, 5 ] ]
+input: |-
+  <?xml version="1.0"?>
+  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" id="style1">
+    <xsl:template match="/objects/o">
+      <xsl:apply-imports>
+        <xsl:with-param name="depth" select="1"/>
+      </xsl:apply-imports>
+      <xsl:with-param name="stray" select="2"/>
+    </xsl:template>
+  </xsl:stylesheet>

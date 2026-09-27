@@ -4,7 +4,7 @@
  */
 
 const {allFilesFrom, xml, yaml} = require('../src/helpers')
-const {GAP} = require('../src/tokens')
+const {GAP, tokenized} = require('../src/tokens')
 const {splitOf} = require('../src/selectors')
 const {REFERENCES} = require('../src/linters/corpus-linter')
 const {kinds} = require('../src/resources/checks.json')
@@ -242,6 +242,52 @@ const DECLARED = /@(?:xsl:)?_?version\b/
 const VERSIONED = {
   'malformed-version-in-stylesheet': 'the attribute is what it reports on',
   'missing-version-in-stylesheet': 'the attribute is what it reports missing',
+}
+
+/**
+ * The function a declarative gate asks the version in force at a node with,
+ * answering `NaN` where nothing declares one, so no floor is cleared (#851).
+ * @type {string}
+ */
+const FLOOR = 'xslint:version'
+
+/**
+ * Whether a selector asks the version in force under a `not()`. There a `NaN`
+ * fails the comparison and the negation turns that into true, so a version
+ * nobody declared is judged as 1.0 rather than left unjudged — how
+ * `empty-variable` reported a typed variable in an unversioned sheet (#1062).
+ * @param {string} xpath - The selector a declarative check is written in
+ * @return {boolean} - True when a version is compared inside a negation
+ */
+const inverts = function(xpath) {
+  const open = []
+  let found = false
+  let previous = ''
+  for (const token of tokenized(xpath)
+    .filter((one) => one.type !== 'whitespace')) {
+    if (token.type === '(' || token.type === '[') {
+      open.push(token.type === '(' && previous === 'not')
+    }
+    if (token.type === ')' || token.type === ']') {
+      open.pop()
+    }
+    if (token.value === FLOOR && open.includes(true)) {
+      found = true
+    }
+    previous = token.value
+  }
+  return found
+}
+
+/**
+ * Whether a fixture declares no version at its root, in any spelling XSLT
+ * gives the attribute, so the version in force anywhere in it is `NaN`.
+ * @param {Document} xsl - The parsed fixture
+ * @return {boolean} - True when the root declares no version
+ */
+const unversioned = function(xsl) {
+  return Array.from(xsl.documentElement.attributes)
+    .every((attribute) => !/^_?version$/.test(attribute.localName))
 }
 
 /**
@@ -1069,6 +1115,54 @@ describe('conformance', function() {
               ].join(' '),
             )
           }
+        }
+      }
+    })
+  it('compares the version in force outside every negation', function() {
+    for (const [kind, keys] of Object.entries(SELECTORS)) {
+      for (const name of names(kind)) {
+        const check = yaml.parsedFromFile(
+          path.join(CHECKS, kind, `${name}.yaml`),
+        )
+        for (const key of keys) {
+          assert.ok(
+            !inverts(check[key] ?? ''),
+            [
+              `${kind}/${name} compares ${FLOOR}(.) inside a not() in its`,
+              `${key}, so the NaN an undeclared or malformed version answers`,
+              'fails the comparison and the negation reports what it meant',
+              'to leave unjudged; state the condition for a report',
+              'positively instead (#851, #1062)',
+            ].join(' '),
+          )
+        }
+      }
+    }
+  })
+  it('packs every check reading the version against an unversioned input',
+    function() {
+      for (const [kind, dir] of Object.entries(PACKED)) {
+        const bare = new Set(
+          allFilesFrom(path.join(RESOURCES, dir))
+            .filter((file) => file.endsWith('.yaml'))
+            .map((file) => yaml.parsedFromFile(file))
+            .filter((yml) => (yml.inputs || [yml.input])
+              .some((input) => unversioned(xml.parsedFromString(input))))
+            .map((yml) => yml.pack),
+        )
+        for (const name of names(kind)) {
+          const check = yaml.parsedFromFile(
+            path.join(CHECKS, kind, `${name}.yaml`),
+          )
+          assert.ok(
+            !SELECTORS[kind].some((key) => (check[key] ?? '').includes(FLOOR)) ||
+              bare.has(name),
+            [
+              `${kind}/${name} asks ${FLOOR}(.) and no pack of it lints a`,
+              'stylesheet declaring no version, so nothing pins what it',
+              'answers where the version in force is NaN (#1062)',
+            ].join(' '),
+          )
         }
       }
     })
