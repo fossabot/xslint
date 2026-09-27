@@ -7,7 +7,7 @@ found:
   positions: [ [ 2, 1 ] ]
 input: |-
   <?xml version="1.0"?>
-  <xsl:package xmlns:xsl="http://www.w3.org/1999/XSL/Transform" name="http://example.com/pack" package-version="1.0">
+  <xsl:package xmlns:xsl="http://www.w3.org/1999/XSL/Transform" name="http://example.com/pack" package-version="1.0" id="p">
     <xsl:template match="/">
       <xsl:value-of select="/objects/o[1]"/>
     </xsl:template>

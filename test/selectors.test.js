@@ -140,13 +140,13 @@ const ATTRIBUTED = [
 const ANCHORED = [
   {
     xpath: kinds.xpath['using-not-outermost-stylesheet'].xpath,
-    anchor: '(/xsl:stylesheet | /xsl:transform)',
-    locals: ['stylesheet', 'transform'],
+    anchor: '(/xsl:stylesheet | /xsl:transform | /xsl:package)',
+    locals: ['stylesheet', 'transform', 'package'],
     tail: '',
   },
   {
     xpath: kinds.xpath['function-template-is-not-child-of-stylesheet'].xpath,
-    anchor: '(/xsl:stylesheet | /xsl:transform)/*',
+    anchor: '(/xsl:stylesheet | /xsl:transform | /xsl:package)/*',
     locals: ['function', 'template'],
     tail: '[not(ancestor::xsl:override)]',
   },

@@ -657,9 +657,9 @@ Then run `npx grunt checks`, `npm test`, `npm run coverage`, and
   version-based *exclusion* fires on the versions where its premise does not
   hold — an inert 2.0 attribute in a 1.0 sheet is still a defect.
 - **Root-robustness.** A declarative rule that anchors on the stylesheet root must
-  match both spellings: `(/xsl:stylesheet | /xsl:transform)[...]`, never
-  `/xsl:stylesheet[...]` — they are exact synonyms in every version. Broaden a
-  descendant root test too (`//(xsl:stylesheet | xsl:transform)`). A whole-rule
+  match all three: `(/xsl:stylesheet | /xsl:transform | /xsl:package)[...]`,
+  never `/xsl:stylesheet[...]`, and so must a descendant root test (#1017).
+  A whole-rule
   root/version guard belongs at the root step (`/*[guard]//x`), not nested in a
   per-node predicate; nest it only when it gates a sub-clause. This is
   machine-enforced by `test/conformance.test.js`.

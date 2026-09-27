@@ -1,9 +1,9 @@
 # Using not outermost stylesheet
 
-The stylesheet root — `xsl:stylesheet` or its synonym `xsl:transform` — must be
-the outermost element of an XSLT document. A nested `xsl:stylesheet` or
-`xsl:transform` inside a template body is invalid and will be rejected by a
-conformant XSLT processor.
+The stylesheet root — `xsl:stylesheet`, its synonym `xsl:transform`, or the
+XSLT 3.0 `xsl:package` — must be the outermost element of an XSLT document. Any
+of the three nested inside a module, as a top-level element or in a template
+body, is invalid and will be rejected by a conformant XSLT processor.
 
 Incorrect:
 

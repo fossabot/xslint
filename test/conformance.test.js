@@ -1058,19 +1058,26 @@ describe('conformance', function() {
       }
     }
   })
-  it('pairs every root xsl:stylesheet with an xsl:transform', function() {
-    const rooted = /(?<!\/)\/xsl:stylesheet/
-    const paired = /(?<!\/)\/xsl:transform/
+  it('anchors a root selector on all three XSLT roots', function() {
+    const roots = [
+      /(?<!\/)\/xsl:stylesheet/,
+      /(?<!\/)\/xsl:transform/,
+      /(?<!\/)\/xsl:package/,
+    ]
     for (const [kind, keys] of Object.entries(SELECTORS)) {
       for (const name of names(kind)) {
         const check = yaml.parsedFromFile(
           path.join(CHECKS, kind, `${name}.yaml`),
         )
         for (const key of keys) {
-          if (check[key] && rooted.test(check[key])) {
+          if (check[key] && roots.some((root) => root.test(check[key]))) {
             assert.ok(
-              paired.test(check[key]),
-              `${kind}/${name} anchors on /xsl:stylesheet but not /xsl:transform`,
+              roots.every((root) => root.test(check[key])),
+              [
+                `${kind}/${name} anchors on one XSLT root and not on all of`,
+                '/xsl:stylesheet, /xsl:transform and /xsl:package, so a module',
+                'rooted at the one it leaves out goes unreported (#1017)',
+              ].join(' '),
             )
           }
         }
