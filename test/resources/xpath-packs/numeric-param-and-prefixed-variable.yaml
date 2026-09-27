@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: name-starts-with-numeric
+found:
+  amount: 7
+  positions: [ [ 4, 3 ], [ 5, 3 ], [ 6, 3 ], [ 7, 3 ], [ 8, 5 ], [ 11, 3 ], [ 12, 5 ] ]
+input: |-
+  <?xml version="1.0"?>
+  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:my="urn:my" version="2.0" id="style1">
+    <xsl:output encoding="UTF-8" method="xml"/>
+    <xsl:param name="1top" select="'Lobachevsky'"/>
+    <xsl:variable name="2var" select="'Mendeleev'"/>
+    <xsl:variable name="my:3var" select="'Pavlov'"/>
+    <xsl:function name="my:4fun">
+      <xsl:param name="5arg"/>
+      <xsl:sequence select="'Butlerov'"/>
+    </xsl:function>
+    <xsl:template name="6tpl">
+      <xsl:param name="7inner" select="'Lyapunov'"/>
+      <xsl:copy-of select="'Markov'"/>
+    </xsl:template>
+    <xsl:template match="/objects/o">
+      <xsl:param name="my:ninth" select="'Kolmogorov'"/>
+      <xsl:variable name="eighth" select="'Sobolev'"/>
+      <xsl:copy-of select="$eighth, $my:ninth"/>
+    </xsl:template>
+  </xsl:stylesheet>
