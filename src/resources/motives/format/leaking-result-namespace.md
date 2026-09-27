@@ -18,6 +18,19 @@ from the serialized output. This differs from a redundant declaration (a prefix
 used nowhere, which should be removed): the prefix here is used, just not by any
 result element.
 
+A simplified stylesheet, whose root is itself a literal result element, spells
+the attribute in the XSLT namespace instead: `xsl:exclude-result-prefixes`. A
+plain `exclude-result-prefixes` there is one more attribute copied into the
+result, and excludes nothing.
+
+```xsl
+<out xsl:version="2.0" xsl:exclude-result-prefixes="xs"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xsl:value-of select="1 cast as xs:integer"/>
+</out>
+```
+
 Incorrect:
 
 ```xsl

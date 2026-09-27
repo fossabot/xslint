@@ -4,7 +4,7 @@
  */
 
 const {allFilesFrom, xml, yaml} = require('../src/helpers')
-const {GAP} = require('../src/tokens')
+const {GAP, tokenized} = require('../src/tokens')
 const {splitOf} = require('../src/selectors')
 const {REFERENCES} = require('../src/linters/corpus-linter')
 const {kinds} = require('../src/resources/checks.json')
@@ -239,6 +239,52 @@ const VERSIONED = {
 }
 
 /**
+ * The function a declarative gate asks the version in force at a node with,
+ * answering `NaN` where nothing declares one, so no floor is cleared (#851).
+ * @type {string}
+ */
+const FLOOR = 'xslint:version'
+
+/**
+ * Whether a selector asks the version in force under a `not()`. There a `NaN`
+ * fails the comparison and the negation turns that into true, so a version
+ * nobody declared is judged as 1.0 rather than left unjudged — how
+ * `empty-variable` reported a typed variable in an unversioned sheet (#1062).
+ * @param {string} xpath - The selector a declarative check is written in
+ * @return {boolean} - True when a version is compared inside a negation
+ */
+const inverts = function(xpath) {
+  const open = []
+  let found = false
+  let previous = ''
+  for (const token of tokenized(xpath)
+    .filter((one) => one.type !== 'whitespace')) {
+    if (token.type === '(' || token.type === '[') {
+      open.push(token.type === '(' && previous === 'not')
+    }
+    if (token.type === ')' || token.type === ']') {
+      open.pop()
+    }
+    if (token.value === FLOOR && open.includes(true)) {
+      found = true
+    }
+    previous = token.value
+  }
+  return found
+}
+
+/**
+ * Whether a fixture declares no version at its root, in any spelling XSLT
+ * gives the attribute, so the version in force anywhere in it is `NaN`.
+ * @param {Document} xsl - The parsed fixture
+ * @return {boolean} - True when the root declares no version
+ */
+const unversioned = function(xsl) {
+  return Array.from(xsl.documentElement.attributes)
+    .every((attribute) => !/^_?version$/.test(attribute.localName))
+}
+
+/**
  * Each exemption table beside the question deciding whether its entries are
  * still needed, so one gate holds every table from the far side.
  * @type {Array.<{table: object, still: function(string): boolean}>}
@@ -390,6 +436,45 @@ const EXPECTS = /found\.(amount|positions|fixes|values)/
  */
 const READS = /dir: '([\w-]+-packs)'/g
 
+/**
+ * The most words a check's message may run to. Past it a message carries the
+ * derivation, which is the motive's job, and fills a terminal line four times
+ * over where the README quotes it (#1072).
+ * @type {number}
+ */
+const WORDS = 30
+
+/**
+ * Where one sentence of a message ends and the next opens: a stop, a gap, and
+ * a capital. A `.` standing alone as the context item, or inside `2.0` or a
+ * `(...)`, ends nothing, since no capital follows it.
+ * @type {RegExp}
+ */
+const STOP = /[.?!] (?=[A-Z])/g
+
+/**
+ * The shape of every check's message, each departure beside the question that
+ * finds it: two sentences, the fault and then the remedy, a period at the end,
+ * names bare rather than quoted, no dash, and no more than `WORDS` (#1072).
+ * @type {{[departure: string]: function(string): boolean}}
+ */
+const SHAPED = {
+  'is not two sentences': (message) => (message.match(STOP) ?? []).length !== 1,
+  'does not end with a period': (message) => !message.endsWith('.'),
+  'quotes a name': (message) => /'(xsl:|@)/.test(message),
+  'holds a dash': (message) => /[–—]| - /.test(message),
+  [`runs past ${WORDS} words`]: (message) => message.split(' ').length > WORDS,
+}
+
+/**
+ * Every way one message departs from `SHAPED`.
+ * @param {string} message - What a check tells the user
+ * @return {Array.<string>} - The departures, none for a message in shape
+ */
+const departures = function(message) {
+  return Object.keys(SHAPED).filter((departure) => SHAPED[departure](message))
+}
+
 describe('conformance', function() {
   it('keeps the generated checks abreast of the YAML that authors them', function() {
     assert.equal(
@@ -436,6 +521,44 @@ describe('conformance', function() {
       )
     })
   })
+  it('words every message as a fault and then its remedy', function() {
+    const found = {}
+    for (const kind of KINDS) {
+      for (const [name, check] of Object.entries(kinds[kind])) {
+        const departed = departures(check.message)
+        if (departed.length > 0) {
+          found[`${kind}/${name}`] = departed
+        }
+      }
+    }
+    assert.deepStrictEqual(
+      found, {},
+      [
+        'a check message departs from the one shape every message takes:',
+        'the fault, then the remedy, a period at the end, names bare, no',
+        `dash, and no more than ${WORDS} words, the derivation being the`,
+        'motive\'s to carry (#1072)',
+      ].join(' '),
+    )
+  })
+  for (const [message, departure] of [
+    ['A dot . stands for itself in 2.0 and later. Keep it.', undefined],
+    ['An xsl:if is empty. Fill it. Or drop it.', 'is not two sentences'],
+    ['An xsl:if is empty, so fill it or drop it.', 'is not two sentences'],
+    ['An xsl:if is empty. Fill it', 'does not end with a period'],
+    ['An \'xsl:if\' is empty. Fill it.', 'quotes a name'],
+    ['The \'@test\' is missing. Add it.', 'quotes a name'],
+    ['An xsl:if is empty — always. Fill it.', 'holds a dash'],
+    ['An xsl:if is empty - always. Fill it.', 'holds a dash'],
+    [`An xsl:if is${' very'.repeat(25)} empty. Fill it.`, `runs past ${WORDS} words`],
+  ]) {
+    it(`finds ${departure ?? 'nothing'} in "${message.slice(0, 40)}"`, function() {
+      assert.deepStrictEqual(
+        departures(message), [departure].filter(Boolean),
+        `the message gate does not read "${message}" as it should`,
+      )
+    })
+  }
   it('gives every rule check at least one test pack', function() {
     for (const [kind, dir] of Object.entries(PACKED)) {
       const packed = new Set(
@@ -961,6 +1084,54 @@ describe('conformance', function() {
               ].join(' '),
             )
           }
+        }
+      }
+    })
+  it('compares the version in force outside every negation', function() {
+    for (const [kind, keys] of Object.entries(SELECTORS)) {
+      for (const name of names(kind)) {
+        const check = yaml.parsedFromFile(
+          path.join(CHECKS, kind, `${name}.yaml`),
+        )
+        for (const key of keys) {
+          assert.ok(
+            !inverts(check[key] ?? ''),
+            [
+              `${kind}/${name} compares ${FLOOR}(.) inside a not() in its`,
+              `${key}, so the NaN an undeclared or malformed version answers`,
+              'fails the comparison and the negation reports what it meant',
+              'to leave unjudged; state the condition for a report',
+              'positively instead (#851, #1062)',
+            ].join(' '),
+          )
+        }
+      }
+    }
+  })
+  it('packs every check reading the version against an unversioned input',
+    function() {
+      for (const [kind, dir] of Object.entries(PACKED)) {
+        const bare = new Set(
+          allFilesFrom(path.join(RESOURCES, dir))
+            .filter((file) => file.endsWith('.yaml'))
+            .map((file) => yaml.parsedFromFile(file))
+            .filter((yml) => (yml.inputs || [yml.input])
+              .some((input) => unversioned(xml.parsedFromString(input))))
+            .map((yml) => yml.pack),
+        )
+        for (const name of names(kind)) {
+          const check = yaml.parsedFromFile(
+            path.join(CHECKS, kind, `${name}.yaml`),
+          )
+          assert.ok(
+            !SELECTORS[kind].some((key) => (check[key] ?? '').includes(FLOOR)) ||
+              bare.has(name),
+            [
+              `${kind}/${name} asks ${FLOOR}(.) and no pack of it lints a`,
+              'stylesheet declaring no version, so nothing pins what it',
+              'answers where the version in force is NaN (#1062)',
+            ].join(' '),
+          )
         }
       }
     })

@@ -15,7 +15,9 @@ the empty *sequence* of that type on purpose — a deliberate empty accumulator,
 not an accidental empty string. The exclusion is version-scoped: in XSLT 1.0
 `@as` is not a recognized attribute, so it is inert and the variable still binds
 the empty string. A `1.0` stylesheet with an empty `@as` variable is therefore
-still flagged — the `@as` does not do what its author expects.
+still flagged — the `@as` does not do what its author expects. Where the
+stylesheet declares no version, or one that is not a decimal, nothing says
+which of the two readings holds, so a typed variable there is left alone.
 
 Incorrect:
 

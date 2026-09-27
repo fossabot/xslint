@@ -2,5 +2,5 @@
 # SPDX-License-Identifier: MIT
 ---
 severity: warning
-message: A pattern alternative starts with //, which adds nothing but, from XSLT 2.0 on, a demand that the node's tree be rooted at a document node, since every pattern already matches at any depth. On an xsl:template, removing it also lowers the default priority from 0.5 to that of the step alone, so give the rule an explicit priority if it must keep ranking as it does.
+message: "A pattern alternative opens with //, which at most demands a document-node root. Drop it, and set an explicit priority if the template must rank as before."
 fix: [ safe, suggestion ]

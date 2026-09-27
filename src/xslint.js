@@ -165,6 +165,14 @@
  * whatever rultor's docker container gives, so the run finished first, node
  * discarded the report, and eleven merges in a row read `-0` on a commit six
  * GitHub runners passed.
+ *
+ * `lint` and `fixed` are not only this module's: `xslint/xslint-lsp` calls
+ * both in-process, on the live buffer rather than the saved file, for its
+ * diagnostics and for every quick-fix it offers, and the VS Code extension
+ * beside it and `xslint/xslint-jetbrains` both launch that server (#336). So a
+ * wrong fix is not a line in a terminal a developer can ignore but an edit one
+ * keystroke from a file nobody has saved yet, which is why a fix is withheld
+ * wherever the text under it does not parse (#636).
  */
 
 const path = require('path')

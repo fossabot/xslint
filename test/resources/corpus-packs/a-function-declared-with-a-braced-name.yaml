@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: unused-function
+found:
+  amount: 1
+  positions: [ [ 0, 11, 3 ] ]
+inputs:
+  - |-
+    <?xml version="1.0"?>
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:f="urn:f" version="3.0">
+      <xsl:function name="Q{urn:f}double" as="xs:integer">
+        <xsl:param name="number" as="xs:integer"/>
+        <xsl:sequence select="$number * 2"/>
+      </xsl:function>
+      <xsl:function name="Q{urn:f}triple" as="xs:integer">
+        <xsl:param name="number" as="xs:integer"/>
+        <xsl:sequence select="$number * 3"/>
+      </xsl:function>
+      <xsl:function name="Q{urn:f}halve" as="xs:integer">
+        <xsl:param name="number" as="xs:integer"/>
+        <xsl:sequence select="$number idiv 2"/>
+      </xsl:function>
+      <xsl:template match="/">
+        <xsl:value-of select="f:double(2), Q{urn:f}triple(2), Q{urn:g}halve(2), f:halve(2, 3)"/>
+      </xsl:template>
+    </xsl:stylesheet>

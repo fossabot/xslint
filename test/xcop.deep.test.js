@@ -47,6 +47,7 @@ const UNFORMATTED = [
   'name-packs/no-break-space-before-the-bracket.yaml',
   'namespace-packs/all-prefixes-excluded-at-once.yaml',
   'namespace-packs/excluded-result-prefixes.yaml',
+  'namespace-packs/prefix-behind-a-minus.yaml',
   'namespace-packs/prefix-ending-another-prefix.yaml',
   'namespace-packs/prefix-in-a-text-value-template.yaml',
   'namespace-packs/prefixes-an-alias-names.yaml',

@@ -3,4 +3,4 @@
 ---
 xpath: "//xsl:when[not(parent::xsl:choose)] | //xsl:otherwise[not(parent::xsl:choose)]"
 severity: error
-message: "'xsl:when' and 'xsl:otherwise' are valid only as children of 'xsl:choose'. Move it into an 'xsl:choose', or use 'xsl:if'."
+message: "An xsl:when or xsl:otherwise is valid only as a child of xsl:choose. Move it into an xsl:choose, or use xsl:if."
