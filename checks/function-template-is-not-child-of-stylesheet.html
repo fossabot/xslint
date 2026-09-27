@@ -113,13 +113,13 @@
   <a class="back" href="../index.html">← all checks</a>
   <div class="meta">
     <span class="severity-error">error</span>
-    <code class="xpath">(/xsl:stylesheet | /xsl:transform)/*//(xsl:function | xsl:template)[not(ancestor::xsl:override)]</code>
+    <code class="xpath">(/xsl:stylesheet | /xsl:transform | /xsl:package)/*//(xsl:function | xsl:template)[not(ancestor::xsl:override)]</code>
   </div>
   <div class="check-content">
 <h1>Function or template is not child of stylesheet</h1>
 <p>An <code>xsl:function</code> or <code>xsl:template</code> declares a component of the stylesheet, and
 a component belongs where the processor looks for one: at the top level, as a
-child of <code>xsl:stylesheet</code> or <code>xsl:transform</code>. One buried inside another
+child of <code>xsl:stylesheet</code>, <code>xsl:transform</code> or <code>xsl:package</code>. One buried inside another
 instruction is never reached, because a template body is a sequence
 constructor and a declaration is not an instruction it can hold.</p>
 <p>XSLT 3.0 gives it one other home. Inside an <code>xsl:override</code> under

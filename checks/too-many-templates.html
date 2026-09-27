@@ -113,12 +113,13 @@
   <a class="back" href="../index.html">← all checks</a>
   <div class="meta">
     <span class="severity-warning">warning</span>
-    <code class="xpath">(/xsl:stylesheet | /xsl:transform)[count(//xsl:template) &gt;= 10]</code>
+    <code class="xpath">(/xsl:stylesheet | /xsl:transform | /xsl:package)[count(//xsl:template) &gt;= 10]</code>
   </div>
   <div class="check-content">
 <h1>Too many templates</h1>
 <p>A stylesheet that declares ten or more templates has grown too large to read
-in one file, whatever the size of each template. Split it into smaller modules
+in one file, whatever the size of each template, and an XSLT 3.0 package is
+held to the same bar as a stylesheet or a transform. Split it into smaller modules
 and pull them together with <code>xsl:import</code> or <code>xsl:include</code>, so each file holds a
 cohesive handful of templates.</p>
 <p>Incorrect:</p>
