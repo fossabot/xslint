@@ -80,13 +80,39 @@ const binding = function(node) {
 }
 
 /**
- * The standard functions answering an atomic value, whichever nodes they are
- * handed: a variable bound to one of them holds no node to select (#1001).
+ * The standard functions answering nodes, the one open door into a closed set:
+ * whatever else a call answers may be atomic, so a variable bound to it holds
+ * nothing a bare name could have meant to select (#1043).
  * @type {Array.<string>}
  */
-const ATOMIC = ['string', 'number', 'boolean', 'concat', 'normalize-space',
-  'string-length', 'count', 'sum', 'data', 'string-join', 'name',
-  'local-name']
+const NODAL = ['key', 'id', 'idref', 'element-with-id', 'document', 'doc',
+  'collection', 'root', 'outermost', 'innermost']
+
+/**
+ * The node kinds yielding a step or a reference to what is already bound.
+ * @type {Array.<string>}
+ */
+const LEAVES = ['step', 'variable']
+
+/**
+ * The node kinds whose first child is the expression they stand over.
+ * @type {Array.<string>}
+ */
+const FILTERED = ['filter', 'parenthesized']
+
+/**
+ * The node kinds combining node sequences, a union and an `intersect` or an
+ * `except` alike, each yielding nodes where every operand does.
+ * @type {Array.<string>}
+ */
+const COMBINED = ['union', 'intersect']
+
+/**
+ * The node kinds answering what their last operand yields, a path and a
+ * mapping; a path with none is the root.
+ * @type {Array.<string>}
+ */
+const TRAILED = ['path', 'simple-map']
 
 /**
  * The namespace of XML Schema, whose types an `as` names an atomic value by.
@@ -102,14 +128,37 @@ const SCHEMA = 'http://www.w3.org/2001/XMLSchema'
 const INDEXED = new WeakMap()
 
 /**
- * Whether a variable holds an atomic value rather than nodes: an `as` naming
- * a type of XML Schema's, or a `select` that is a literal or a call answering
- * an atomic value whatever it is handed. Spelling such a variable where a
- * node is selected is a type error, so no fix offers it (#1001).
- * @param {Element} variable - The `xsl:variable` a bare name collides with
- * @return {boolean} - Whether it is bound to an atomic value
+ * Whether an expression is known to yield nodes, which a closed set of shapes
+ * does: a step, a variable, a filter over one, a union or an intersection of
+ * them, a path or a mapping ending in one, and a call on `NODAL`. Every other
+ * shape may answer an atomic value, the list of those being open (#1043).
+ * @param {{node: Node, expression: string, pattern: boolean}} found - Record
+ * @param {object} node - A node of its tree
+ * @return {boolean} - Whether it yields nodes alone
  */
-const atomised = function(variable) {
+const nodal = function(found, node) {
+  const kids = node.children
+  let answer = LEAVES.includes(node.kind) ||
+    NODAL.some((name) => calls(found, node, name))
+  if (FILTERED.includes(node.kind) && kids.length > 0) {
+    answer = nodal(found, kids[0])
+  } else if (COMBINED.includes(node.kind)) {
+    answer = kids.every((kid) => nodal(found, kid))
+  } else if (TRAILED.includes(node.kind)) {
+    answer = kids.length === 0 || nodal(found, kids[kids.length - 1])
+  }
+  return answer
+}
+
+/**
+ * Whether a variable is known to hold nodes: no `as` naming a type of XML
+ * Schema's, and a `select` whose shape yields nodes. Spelling any other one
+ * where a node is selected may be a type error, so no fix offers it (#1001,
+ * #1043).
+ * @param {Element} variable - The `xsl:variable` a bare name collides with
+ * @return {boolean} - Whether it is bound to nodes
+ */
+const selectable = function(variable) {
   const document = variable.ownerDocument
   if (!INDEXED.has(document)) {
     const index = new Map()
@@ -129,13 +178,8 @@ const atomised = function(variable) {
     '').trim().split(':')
   const typed = type.length > 1 &&
     variable.lookupNamespaceURI(type[0]) === SCHEMA
-  let valued = false
-  if (record !== undefined && isValid(record)) {
-    const tree = parseOf(record).tree
-    valued = tree.kind === 'literal' ||
-      ATOMIC.some((name) => calls(record, tree, name))
-  }
-  return typed || valued
+  return !typed && record !== undefined && isValid(record) &&
+    nodal(record, parseOf(record).tree)
 }
 
 /**
@@ -212,8 +256,8 @@ const heads = function(found) {
 
 /**
  * The bare names the expression opens a path with that a variable in scope has
- * taken, each with the fix spelling the variable unless it is atomic. A step is
- * read for the name it *tests* rather than for the text it begins with, so
+ * taken, each with the fix spelling the variable where it holds nodes. A step
+ * is read for the name it *tests* rather than for the text it begins with, so
  * `@title`, `child::title` and `*` are none of them this construct, where a
  * `title[1]`, a gapped ` title/x` and every union branch but the first are.
  * @param {{node: Node, expression: string, pattern: boolean}} found - The
@@ -226,9 +270,9 @@ const confused = function(found, taken) {
   for (const step of heads(found)) {
     const first = tokensOf(found, step)[0]
     if (first.type === TOKENS.NAME && taken.has(first.value)) {
-      let fix = {value: first.value, replacement: `$${first.value}`}
-      if (atomised(taken.get(first.value))) {
-        fix = undefined
+      let fix = undefined
+      if (selectable(taken.get(first.value))) {
+        fix = {value: first.value, replacement: `$${first.value}`}
       }
       results.push({at: first.start, fix})
     }
