@@ -154,7 +154,7 @@
     <td><a href="checks/blank-nested-if.html">blank-nested-if</a></td>
     <td>xpath</td>
     <td><span class="severity-warning">warning</span></td>
-    <td>An xsl:if holds nothing but another xsl:if, which states one condition in two places. Combine the conditions with 'and' into a single xsl:if, unless the outer test guards the inner one against an error.</td>
+    <td>An xsl:if holds nothing but another xsl:if, stating one condition in two places. Combine the tests with 'and' in one xsl:if, unless the outer test guards the inner one.</td>
   </tr>
   <tr>
     <td><a href="checks/duplicate-param-name.html">duplicate-param-name</a></td>
@@ -172,7 +172,7 @@
     <td><a href="checks/empty-choose.html">empty-choose</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>'xsl:choose' has no 'xsl:when' branch. Add one, or drop the 'xsl:choose' and keep its content directly.</td>
+    <td>An xsl:choose has no xsl:when branch. Add one, or drop the xsl:choose and keep its content directly.</td>
   </tr>
   <tr>
     <td><a href="checks/empty-content-in-instructions.html">empty-content-in-instructions</a></td>
@@ -196,13 +196,13 @@
     <td><a href="checks/function-template-is-not-child-of-stylesheet.html">function-template-is-not-child-of-stylesheet</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>'xsl:function' or 'xsl:template' are used in the wrong places. Use 'xsl:function' and 'xsl:template' as child nodes of 'xsl:stylesheet'.</td>
+    <td>An xsl:function or xsl:template is nested inside another element. Move it up to the top level, as a child of the stylesheet element.</td>
   </tr>
   <tr>
     <td><a href="checks/function-use-in-xslt-1.html">function-use-in-xslt-1</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>'xsl:function' requires XSLT 2.0 or later, and the version in force here is below that. Use a named template, or raise that version to 2.0.</td>
+    <td>An xsl:function requires XSLT 2.0 or later, and the version in force here is below that. Use a named template, or raise that version to 2.0.</td>
   </tr>
   <tr>
     <td><a href="checks/incorrect-use-of-boolean-constants.html">incorrect-use-of-boolean-constants</a></td>
@@ -214,25 +214,25 @@
     <td><a href="checks/malformed-version-in-stylesheet.html">malformed-version-in-stylesheet</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>A declared version is not a number, so it names no XSLT version and no version gate under it clears its floor, leaving every check about a construct a later version introduced quiet rather than guessing. Declare it as a decimal, such as 2.0</td>
+    <td>A declared version is not a decimal number, so it names no XSLT version and every check gated on one stays quiet. Declare it as a decimal, such as 2.0.</td>
   </tr>
   <tr>
     <td><a href="checks/missing-id-in-stylesheet.html">missing-id-in-stylesheet</a></td>
     <td>xpath</td>
     <td><span class="severity-warning">warning</span></td>
-    <td>The '@id' attribute is missing in the 'xsl:stylesheet' element. Declare it to specify the unique identifier explicitly.</td>
+    <td>The stylesheet element has no @id attribute. Declare it to specify the unique identifier explicitly.</td>
   </tr>
   <tr>
     <td><a href="checks/missing-or-empty-href.html">missing-or-empty-href</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>The '@href' is missing or empty here, so this pulls in no other module and no processor will load the stylesheet</td>
+    <td>The @href is missing or empty, so this pulls in no module and no processor will load the stylesheet. Name the module to pull in.</td>
   </tr>
   <tr>
     <td><a href="checks/missing-or-empty-name.html">missing-or-empty-name</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>The '@name' is missing or empty here, and neither is a QName, so no processor will load this stylesheet</td>
+    <td>The @name is missing or empty, so it holds no QName and no processor will load this stylesheet. Give it a name.</td>
   </tr>
   <tr>
     <td><a href="checks/missing-version-in-stylesheet.html">missing-version-in-stylesheet</a></td>
@@ -268,13 +268,13 @@
     <td><a href="checks/not-using-attribute-test-in-if-when-node.html">not-using-attribute-test-in-if-when-node</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>'xsl:if' or 'xsl:when' don't have attribute @test. Add this attribute or delete node.</td>
+    <td>An xsl:if or xsl:when has no @test attribute. Add one, or remove the element.</td>
   </tr>
   <tr>
     <td><a href="checks/otherwise-not-last.html">otherwise-not-last</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>'xsl:otherwise' must be the last child of its 'xsl:choose'. Move it after every 'xsl:when'.</td>
+    <td>An xsl:otherwise must be the last child of its xsl:choose. Move it after every xsl:when.</td>
   </tr>
   <tr>
     <td><a href="checks/oversized-template.html">oversized-template</a></td>
@@ -286,7 +286,7 @@
     <td><a href="checks/param-after-content.html">param-after-content</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>'xsl:param' must be declared before any other content in its 'xsl:template' or 'xsl:function'. Move it above the content.</td>
+    <td>An xsl:param must be declared before any other content in its xsl:template or xsl:function. Move it above the content.</td>
   </tr>
   <tr>
     <td><a href="checks/setting-value-of-variable-incorrectly.html">setting-value-of-variable-incorrectly</a></td>
@@ -304,7 +304,7 @@
     <td><a href="checks/sort-not-first.html">sort-not-first</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>'xsl:sort' must come before any other content in its 'xsl:for-each' or 'xsl:apply-templates'. Move it to the front.</td>
+    <td>An xsl:sort must come before any other content in its xsl:for-each or xsl:apply-templates. Move it to the front.</td>
   </tr>
   <tr>
     <td><a href="checks/stylesheet-has-no-templates.html">stylesheet-has-no-templates</a></td>
@@ -316,13 +316,13 @@
     <td><a href="checks/template-has-no-name-or-match.html">template-has-no-name-or-match</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>An 'xsl:template' must have a '@match' or '@name' attribute, or both. Add one of them.</td>
+    <td>An xsl:template must have a @match or @name attribute, or both. Add one of them.</td>
   </tr>
   <tr>
     <td><a href="checks/text-outside-xsl-text.html">text-outside-xsl-text</a></td>
     <td>xpath</td>
     <td><span class="severity-warning">warning</span> <span class="fix-suggestion">suggested fix</span></td>
-    <td>Literal text appears directly inside an 'xsl:' instruction element. Wrap it in 'xsl:text'.</td>
+    <td>Literal text appears directly inside an XSLT instruction element. Wrap it in xsl:text.</td>
   </tr>
   <tr>
     <td><a href="checks/too-many-templates.html">too-many-templates</a></td>
@@ -364,7 +364,7 @@
     <td><a href="checks/when-or-otherwise-outside-choose.html">when-or-otherwise-outside-choose</a></td>
     <td>xpath</td>
     <td><span class="severity-error">error</span></td>
-    <td>'xsl:when' and 'xsl:otherwise' are valid only as children of 'xsl:choose'. Move it into an 'xsl:choose', or use 'xsl:if'.</td>
+    <td>An xsl:when or xsl:otherwise is valid only as a child of xsl:choose. Move it into an xsl:choose, or use xsl:if.</td>
   </tr>
   <tr>
     <td><a href="checks/with-param-use-in-invalid-parent-node.html">with-param-use-in-invalid-parent-node</a></td>
@@ -418,13 +418,13 @@
     <td><a href="checks/syntax-newer-than-xslt-version.html">syntax-newer-than-xslt-version</a></td>
     <td>validation</td>
     <td><span class="severity-error">error</span></td>
-    <td>This XPath syntax belongs to a later XSLT version than the one in force here, so a conformant processor of the version in force rejects it. Raise that version, or spell the construct the way it allows.</td>
+    <td>This XPath syntax belongs to a later XSLT version than the one in force, so a conformant processor rejects it. Raise the version, or respell the construct.</td>
   </tr>
   <tr>
     <td><a href="checks/circular-import.html">circular-import</a></td>
     <td>format</td>
     <td><span class="severity-error">error</span></td>
-    <td>The stylesheet is part of an xsl:import/xsl:include cycle — it pulls in, directly or through a chain, a stylesheet that pulls it back (or imports itself). This is a static error. Break the cycle so no module depends on one that depends on it.</td>
+    <td>The stylesheet pulls in itself, or a module that pulls it back, through xsl:import or xsl:include, which is a static error. Break the cycle.</td>
   </tr>
   <tr>
     <td><a href="checks/confusing-variable-and-node.html">confusing-variable-and-node</a></td>
@@ -478,7 +478,7 @@
     <td><a href="checks/redundant-boolean-call.html">redundant-boolean-call</a></td>
     <td>format</td>
     <td><span class="severity-warning">warning</span> <span class="fix-safe">safe fix</span></td>
-    <td>A boolean() call stands where nothing but a truth is taken — a test or a use-when, an operand of and/or, the argument of not(), the condition of an if, the body of a satisfies — so the wrapper is redundant. Drop it.</td>
+    <td>A boolean() call stands where nothing but a truth is taken, so the wrapper is redundant. Drop it.</td>
   </tr>
   <tr>
     <td><a href="checks/redundant-double-negation.html">redundant-double-negation</a></td>
@@ -508,13 +508,13 @@
     <td><a href="checks/scans-whole-document.html">scans-whole-document</a></td>
     <td>format</td>
     <td><span class="severity-warning">warning</span></td>
-    <td>An expression opens a path with //, which scans the whole document from the root every time it is evaluated. Name the path you mean, look the nodes up with an xsl:key, or bind the scan once in a top-level variable.</td>
+    <td>An expression opens a path with //, which scans the whole document each time it runs. Name the path, use xsl:key, or bind the scan once in a top-level variable.</td>
   </tr>
   <tr>
     <td><a href="checks/starts-with-double-slash.html">starts-with-double-slash</a></td>
     <td>format</td>
     <td><span class="severity-warning">warning</span> <span class="fix-safe">safe fix</span> <span class="fix-suggestion">suggested fix</span></td>
-    <td>A pattern alternative starts with //, which adds nothing but, from XSLT 2.0 on, a demand that the node's tree be rooted at a document node, since every pattern already matches at any depth. On an xsl:template, removing it also lowers the default priority from 0.5 to that of the step alone, so give the rule an explicit priority if it must keep ranking as it does.</td>
+    <td>A pattern alternative opens with //, which at most demands a document-node root. Drop it, and set an explicit priority if the template must rank as before.</td>
   </tr>
   <tr>
     <td><a href="checks/string-length-compared-to-zero.html">string-length-compared-to-zero</a></td>
@@ -526,13 +526,13 @@
     <td><a href="checks/template-writes-nothing.html">template-writes-nothing</a></td>
     <td>format</td>
     <td><span class="severity-warning">warning</span></td>
-    <td>This template declares variables and writes nothing to the result tree, so applying it produces nothing</td>
+    <td>This template declares variables and writes nothing to the result tree, so applying it produces nothing. Write the output it was meant to build, or empty it.</td>
   </tr>
   <tr>
     <td><a href="checks/translate-for-case.html">translate-for-case</a></td>
     <td>format</td>
     <td><span class="severity-warning">warning</span> <span class="fix-suggestion">suggested fix</span></td>
-    <td>translate() folds case over the ASCII alphabet; XSLT 2.0 does this with lower-case() or upper-case(), which are shorter and Unicode-aware.</td>
+    <td>translate() folds case over the ASCII alphabet alone. Use lower-case() or upper-case(), which are shorter and Unicode-aware.</td>
   </tr>
   <tr>
     <td><a href="checks/unabbreviated-axis.html">unabbreviated-axis</a></td>
