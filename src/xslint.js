@@ -189,6 +189,14 @@
  * it with and the gating loop is where the CLI used to keep a second copy of
  * itself — it named the withheld checks a glob had graded from out there, one
  * tier spelled in two places, and the copy is gone.
+ *
+ * `lint` and `fixed` are not only this module's: `xslint/xslint-lsp` calls
+ * both in-process, on the live buffer rather than the saved file, for its
+ * diagnostics and for every quick-fix it offers, and the VS Code extension
+ * beside it and `xslint/xslint-jetbrains` both launch that server (#336). So a
+ * wrong fix is not a line in a terminal a developer can ignore but an edit one
+ * keystroke from a file nobody has saved yet, which is why a fix is withheld
+ * wherever the text under it does not parse (#636).
  */
 
 const path = require('path')

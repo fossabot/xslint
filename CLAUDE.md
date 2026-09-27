@@ -402,8 +402,8 @@ files and what their parameter entities name (#1010), calls `lint`, applies
 `process.exitCode`, a `no-restricted-syntax` selector banning the
 `process.exit` that ends the process where it stands and abandons every write
 the kernel has not taken (#767, #822). The package `main` re-exports `lint`
-and `fixed` so an embedder (the planned LSP server, #336) can lint a buffer
-without shelling out; the bin stays `src/index.mjs`.
+and `fixed` for the `xslint-lsp` server VS Code and `xslint-jetbrains` run on
+a live buffer (#336); the bin is `src/index.mjs`.
 
 `src/index.mjs` reaches `xslint.js` through a dynamic `import` inside the
 command action, not a top-level one, and so runs `program.parseAsync`. Importing
