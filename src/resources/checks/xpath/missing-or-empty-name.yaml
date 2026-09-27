@@ -3,4 +3,4 @@
 ---
 xpath: "//(xsl:variable | xsl:param | xsl:call-template | xsl:function | xsl:key | xsl:attribute-set | xsl:character-map | xsl:accumulator)[not(@name) and not(@_name)] | //(xsl:variable | xsl:param | xsl:with-param | xsl:call-template | xsl:template | xsl:function | xsl:key | xsl:attribute-set | xsl:decimal-format | xsl:character-map | xsl:mode | xsl:accumulator)[@name = '']"
 severity: error
-message: The '@name' is missing or empty here, and neither is a QName, so no processor will load this stylesheet
+message: "The @name is missing or empty, so it holds no QName and no processor will load this stylesheet. Give it a name."
