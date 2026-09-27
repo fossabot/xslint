@@ -160,11 +160,45 @@ const textual = function(elements) {
 }
 
 /**
- * The fix that stops a prefix leaking by adding it to the root's
- * `exclude-result-prefixes` — appended to the existing attribute, or a new one
- * inserted after the element name. It changes the serialized output, which is
- * why the check declares it a suggestion. Only offered when a single prefix
- * leaks, since several would each edit the one shared attribute and collide.
+ * The name a root excludes prefixes under: the plain one on an XSLT root, and
+ * the one in the XSLT namespace on a simplified stylesheet, whose plain
+ * namesake is a result attribute like any other — spelled with whichever
+ * prefix the document binds, or empty where it binds none (#1040).
+ * @param {Element} root - The stylesheet root
+ * @return {string} - The qualified name, or an empty string
+ */
+const spelling = function(root) {
+  let name = 'exclude-result-prefixes'
+  if (root.namespaceURI !== XSLT) {
+    name = ''
+    const prefix = root.lookupPrefix(XSLT)
+    if (prefix) {
+      name = `${prefix}:exclude-result-prefixes`
+    }
+  }
+  return name
+}
+
+/**
+ * The attribute a root excludes prefixes in, in the namespace `spelling`
+ * forks on, or null where it excludes none (#1040).
+ * @param {Element} root - The stylesheet root
+ * @return {?Node} - The attribute, or null
+ */
+const exclusions = function(root) {
+  let attribute = root.getAttributeNode('exclude-result-prefixes')
+  if (root.namespaceURI !== XSLT) {
+    attribute = root.getAttributeNodeNS(XSLT, 'exclude-result-prefixes')
+  }
+  return attribute
+}
+
+/**
+ * The fix that stops a prefix leaking by adding it to the root's excluded
+ * prefixes — appended to the existing attribute, or a new one inserted after
+ * the element name. It changes the serialized output, which is why the check
+ * declares it a suggestion. Only offered when a single prefix leaks, since
+ * several would each edit the one shared attribute and collide.
  * @param {Element} root - The stylesheet root
  * @param {string} prefix - The leaking prefix to exclude
  * @param {string} content - Raw source text of the file it stands in
@@ -172,12 +206,12 @@ const textual = function(elements) {
  *  replacement: string}} - The fix
  */
 const exclusion = function(root, prefix, content) {
-  const attribute = root.getAttributeNode('exclude-result-prefixes')
+  const attribute = exclusions(root)
   let fix = {
     line: root.lineNumber,
     col: root.columnNumber + root.nodeName.length + 1,
     value: '',
-    replacement: ` exclude-result-prefixes="${prefix}"`,
+    replacement: ` ${spelling(root)}="${prefix}"`,
   }
   if (attribute) {
     fix = substitution(attribute, `${attribute.value} ${prefix}`, content)
@@ -208,7 +242,7 @@ const lintByResultNamespace = function(corpus, suppressions = []) {
         (root.getAttribute('extension-element-prefixes') || '').split(GAPS),
       )
       const excluded = new Set(
-        (root.getAttribute('exclude-result-prefixes') || '').split(GAPS),
+        (exclusions(root)?.value ?? '').split(GAPS),
       )
       const leaks = !excluded.has('#all') &&
         !textual(elements) &&
@@ -233,7 +267,7 @@ const lintByResultNamespace = function(corpus, suppressions = []) {
           file: file,
           line: where.line,
           pos: where.pos,
-          ...(leaking.length === 1 &&
+          ...(leaking.length === 1 && spelling(root) &&
             {fix: exclusion(root, declared(attribute.name), content)}),
         })
       }

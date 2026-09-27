@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: leaking-result-namespace
+# A simplified root declares its exclusions in the XSLT namespace, so a prefix
+# named there does not leak (#1040).
+found:
+  amount: 0
+  positions: [ ]
+  fixes: [ ]
+input: |-
+  <?xml version="1.0"?>
+  <sheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsl:exclude-result-prefixes="xs" xsl:version="2.0">
+    <xsl:value-of select="3 cast as xs:integer"/>
+  </sheet>
