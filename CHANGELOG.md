@@ -9,6 +9,13 @@ publication date only; detailed notes begin with the Unreleased section.
 
 ## Unreleased
 
+- Remove `--stable`, the `stable:` key in `.xslint.yml`, and the `nursery:`
+  mark it read. A check was to join the nursery by hand the day an issue
+  reported it wrong, and nothing held the tree to that: four such issues are
+  open and no check carries a mark, so `--stable` reported the same run as
+  none. The flag is now an unknown option, the key an unknown key, and a check
+  carrying a `nursery:` mark fails the build as `mature:` does (#1070).
+
 - Call a directive unused only where the run ran what it covers.
   `--only`, `--suppress` and a rule turned `off` skip checks, and a directive
   over one of them covered nothing and was reported unused, telling the author

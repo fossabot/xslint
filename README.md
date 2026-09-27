@@ -177,26 +177,6 @@ quiet, so this runs every `unused-*` check but `unused-variable`:
 xslint --only=unused --suppress=unused-variable
 ```
 
-Use `--stable` when every defect in the report has to be worth acting on:
-
-```bash
-xslint --stable
-```
-
-It leaves out the *nursery* — the checks an open issue reports wrong about code
-a processor accepts. A check joins the nursery the day such an issue is filed
-and leaves the day it closes, and while it sits there its own [check
-page][checks] names the issue keeping it there.
-
-That is the part `--suppress` cannot do for you. The nursery is read off the
-checks themselves, so it follows the bug reports, where the same names written
-into your own `.xslint.yml` go stale in both directions: they keep withholding
-a check that has since been fixed, and never withhold one newly reported
-wrong.
-
-The nursery holds no checks today, so `--stable` reports all sixty-nine
-checks.
-
 ## Configuration
 
 Project-wide settings live in a `.xslint.yml` file, discovered by walking up
@@ -215,7 +195,6 @@ only:
 max-warnings: 10                        # default for --max-warnings
 log-level: info                         # default for --log-level
 quiet: false                            # default for --quiet
-stable: false                           # default for --stable
 ```
 
 - **`rules`** maps a check name — or a glob such as `unused-*` — to
@@ -230,12 +209,8 @@ stable: false                           # default for --stable
 - **`only`** lists the substrings `--only` would take, narrowing every run to
   the checks they name. Passing `--only` replaces this list rather than adding
   to it, and a check `rules` turns `off` stays off whichever of the two chose it.
-- **`max-warnings`**, **`log-level`**, **`quiet`**, and **`stable`** set the
-  defaults for the matching command-line flags. A check named **verbatim** under
-  `rules` outranks `stable`, so grading a nursery check `warning` or `error`
-  puts it back in the report. A glob does not: `'*': warning` grades every check
-  it reaches and vouches for none, so the nursery stays withheld and each
-  withheld check is named on standard error.
+- **`max-warnings`**, **`log-level`**, and **`quiet`** set the defaults for the
+  matching command-line flags.
 
 Unknown top-level keys, rule names that match no check, and values of the wrong
 type (a non-numeric `max-warnings`, a non-list `exclude` or `only`, a

@@ -13,7 +13,7 @@ Its derivation stands at the top of `src/xslint.js` itself, for the reason the n
 
 ## `src/config.js`
 
-Resolves `.xslint.yml` (severities/`off`, excludes, `max-warnings`, `stable`).
+Resolves `.xslint.yml` (severities/`off`, excludes, `max-warnings`).
 
 ## `src/gitignore.js`
 

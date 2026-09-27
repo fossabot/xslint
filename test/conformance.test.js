@@ -71,12 +71,6 @@ const RESOURCES = path.resolve(__dirname, 'resources')
 const KINDS = ['xpath', 'corpus', 'validation', 'format']
 
 /**
- * A ticket as this repository writes one.
- * @type {RegExp}
- */
-const TICKET = /#\d+/g
-
-/**
  * Rule kinds paired with the one directory holding their packs. The code-driven
  * kinds are enforced separately: a format check's packs are scattered across
  * the per-linter directories (so it is matched by `pack:` name across them),
@@ -353,26 +347,15 @@ const names = function(kind) {
 }
 
 /**
- * Every check carrying a nursery mark, paired with the tickets its own YAML
- * names. Read off the checks so the table beside it answers to the tree rather
- * than to itself, and a mark spelling no ticket at all comes back empty and
- * matches nothing a reader could have written down.
- * @return {{[name: string]: string}} - The marks, by check name
+ * Keys a check may no longer carry, each beside what it stood for: a flag
+ * claiming a check finished (#865), and a mark the tree was to add by hand the
+ * day an issue reported one wrong, which no gate could hold it to (#1070).
+ * @type {Array.<Array.<string>>}
  */
-const nursed = function() {
-  const found = {}
-  for (const kind of KINDS) {
-    for (const name of names(kind)) {
-      const check = yaml.parsedFromFile(
-        path.join(CHECKS, kind, `${name}.yaml`),
-      )
-      if (Object.hasOwn(check, 'nursery')) {
-        found[name] = (String(check.nursery).match(TICKET) || []).join(' ')
-      }
-    }
-  }
-  return found
-}
+const RETIRED = [
+  ['mature', 'maturity flag'],
+  ['nursery', 'nursery mark'],
+]
 
 /**
  * Whether the document is XSLT at all: an element in the XSLT namespace, or an
@@ -440,32 +423,18 @@ describe('conformance', function() {
       }
     }
   })
-  it('carries no maturity flag on a check of any kind', function() {
-    for (const kind of KINDS) {
-      for (const name of names(kind)) {
-        assert.ok(
-          !Object.hasOwn(
-            yaml.parsedFromFile(path.join(CHECKS, kind, `${name}.yaml`)),
-            'mature',
-          ),
-          `${kind}/${name} carries the retired mature flag`,
-        )
-      }
-    }
-  })
-  it('stands every nursery check on an open issue of its own', function() {
-    assert.deepStrictEqual(
-      nursed(), {},
-      [
-        'a check carries a `nursery:` mark where the tier holds none: every',
-        'issue reporting one of the sixty-eight wrong about code a processor',
-        'accepts is closed, which is the release bar rather than a claim any',
-        'check is finished. A mark returning is a check reported wrong again:',
-        'it stands in the literal above beside the issue its own YAML names,',
-        'so an edited mark reddens as loudly as a stale one and the tier',
-        'empties again as the ticket closes (#581, #637, #851)',
-      ].join(' '),
-    )
+  RETIRED.forEach(([key, what]) => {
+    it(`carries no ${what} on a check of any kind`, function() {
+      assert.deepStrictEqual(
+        KINDS.flatMap((kind) => names(kind)
+          .filter((name) => Object.hasOwn(
+            yaml.parsedFromFile(path.join(CHECKS, kind, `${name}.yaml`)), key,
+          ))
+          .map((name) => `${kind}/${name}`)),
+        [],
+        `a check cannot carry the retired ${key} key, ${what} being gone`,
+      )
+    })
   })
   it('gives every rule check at least one test pack', function() {
     for (const [kind, dir] of Object.entries(PACKED)) {

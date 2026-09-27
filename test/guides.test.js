@@ -182,14 +182,11 @@
  * that shows: it said fifty-four when #895 was filed, fifty-seven and then
  * fifty-nine as marks came off, and sixty-eight was the truth by the time
  * anything asked, a live figure restated by hand at three landings and
- * wrong after every one. `LENGTHS` holds the nursery and the tier now,
+ * wrong after every one. `LENGTHS` held the nursery and the tier from then,
  * both off one walk of `checks.json`, `checks` is among the nouns a claim
  * may be spelled with, and the vocabulary reaches ninety-nine with `no`
- * standing for the none an empty nursery has, which is the claim the tree
- * makes today and one no number word spells. The entry itself states no
- * count at all: what a change did is a record, where what a tier reports
- * is a fact about the tree, and the second belongs to the documents a gate
- * reads (#895).
+ * standing for a none no number word spells (#895). The tier went at #1070,
+ * and its two rows with it.
  *
  * The breach behind this restatement is the shared budget once more, and
  * the plainest reading of it yet: #983 and #984 each measured themselves
@@ -262,26 +259,6 @@ const elements = function(check) {
 }
 
 /**
- * Every check a run reads, whatever kind declares it: the four kinds are one
- * namespace to a user, and a claim about how many there are is a claim about
- * all of them.
- * @return {Array.<object>} - The checks, as `checks.json` holds them
- */
-const checked = function() {
-  return Object.values(kinds).flatMap((kind) => Object.values(kind))
-}
-
-/**
- * The checks the nursery holds, which is the ones carrying a `nursery:` mark
- * naming the open issue that reports them wrong. The tier is the rest, so both
- * counts follow from the same walk and neither can be stated apart from it.
- * @return {Array.<object>} - The checks `--stable` withholds
- */
-const nursed = function() {
-  return checked().filter((check) => Object.hasOwn(check, 'nursery'))
-}
-
-/**
  * Each list as a document may name it, paired with what it holds — a constant
  * of ours, or a check, whose list is the elements its own selector names.
  * `NAMED` is `ATTRIBUTES` as a set, so it counts to the same and answers to a
@@ -294,8 +271,6 @@ const LENGTHS = new Map([
   ['NAMED', ATTRIBUTES.length],
   ['UNINDEXED', unindexed()],
   ['missing-or-empty-name', elements('missing-or-empty-name')],
-  ['nursery', nursed().length],
-  ['stable', checked().length - nursed().length],
 ])
 
 /**
