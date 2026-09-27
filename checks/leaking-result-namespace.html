@@ -124,7 +124,9 @@ result element.</p>
 <p>A simplified stylesheet, whose root is itself a literal result element, spells
 the attribute in the XSLT namespace instead: <code>xsl:exclude-result-prefixes</code>. A
 plain <code>exclude-result-prefixes</code> there is one more attribute copied into the
-result, and excludes nothing.</p>
+result, and excludes nothing. The same holds for the extension namespaces a
+root declares, which never reach the result: <code>extension-element-prefixes</code> on
+<code>xsl:stylesheet</code>, <code>xsl:extension-element-prefixes</code> on a simplified root.</p>
 <pre><code class="language-xsl">&lt;out xsl:version=&quot;2.0&quot; xsl:exclude-result-prefixes=&quot;xs&quot;
   xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot;
   xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;&gt;
