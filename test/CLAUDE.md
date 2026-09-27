@@ -497,16 +497,9 @@ there asked its four questions behind an `if (check.mature !== true) continue` a
 sixty-eight checks, reporting as passing while asserting nothing — #645's and #607's own shape,
 inside the file written to catch it. A key nothing carries is a key nothing refuses either, so the
 questions could be re-armed by writing it back; what the gate asks now is that no check of any kind
-carries it. The `nursery:` mark of #581 is held by a gate of the opposite shape, and the shapes
-differ because the claims do: `NURSERY` names each withheld check beside the **issue numbers** its
-own YAML gives, matched by one `deepStrictEqual`, so a check joining the tier, a mark whose ticket
-changed, and a mark still standing once its ticket closed each redden. Reading the numbers rather
-than a boolean is the whole of it — a flag saying a check is finished asserts what no tree can
-weigh, which is where `mature` went wrong, where a number is a pointer a reader opens and a closed
-ticket retracts. The table has to be maintained by hand against GitHub for the same reason it is
-readable: nothing in the tree knows an issue has closed, so what the gate catches is the mark
-drifting from the table, and the *table* drifting from the issues is caught by whoever closes one
-and finds the check still withheld. A
+carries it. The `nursery:` mark of #581 is refused the same way since #1070, one `RETIRED` table
+holding both keys: the mark could only ever be held to naming an open issue, never to being added
+the day one was filed, so the tier it fed stood empty while four such issues were open. A
 pack gives one position per defect it expects, too: the harness walks the `positions`, so an
 `amount` standing above their number is a count asserted and a place asserted nowhere — three packs
 of #565's own were written that way and passed, pinning four runs' replacements while saying nothing
@@ -649,9 +642,8 @@ whose subject *is* that attribute, `malformed-version-in-stylesheet` and
 `missing-version-in-stylesheet`, each of which reddens when its own selector stops reading one.
 What stood there asked the opposite — that a selector naming `@version` name `@xsl:version`
 beside it, widened from a comparison to a presence test at #608 — which is a list of spellings
-where every check but those two means a floor. The nursery empties with it: `nursed()` is held
-to holding nothing, so a check reported wrong again brings its mark back beside the issue in the
-literal there, and the four checks these marks withheld are in the report at last (#581, #851).
+where every check but those two means a floor. The nursery emptied with it, and the four checks
+its marks withheld came back into the report (#581, #851).
 
 The line cap is held from a third side since #825. A file the cap is lifted off must have its
 length stated in a guide, and the number must be the one ESLint reads: `SPRAWLING`'s membership was

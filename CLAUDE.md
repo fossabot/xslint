@@ -538,12 +538,10 @@ importing file). Because usage is followed across files, a symbol defined in a
 A validator or format YAML is `severity` and `message` alone. A message is
 two sentences, fault then remedy, in thirty words, names bare, no dash (#1072).
 
-A check of any kind may carry two more keys. `fix:` names the tier every fix it
+A check of any kind may carry one more key. `fix:` names the tier every fix it
 offers lands in — `safe`, `suggestion`, or both where the tier is the standing
 place's rather than the check's — and is the one place a tier is spelled,
-`src/xslint.js` stamping every defect from it (#899). `nursery:` is a sentence
-opening with the number of the open issue reporting that check wrong, which is
-what `--stable` withholds it on (see **User configuration**).
+`src/xslint.js` stamping every defect from it (#899).
 
 ## Adding a rule
 
@@ -806,11 +804,14 @@ packs** among them: they are bars on what a test asserts, not claims about a
 check. `test/conformance.test.js` refuses the key in a check of any kind, so
 prose is not the only thing keeping the bar retired (#865).
 
-The `nursery:` mark **User configuration** describes is not that flag returning
-under another name: `mature: true` asserted a check had no more bugs, which no
-tree can show, where a mark names an open issue reporting one, which a closed
-ticket retracts. So it is deleted on evidence rather than earned on
-attestation, and it freezes nothing (#581).
+Nor is there a tier withholding the checks an open issue reports wrong. A
+`nursery:` mark did that under `--stable` from #581, to be added by hand the
+day such an issue was filed, and nothing could hold the tree to it: whether a
+ticket reports a check wrong is not readable off the ticket, so four were open
+and the tier held none (#1070). The release bar is what the three corpus
+reports under `test/resources/corpora/` and `REFUSED` in
+`test/snapshot.test.js` measure on every run (#876), and
+`test/conformance.test.js` refuses the `nursery:` key as it refuses `mature:`.
 
 ## Test packs
 
@@ -955,17 +956,9 @@ the 22 and could only ever ask whether the string appeared.
   validator and linter.
 - **Only**: `--only=<rule-substring>` (or `only:`, which the flag replaces)
   reports only the checks it names; a suppression outranks it (#1030).
-- **Stable tier**: `--stable` (or `stable: true` in the config) withholds the
-  **nursery**, the checks an open issue reports wrong about code a processor
-  accepts. The nursery holds no checks since #851, so `--stable` reports
-  sixty-nine checks — the release bar, and no claim that a check is finished.
-  Each says so itself, in a `nursery:` mark opening with that issue's number,
-  so the tier is derived from the tree and empties as tickets close. A check
-  the config grades **verbatim** is re-admitted; a glob grades and vouches for
-  nothing, and the run says which check it leaves withheld (#581, #851).
 - **Config**: `.xslint.yml` (found by walking up, or `--config <path>`) can turn
   rules `off`, re-grade severity, `exclude:` file globs, and default
-  `max-warnings`/`log-level`/`quiet`/`stable`. Flags override the file overrides
+  `max-warnings`/`log-level`/`quiet`. Flags override the file overrides
   the defaults (`src/config.js`). Unknown keys and no-match patterns are
   reported, an `exclude:` that excluded nothing among them — counted at both
   doors, a `dir/**` pruning a directory matching no file, and asked only of a
@@ -1067,7 +1060,7 @@ one of them.
 | `scripts/budget.js` | Judges what a corpus cost the nightly tier against its budget, from both sides |
 | `scripts/snapshot.js` | Judges what a corpus drew against the report committed beside it, and rewrites that report on `--write` |
 | `scripts/readme.js` | The figures `README.md` states of the tree, off the corpus reports and `checks.json`, written by `npx grunt readme` |
-| `test/conformance.test.js` | Enforces naming, motives, selector hygiene, the retirement of the `mature` flag, the suite's own shape, and the length a guide states of the file the line cap is lifted off |
+| `test/conformance.test.js` | Enforces naming, motives, selector hygiene, the retirement of the `mature` flag and the `nursery` mark, the suite's own shape, and the length a guide states of the file the line cap is lifted off |
 | `test/shadows.test.js` | Every attribute a declarative selector compares the value of, held to asking both spellings XSLT gives one |
 | `test/guides.js` | The guides as data: the chain a turn loads on its way to one file, what that chain may cost, and how a claim standing in one is read |
 | `test/guides.test.js` | The guides themselves: a bar on what a chain of them costs a turn, the index held to the tree from both sides, and the counts a guide states of a list in the code |

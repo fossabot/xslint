@@ -166,30 +166,6 @@
  * discarded the report, and eleven merges in a row read `-0` on a commit six
  * GitHub runners passed.
  *
- * `NURSERY` is what `--stable` withholds, read off `checks.json` rather than
- * written out here, each check naming the open issue that keeps it out (#581).
- * Three things about the gate are deliberate, and each is a channel kept apart
- * from one that already existed. It matches a **whole name**, where
- * `suppressed` matches a substring and `unused-function` stands inside
- * `unused-function-template-parameter`, which is settled. It exempts a name
- * the config grades **verbatim** and never one a glob reached, which is what
- * `admitted` is for beside `overrides`: that map is keyed by expanded names,
- * so `'*': warning` would have exempted every one of them silently, a pattern
- * about severity being no vouch for a check. It defaults to `overrides`'s
- * keys, verbatim for an embedder calling `lint`, and a glob run says which of
- * the checks it graded stay withheld. And it stands **after** the directive
- * pass: a defect withheld in front of it is a defect the directive over it
- * never suppressed, so `--stable` would call that directive unused and tell
- * the author to delete the one line keeping the file quiet under the other
- * tier. Since #851 the tier holds nothing: every issue reporting one of the
- * sixty-eight checks wrong about code a processor accepts is closed, which is
- * the release bar rather than a claim any of them is finished. What a member
- * costs a run is therefore reached by handing `lint` a `nursery` of its own,
- * an option beside `admitted`, since the tree's own holds no name to exercise
- * it with and the gating loop is where the CLI used to keep a second copy of
- * itself — it named the withheld checks a glob had graded from out there, one
- * tier spelled in two places, and the copy is gone.
- *
  * `lint` and `fixed` are not only this module's: `xslint/xslint-lsp` calls
  * both in-process, on the live buffer rather than the saved file, for its
  * diagnostics and for every quick-fix it offers, and the VS Code extension
@@ -374,20 +350,6 @@ const CHECKS = [
   ...LINTERS.flatMap((stage) => stage.checks),
   ...EXPRESSION_LINTERS.flatMap((stage) => stage.checks),
 ]
-
-/**
- * The checks a stable run withholds, each paired with the open issue reporting
- * it wrong — read off the checks themselves, where a `nursery` mark names that
- * issue, so the tier is the tree's answer rather than a list kept beside it,
- * and holds nothing wherever every such issue is closed. A whole name and
- * never a substring, which is what `suppress` matches (#581, #851).
- * @type {Map.<string, string>}
- */
-const NURSERY = new Map(
-  Object.values(kinds).flatMap((kind) => Object.entries(kind))
-    .filter(([, check]) => Object.hasOwn(check, 'nursery'))
-    .map(([name, check]) => [name, check.nursery]),
-)
 
 /**
  * The tiers each check declares under its `fix:`, which is the one place a
@@ -700,16 +662,11 @@ const ranked = function(one, two) {
  *  Raw stylesheets as read, a byte order mark held aside by `parted`, and
  *  the files their parameter entities name, read by the caller (#1010)
  * @param {{suppress: Array.<string>, overrides: {[check: string]: string},
- *  stable: boolean, admitted: Array.<string>, nursery: Map, only: Array}}
- *  options - Skips, re-grades, the tier gate, its exemptions and marks, choices
+ *  only: Array}} options - Skips, re-grades and choices
  * @return {Array.<object>} - The defects that survive suppression
  */
 const lint = function(
-  sources,
-  {
-    suppress = [], overrides = {}, stable = false,
-    admitted = Object.keys(overrides), nursery = NURSERY, only = [],
-  } = {},
+  sources, {suppress = [], overrides = {}, only = []} = {},
 ) {
   const chosen = chosenOf(only)
   const suppressions = [
@@ -755,24 +712,8 @@ const lint = function(
       logger.warn(`Unused xslint-disable directive at ${file}:${stale.line}`)
     }
   }
-  const gated = new Set()
-  if (stable) {
-    for (const [name, issue] of nursery) {
-      if (!admitted.includes(name)) {
-        gated.add(name)
-        if (overrides[name]) {
-          logger.warn(
-            [
-              `Rule '${name}' stays withheld under the stable tier,`,
-              `a pattern grading it having named no check: ${issue}`,
-            ].join(' '),
-          )
-        }
-      }
-    }
-  }
   return defects.filter(
-    (defect) => chosen.includes(defect.name) && !gated.has(defect.name) &&
+    (defect) => chosen.includes(defect.name) &&
       !suppresses(directives.get(defect.file), defect),
   ).sort(ranked)
 }
@@ -781,7 +722,7 @@ const lint = function(
  * Entry point for the command line.
  * @param {Array.<string>} pths - Files or directories with .xsl to lint
  * @param {object} options - CLI options: `logLevel`, `quiet`, `suppress`,
- *  `maxWarnings`, `config`, `format`, `stable`, `only`, `fix`, `fixDryRun`,
+ *  `maxWarnings`, `config`, `format`, `only`, `fix`, `fixDryRun`,
  *  `fixSuggestions`
  */
 const xslint = function(pths, options) {
@@ -792,7 +733,6 @@ const xslint = function(pths, options) {
   }
   const disabled = []
   const overrides = {}
-  const admitted = []
   for (const [pattern, severity] of Object.entries(config.rules)) {
     const matched = CHECKS.filter((check) => minimatch(check, pattern))
     if (matched.length === 0) {
@@ -803,9 +743,6 @@ const xslint = function(pths, options) {
         disabled.push(check)
       } else {
         overrides[check] = severity
-        if (check === pattern) {
-          admitted.push(check)
-        }
       }
     }
   }
@@ -840,7 +777,6 @@ const xslint = function(pths, options) {
       content: content,
       subsets: subsetsOf(stylesheet, content),
     }))
-  const stable = options.stable ?? config.stable ?? false
   let only = config.only
   if (options.only?.length > 0) {
     only = options.only
@@ -848,8 +784,6 @@ const xslint = function(pths, options) {
   let reported = lint(sources, {
     suppress: [...options.suppress, ...disabled],
     overrides: overrides,
-    stable: stable,
-    admitted: admitted,
     only: only,
   })
   if (options.fix || options.fixDryRun || options.fixSuggestions) {

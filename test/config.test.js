@@ -58,16 +58,10 @@ const CASES = [
     expected: [],
   },
   {
-    name: 'reads the stable tier from the config file',
+    name: 'reads nothing off the retired stable tier',
     content: 'stable: true\n',
     field: 'stable',
-    expected: true,
-  },
-  {
-    name: 'ignores a non-boolean stable',
-    content: 'stable: 3\n',
-    field: 'stable',
-    expected: null,
+    expected: undefined,
   },
   {
     name: 'ignores a log-level that is not a string',
@@ -95,7 +89,6 @@ describe('config', function() {
       maxWarnings: null,
       logLevel: null,
       quiet: null,
-      stable: null,
       base: dir,
     })
   })

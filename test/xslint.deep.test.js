@@ -797,14 +797,16 @@ describe('xslint', function() {
     fs.rmSync(dir, {recursive: true, force: true})
     assert.ok(!streams.stderr.includes('Processed files'))
   })
-  it('should keep a settled check with --stable', function() {
-    const streams = xslintStreams([
-      'test/resources/stylesheets/xsl-with-some-violations.xsl',
-      '--stable',
-    ])
-    assert.ok(streams.stdout.includes('short-names'))
+  it('should reject the retired --stable', function() {
+    assert.ok(
+      xslintStreams([
+        'test/resources/stylesheets/xsl-with-some-violations.xsl',
+        '--stable',
+      ]).stderr.includes('unknown option \'--stable\''),
+      'a retired tier cannot pass for a flag the run still reads',
+    )
   })
-  it('should read the stable tier from the config file', function() {
+  it('should warn about the retired stable key in the config', function() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xslint-'))
     const cfg = path.join(dir, '.xslint.yml')
     fs.writeFileSync(cfg, 'stable: true\n')
@@ -813,7 +815,10 @@ describe('xslint', function() {
       `--config=${cfg}`,
     ])
     fs.rmSync(dir, {recursive: true, force: true})
-    assert.ok(streams.stdout.includes('short-names'))
+    assert.ok(
+      streams.stderr.includes('Unknown key \'stable\''),
+      'a retired key cannot be read in silence as though it still gated',
+    )
   })
   it('should suppress a defect with an inline disable-next-line', function() {
     const streams = xslintStreams(['test/resources/directives/used.xsl'])
