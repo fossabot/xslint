@@ -9,6 +9,14 @@ publication date only; detailed notes begin with the Unreleased section.
 
 ## Unreleased
 
+- Read the extension namespaces a simplified stylesheet declares.
+  `leaking-result-namespace` read only the plain `extension-element-prefixes`,
+  which on a literal result element root is a result attribute, so a prefix
+  named in `xsl:extension-element-prefixes` was reported as leaking and a fix
+  offered to exclude it, though Saxon leaves it out of the result. The root is
+  now read in the XSLT namespace, as its excluded prefixes already were
+  (#1086).
+
 - Report a parameter whose name starts with a digit, and a prefixed variable.
   `name-starts-with-numeric` read neither `xsl:param` nor the local part of a
   variable or template name, so `<xsl:param name="1top"/>` and
