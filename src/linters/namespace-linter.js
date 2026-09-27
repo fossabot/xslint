@@ -7,7 +7,8 @@ const {expressionsOf} = require('../attributes')
 const {metaOf, suppressed} = require('../checks')
 const {deletion, standsAt} = require('../fixes')
 const {logger} = require('../logger')
-const {GAPS, NAMED} = require('../tokens')
+const {parseOf} = require('../syntax')
+const {GAPS, NAMED, TOKENS} = require('../tokens')
 const {XSLT} = require('../xsl-version')
 
 /**
@@ -93,17 +94,82 @@ const qualifying = function(prefix) {
 }
 
 /**
- * Whether a prefix is used anywhere in the document — by an element name, an
- * attribute name, a qualified name inside an attribute value or a text value
- * template, or a prefix list naming it; a namespace declaration itself is not
- * usage. A value is read as text rather than as tokens, since a string literal
- * such as `function-available('ext:name')` names a prefix as surely as a step.
+ * The kinds a qualified name is lexed as, a prefixed function standing
+ * before its bracket being one of its own.
+ * @type {Array.<string>}
+ */
+const NAMES = [TOKENS.NAME, TOKENS.USER_FUNCTION]
+
+/**
+ * The kinds holding a literal, whose text names a prefix as surely as a step
+ * does in `function-available('ext:name')`, and is read as text for it.
+ * @type {Array.<string>}
+ */
+const LITERALS = [TOKENS.STRING, TOKENS.UNCLOSED]
+
+/**
+ * Whether a token stream qualifies a name with a prefix: a name spelled with
+ * it, a wildcard it opens (`tei:*`, lexed as three tokens), or a literal
+ * holding it. The lexer decides where a name begins, so `last()-tei:x` uses
+ * `tei` where a scan of the text reads the `-` as part of a name (#1041).
+ * @param {Array.<{type: string, value: string}>} tokens - Lexed expression
+ * @param {string} prefix - Prefix to look for
+ * @param {RegExp} pattern - The pattern of its use in a text
+ * @return {boolean} - True when the prefix is used
+ */
+const qualifies = function(tokens, prefix, pattern) {
+  return tokens.some((token, index) =>
+    (NAMES.includes(token.type) && token.value.startsWith(`${prefix}:`)) ||
+    (token.type === TOKENS.NAME && token.value === prefix &&
+      tokens[index + 1]?.type === TOKENS.COLON &&
+      tokens[index + 2]?.type === TOKENS.MULTI) ||
+    (LITERALS.includes(token.type) && pattern.test(token.value)),
+  )
+}
+
+/**
+ * What a document says outside its elements' names and prefix lists, read
+ * once for every prefix it declares: the tokens of each expression it carries,
+ * and each attribute value with those expressions blanked out of it — a
+ * QName-valued `mode` or `as`, the text around a template's braces — which is
+ * scanned as text, as every value was until #1041.
  * @param {Document} xsl - The document to read
  * @param {Array.<Element>} elements - Every element of the document
+ * @return {{streams: Array.<Array>, texts: Array.<string>}} - What to scan
+ */
+const readOf = function(xsl, elements) {
+  const records = new Map()
+  for (const found of expressionsOf(xsl)) {
+    records.set(found.node, (records.get(found.node) ?? []).concat([found]))
+  }
+  return {
+    streams: expressionsOf(xsl).map((found) => parseOf(found).tokens),
+    texts: elements.flatMap((element) => Array.from(element.attributes))
+      .filter((attribute) =>
+        !declared(attribute.name) && attribute.name !== 'xmlns')
+      .map((attribute) => (records.get(attribute) ?? []).reduce(
+        (value, found) => [
+          value.slice(0, found.start),
+          ' '.repeat(found.expression.length),
+          value.slice(found.start + found.expression.length),
+        ].join(''),
+        attribute.value,
+      )),
+  }
+}
+
+/**
+ * Whether a prefix is used anywhere in the document — by an element name, an
+ * attribute name, a qualified name inside an expression or a literal it
+ * holds, the text of a value no expression covers, or a prefix list naming
+ * it; a namespace declaration itself is not usage.
+ * @param {Array.<Element>} elements - Every element of the document
+ * @param {{streams: Array.<Array>, texts: Array.<string>}} read - What the
+ *  document says, as {@link readOf} reads it
  * @param {string} prefix - Prefix to look for
  * @return {boolean} - True when the prefix is used
  */
-const used = function(xsl, elements, prefix) {
+const used = function(elements, read, prefix) {
   const qualifier = `${prefix}:`
   const pattern = qualifying(prefix)
   return elements.some((element) =>
@@ -111,14 +177,10 @@ const used = function(xsl, elements, prefix) {
       listed(element).includes(prefix) ||
       Array.from(element.attributes).some(
         (attribute) =>
-          !declared(attribute.name) &&
-          attribute.name !== 'xmlns' &&
-          (attribute.name.startsWith(qualifier) ||
-            pattern.test(attribute.value)),
+          !declared(attribute.name) && attribute.name.startsWith(qualifier),
       ),
-  ) || expressionsOf(xsl).some(
-    (found) => found.node.nodeType !== 2 && pattern.test(found.expression),
-  )
+  ) || read.texts.some((text) => pattern.test(text)) ||
+    read.streams.some((tokens) => qualifies(tokens, prefix, pattern))
 }
 
 /**
@@ -139,9 +201,10 @@ const lintByNamespace = function(corpus, suppressions = []) {
   if (!suppressed(CHECK, suppressions)) {
     for (const {file, content, xsl} of corpus) {
       const elements = Array.from(xsl.getElementsByTagName('*'))
+      const read = readOf(xsl, elements)
       for (const attribute of Array.from(xsl.documentElement.attributes)) {
         const prefix = declared(attribute.name)
-        if (prefix && prefix !== 'xml' && !used(xsl, elements, prefix)) {
+        if (prefix && prefix !== 'xml' && !used(elements, read, prefix)) {
           const where = standsAt(attribute, content)
           defects.push({
             name: CHECK,
