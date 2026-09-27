@@ -1,7 +1,8 @@
 # Leaking result namespace
 
 A literal result element copies every namespace in scope on the stylesheet into
-the result tree, unless the prefix is excluded. So a prefix declared only for
+the result tree, unless the prefix is excluded. The XSLT namespace is the one
+exception, under whatever prefix it is bound, so it never needs excluding. So a prefix declared only for
 the stylesheet's own logic — `xs` for a sequence type in `as="xs:integer"`, a
 helper `my`/`eo` called from a `select` — is serialized onto output elements it
 never names. `xsl:element` does not do this, so the leak appears precisely when
