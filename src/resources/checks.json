@@ -253,9 +253,9 @@
         "message": "This XSLT 2.0 construct stands where the version in force is below 2.0, which a conformant 1.0 processor rejects. Use a 1.0 equivalent, or raise that version to 2.0."
       },
       "name-starts-with-numeric": {
-        "xpath": "//(xsl:variable | xsl:template)[matches(@name, '^[0-9]')] | //xsl:function[matches(@name, '^([^:]*:)?[0-9]')]",
-        "severity": "warning",
-        "message": "A variable, function, or template name starts with a digit, which is invalid in XPath. Rename it to start with a letter."
+        "xpath": "//(xsl:variable | xsl:param | xsl:template | xsl:function)[matches(@name, '^([^:]*:)?[0-9]')]",
+        "severity": "error",
+        "message": "A variable, parameter, function, or template name starts with a digit, so no processor loads this stylesheet. Rename it to start with a letter."
       },
       "not-creating-attribute-correctly": {
         "xpath": "//xsl:attribute[not(contains(@name, '{')) and not(@_name)][not(@namespace) and not(@_namespace)][parent::*[not(self::xsl:*)]][not(*) or (count(*) = 1 and (xsl:value-of[not(@separator) and not(@_separator)] or xsl:text[not(@disable-output-escaping) and not(@_disable-output-escaping)]))][not(preceding-sibling::*[not(self::xsl:variable) and not(self::xsl:attribute)])][not(preceding-sibling::xsl:attribute[@_name or not(@name) or contains(@name, '{')])][not(preceding-sibling::xsl:attribute/@name = @name)][not(some $held in ../@*[not(namespace-uri() = 'http://www.w3.org/1999/XSL/Transform')] satisfies local-name($held) = replace(xslint:attribute(., 'name'), '^.*:', ''))][not(@separator) and not(@_separator) and not(@type) and not(@_type) and not(@validation) and not(@_validation)][not(some $value in (. | .//@select | .//@_select) satisfies preceding-sibling::xsl:variable[contains($value, concat('$', xslint:attribute(., 'name')))])]",

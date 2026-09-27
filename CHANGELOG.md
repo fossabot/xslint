@@ -9,6 +9,13 @@ publication date only; detailed notes begin with the Unreleased section.
 
 ## Unreleased
 
+- Report a parameter whose name starts with a digit, and a prefixed variable.
+  `name-starts-with-numeric` read neither `xsl:param` nor the local part of a
+  variable or template name, so `<xsl:param name="1top"/>` and
+  `<xsl:variable name="my:3var"/>` went unreported while `my:4fun` was caught.
+  Every declaration is now judged on its local part, and the check is graded
+  `error`, since no processor loads a stylesheet holding such a name (#969).
+
 - Call a directive unused only where the run ran what it covers.
   `--only`, `--suppress` and a rule turned `off` skip checks, and a directive
   over one of them covered nothing and was reported unused, telling the author
