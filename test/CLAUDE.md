@@ -660,6 +660,14 @@ standing within `NEARBY` characters of the file's own name, so the drift above i
 reading and not as so many lines: the gate cannot tell what a ticket once measured from what the
 file stands at today, and a history spelled the other way is a stale claim it rightly fails.
 
+`QUIET` is the ratchet on the `recommended` preset, counted off the committed corpus reports: 166,
+37 and 11 reports over DocBook-XSL, TEI and DITA-OT once `unused-variable` left it, 127 of
+DocBook-XSL's being `broken-href`, most naming modules its build generates. The defect the bar
+catches is a noisy check joining the preset, so each bar stands at the geometric middle of those
+readings and the ones `unused-variable` gives when put back, 279, 141 and 28. The nearest candidate
+the first draft left out, `use-choose-without-otherwise`, gives 429, 310 and 114 and is caught by
+all three.
+
 ## `test/guides.test.js`
 
 Its derivation stands at the top of `test/guides.test.js` itself, for the reason it gives there:

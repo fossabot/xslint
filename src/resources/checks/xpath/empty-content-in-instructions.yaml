@@ -3,4 +3,5 @@
 ---
 xpath: '//(xsl:for-each | xsl:if)[not(* | processing-instruction()) and xslint:normalize-space(.) = "" and not(text()[ancestor::*[@xml:space][1]/@xml:space = ''preserve''])]'
 severity: warning
+preset: recommended
 message: An instruction element such as xsl:for-each or xsl:if has no content. Add content or remove the empty element.

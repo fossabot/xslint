@@ -25,7 +25,9 @@ const SEVERITIES = ['off', 'warning', 'error']
  * reporting rather than silently ignoring.
  * @type {Array.<string>}
  */
-const KEYS = ['rules', 'exclude', 'only', 'max-warnings', 'log-level', 'quiet']
+const KEYS = [
+  'rules', 'exclude', 'only', 'preset', 'max-warnings', 'log-level', 'quiet',
+]
 
 /**
  * Nearest configuration file, searching from given directory up to the root.
@@ -78,7 +80,7 @@ const typed = function(raw, key, ok, expected, fallback) {
  * and any known key holding the wrong type rather than dropping them silently.
  * @param {object|null} raw - Parsed YAML, or null when there is no file
  * @return {{rules: object, exclude: Array.<string>, only: Array.<string>,
- *  maxWarnings: number|null, logLevel: string|null,
+ *  preset: string|null, maxWarnings: number|null, logLevel: string|null,
  *  quiet: boolean|null}} - Normalized configuration
  */
 const normalized = function(raw) {
@@ -112,6 +114,9 @@ const normalized = function(raw) {
       (val) => Array.isArray(val) && val.every((it) => typeof it === 'string'),
       'a list of strings', [],
     ),
+    preset: typed(
+      raw, 'preset', (val) => typeof val === 'string', 'a string', null,
+    ),
     maxWarnings: typed(
       raw, 'max-warnings',
       (val) => typeof val === 'number' && !Number.isNaN(val), 'a number', null,
@@ -134,8 +139,8 @@ const normalized = function(raw) {
  * @param {string|undefined} explicit - Path from '--config', if any
  * @param {string} from - Directory the search starts in
  * @return {{rules: object, exclude: Array.<string>, only: Array.<string>,
- *  maxWarnings: number|null, logLevel: string|null, quiet: boolean|null,
- *  base: string}} - Configuration
+ *  preset: string|null, maxWarnings: number|null, logLevel: string|null,
+ *  quiet: boolean|null, base: string}} - Configuration
  */
 const configFrom = function(explicit, from = process.cwd()) {
   let file

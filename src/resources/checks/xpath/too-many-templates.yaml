@@ -3,4 +3,5 @@
 ---
 xpath: (/xsl:stylesheet | /xsl:transform | /xsl:package)[count(//xsl:template) >= 10]
 severity: warning
+preset: all
 message: The stylesheet declares 10 or more templates, too many to read in one file. Split it into imported modules.

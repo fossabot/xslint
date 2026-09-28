@@ -2,5 +2,6 @@
 # SPDX-License-Identifier: MIT
 ---
 severity: warning
+preset: all
 message: "A pattern alternative opens with //, which at most demands a document-node root. Drop it, and set an explicit priority if the template must rank as before."
 fix: [ safe, suggestion ]

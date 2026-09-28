@@ -923,7 +923,9 @@ const SEEDED = new Map(ROWS.map((row, index) => {
  * @type {Map.<string, string>}
  */
 const REPORTED = new Map(
-  [...YARDS].map(([flag, yard]) => [flag, xslintStreams([flag, yard]).stdout]),
+  [...YARDS].map(
+    ([flag, yard]) => [flag, xslintStreams([flag, '--preset', 'all', yard]).stdout],
+  ),
 )
 
 /**
@@ -986,7 +988,7 @@ describe('fixer', function() {
   })
   it('cannot abbreviate a parent axis that has no short form', function() {
     const file = scratch(fixture('unabbreviated-axis.xsl'))
-    runXslint(['--fix', file])
+    runXslint(['--fix', '--preset', 'all', file])
     assert.ok(fs.readFileSync(file, 'utf-8').includes('parent::n'))
   })
   it('should abbreviate an axis in a wrapped value of a CRLF file', function() {
@@ -994,7 +996,7 @@ describe('fixer', function() {
       fixture('unabbreviated-axis-in-a-wrapped-value.xsl')
         .replace(/\n/g, '\r\n'),
     )
-    runXslint(['--fix', file])
+    runXslint(['--fix', '--preset', 'all', file])
     assert.equal(
       fs.readFileSync(file, 'utf-8'),
       fixture('unabbreviated-axis-in-a-wrapped-value.fixed.xsl')
@@ -1006,7 +1008,7 @@ describe('fixer', function() {
       fixture('redundant-import-spelled-every-way.xsl')
         .replace(/\n/g, '\r\n'),
     )
-    runXslint(['--fix-suggestions', file])
+    runXslint(['--fix-suggestions', '--preset', 'all', file])
     assert.equal(
       fs.readFileSync(file, 'utf-8'),
       fixture('redundant-import-spelled-every-way.fixed.xsl')
@@ -1015,24 +1017,30 @@ describe('fixer', function() {
   })
   it('should announce how many defects --fix would fix', function() {
     const file = scratch(fixture('redundant-whitespace.xsl'))
-    assert.ok(xslintStreams([file]).stderr.includes('fixable with --fix'))
+    assert.ok(
+      xslintStreams(['--preset', 'all', file]).stderr
+        .includes('fixable with --fix'),
+    )
   })
   it('should announce a suggestion under --fix-suggestions', function() {
     const file = scratch(fixture('using-disable-output-escaping.xsl'))
     assert.ok(
-      xslintStreams([file]).stderr.includes('fixable with --fix-suggestions'),
+      xslintStreams(['--preset', 'all', file]).stderr
+        .includes('fixable with --fix-suggestions'),
     )
   })
   it('should announce a fix skipped for overlapping another', function() {
     const file = scratch(fixture('overlapping-fixes.xsl'))
     assert.ok(
-      xslintStreams(['--fix', file]).stderr.includes('overlaps another fix'),
+      xslintStreams(['--fix', '--preset', 'all', file]).stderr
+        .includes('overlaps another fix'),
     )
   })
   it('cannot drop a skipped overlapping defect from the report', function() {
     const file = scratch(fixture('overlapping-fixes.xsl'))
     assert.ok(
-      xslintStreams(['--fix', file]).stdout.includes('redundant-whitespace'),
+      xslintStreams(['--fix', '--preset', 'all', file]).stdout
+        .includes('redundant-whitespace'),
     )
   })
   REWRITTEN.forEach((name) => {

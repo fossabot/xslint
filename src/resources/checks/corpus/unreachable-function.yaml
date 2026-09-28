@@ -6,4 +6,5 @@ usage: //@*
 reference: call
 reachable: true
 severity: warning
+preset: recommended
 message: A stylesheet function is called only from functions that are themselves never reached, so it can never run. Remove it, or call it from a template.

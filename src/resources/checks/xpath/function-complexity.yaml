@@ -3,4 +3,5 @@
 ---
 xpath: //xsl:function[count(.//xsl:*) > 50]
 severity: warning
+preset: all
 message: The function contains more than 50 XSLT elements. Split it into smaller functions.

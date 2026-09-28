@@ -3,4 +3,5 @@
 ---
 xpath: "//xsl:variable[not(@select) and not(@_select) and not(node()) and (not(@as or @_as) or xslint:version(.) < 2.0)]"
 severity: warning
+preset: all
 message: An empty xsl:variable binds the empty string without saying so. State the value with select="''" or give it some content.

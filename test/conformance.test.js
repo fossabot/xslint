@@ -8,6 +8,7 @@ const {GAP, tokenized} = require('../src/tokens')
 const {splitOf} = require('../src/selectors')
 const {REFERENCES} = require('../src/linters/corpus-linter')
 const {kinds} = require('../src/resources/checks.json')
+const {PRESETS} = require('../src/xslint')
 const {DECIMAL, XSLT} = require('../src/xsl-version')
 const {walked} = require('../src/tree')
 const {authored, rendered, PLACE} = require('../scripts/generate-checks')
@@ -404,6 +405,35 @@ const RETIRED = [
 ]
 
 /**
+ * The most reports the recommended preset may draw over each corpus: the
+ * geometric middle of what it draws and what it would draw holding
+ * `unused-variable` again, the check moved out for its volume, so a noisy
+ * check joining it turns this red (#1094).
+ * @type {{[corpus: string]: number}}
+ */
+const QUIET = {docbook: 215, tei: 72, ditaot: 18}
+
+/**
+ * How far under its bar a reading may stand before the bar has stopped being
+ * one and wants retightening, as every ratchet in the suite reads it.
+ * @type {number}
+ */
+const SLACK = 4
+
+/**
+ * What the recommended preset draws over a corpus, read off the report the
+ * nightly job diffs that corpus against.
+ * @param {string} corpus - Name of the corpus
+ * @return {number} - How many of its reports a recommended check made
+ */
+const recommended = function(corpus) {
+  return fs.readFileSync(path.join(RESOURCES, 'corpora', `${corpus}.txt`), 'utf-8')
+    .split('\n')
+    .filter((line) => PRESETS.recommended.includes(line.split(' ')[1]))
+    .length
+}
+
+/**
  * Whether the document is XSLT at all: an element in the XSLT namespace, or an
  * attribute in it, which is the whole of what a simplified stylesheet has. A
  * pack whose fixture holds neither is a fixture no check can see a node of, so
@@ -526,6 +556,43 @@ describe('conformance', function() {
           .map((name) => `${kind}/${name}`)),
         [],
         `a check cannot carry the retired ${key} key, ${what} being gone`,
+      )
+    })
+  })
+  it('places every check in a preset a run may start from', function() {
+    assert.deepStrictEqual(
+      KINDS.flatMap((kind) => Object.entries(kinds[kind])
+        .filter(([, check]) => !Object.hasOwn(PRESETS, check.preset))
+        .map(([name]) => `${kind}/${name}`)),
+      [],
+      [
+        'a check names no preset a run may start from, so whether a run',
+        'reports it by default was decided by nobody (#1094)',
+      ].join(' '),
+    )
+  })
+  it('recommends every check a processor refuses the stylesheet over', function() {
+    assert.deepStrictEqual(
+      KINDS.flatMap((kind) => Object.entries(kinds[kind])
+        .filter(([, check]) => check.severity === 'error')
+        .filter(([, check]) => check.preset !== 'recommended')
+        .map(([name]) => `${kind}/${name}`)),
+      [],
+      [
+        'a check graded an error stays out of the recommended preset, so a',
+        'default run keeps quiet about a stylesheet no processor loads',
+      ].join(' '),
+    )
+  })
+  Object.entries(QUIET).forEach(([corpus, bar]) => {
+    it(`keeps the recommended preset quiet over ${corpus}`, function() {
+      assert.ok(
+        recommended(corpus) <= bar && recommended(corpus) * SLACK > bar,
+        [
+          `the recommended preset draws ${recommended(corpus)} reports over`,
+          `${corpus} against a bar of ${bar}: past it a noisy check joined`,
+          'the preset, and far enough under it the bar wants retightening',
+        ].join(' '),
       )
     })
   })
