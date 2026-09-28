@@ -30,7 +30,10 @@ prefix without an `xmlns:xsl` declaration in scope has elements no processor can
 place in any namespace, and it refuses the file before it reads a single
 template. This is how a fragment cut out of a larger stylesheet breaks: the
 declaration stayed on the root it was cut from. Declare the prefix on the root
-of the file itself, bound to the namespace it stood for.
+of the file itself, bound to the namespace it stood for. Two prefixes take no
+declaration at all: `xml` is bound to its own namespace already, so rebinding it
+to another URI breaks the file rather than repairing it, and `xmlns` belongs to
+declarations alone, so an element spelled with it has to be renamed.
 
 Both are fine where they are not content. Inside a comment and inside a
 processing instruction, XML reads neither as opening or closing anything, and

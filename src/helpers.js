@@ -210,6 +210,15 @@ const ENTITIES = [
 ]
 
 /**
+ * The refusal `@xmldom/xmldom` raises for a prefix no declaration in scope
+ * binds, `xmlns` on an element among them. Its other namespace refusals are
+ * a declaration binding a reserved prefix wrongly, which declaring more
+ * cannot repair, so they stay syntax faults (#1019).
+ * @type {string}
+ */
+const UNBOUND = 'NamespaceError: prefix is non-null and namespace is null'
+
+/**
  * What a document nothing is wrong with earns: no reason at all.
  * @type {{reason: string, line: number, pos: number, namespace: boolean}}
  */
@@ -259,7 +268,7 @@ const documentOf = function(text, where = located) {
         if (!ENTITIES.some((one) => reason.startsWith(one))) {
           fault = {
             reason: reason, ...where(context.locator),
-            namespace: reason.includes('NamespaceError'),
+            namespace: reason.includes(UNBOUND),
           }
           throw new Error(reason)
         }

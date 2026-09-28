@@ -302,6 +302,16 @@ const WORDED = [
     key: 'namespace',
   },
   {
+    name: 'should call an xmlns element prefix a namespace fault',
+    content: '<a>\n  <xmlns:b/>\n</a>',
+    key: 'namespace',
+  },
+  {
+    name: 'should not call a rebound xml prefix one nothing declares',
+    content: '<a><xml:b xmlns:xml="urn:q"/></a>',
+    key: 'message',
+  },
+  {
     name: 'should call a tag mismatch a syntax fault',
     content: '<a><b></a>',
     key: 'message',
