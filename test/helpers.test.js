@@ -33,10 +33,10 @@ const REFUSED = [
 
 /**
  * Stylesheets whose entities name one another, each paired with the `select`
- * its one `xsl:value-of` reads once every reference is resolved. XML expands a
- * replacement text again until nothing is left to expand, and a name reaching
- * itself is left standing as the reference it is rather than walked forever
- * (#1044).
+ * its one `xsl:value-of` reads once every reference is resolved, again until
+ * nothing is left to expand. A name reaching itself stays the reference it
+ * is, and so does one outgrowing the cap: of ten laughs, `lol5` is the first
+ * past it, so `lol9` holds ten thousand references to it (#1044).
  * @type {Array.<{name: string, file: string, select: string}>}
  */
 const NESTED = [
@@ -59,6 +59,11 @@ const NESTED = [
     name: 'leaves a reference standing where an entity names itself',
     file: 'self-reaching.xsl',
     select: 'count(&self;)',
+  },
+  {
+    name: 'leaves a reference standing where its value would outgrow the cap',
+    file: 'laughing.xsl',
+    select: `count(${'&lol5;'.repeat(10 ** 4)})`,
   },
 ]
 
@@ -118,6 +123,7 @@ describe('helpers', function() {
   })
   NESTED.forEach(({name, file, select}) => {
     it(name, function() {
+      this.timeout(5000)
       const where = path.resolve(__dirname, 'resources', 'entities', file)
       const content = fs.readFileSync(where, 'utf-8')
       assert.equal(

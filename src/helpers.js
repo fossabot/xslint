@@ -131,9 +131,20 @@ const circular = function(name, entities) {
 }
 
 /**
+ * The most characters a resolved entity value may hold. DocBook-XSL's largest
+ * is `lowercase` at 3720, and TEI and DITA-OT declare none, so this stands
+ * some seventeen times above any value the corpora hold, while ten entities
+ * each naming the one before ten times stop here and not at 10^9 (#1044).
+ * @type {number}
+ */
+const CEILING = 65536
+
+/**
  * What one declared entity resolves to, each reference to another declared
  * entity replaced by that one's resolution, remembered in `done`. A reference
- * to a name in `cyclic` stays standing, so the walk never comes back round.
+ * to a name in `cyclic` stays standing, so the walk never comes back round,
+ * and a name whose resolution would pass `CEILING` resolves to its own
+ * reference, measured before a character of it is joined.
  * @param {string} name - Declared entity name
  * @param {Map.<string, string>} entities - Declared entity values
  * @param {Set.<string>} cyclic - Names reaching themselves
@@ -142,13 +153,21 @@ const circular = function(name, entities) {
  */
 const resolution = function(name, entities, cyclic, done) {
   if (!done.has(name)) {
-    done.set(name, entities.get(name).replace(REFERENCE, (whole, inner) => {
-      let text = whole
-      if (entities.has(inner) && !cyclic.has(inner)) {
-        text = resolution(inner, entities, cyclic, done)
+    const pieces = entities.get(name).split(REFERENCE).map((piece, index) => {
+      let text = piece
+      if (index % 2 === 1) {
+        text = `&${piece};`
+      }
+      if (index % 2 === 1 && entities.has(piece) && !cyclic.has(piece)) {
+        text = resolution(piece, entities, cyclic, done)
       }
       return text
-    }))
+    })
+    let text = `&${name};`
+    if (pieces.reduce((sum, piece) => sum + piece.length, 0) <= CEILING) {
+      text = pieces.join('')
+    }
+    done.set(name, text)
   }
   return done.get(name)
 }

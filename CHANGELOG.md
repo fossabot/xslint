@@ -13,7 +13,9 @@ publication date only; detailed notes begin with the Unreleased section.
   replaced once, so DocBook's `&section.id;` reached the validator as
   `generate-id(&section;)` and the expression holding it was dropped unread.
   Declared values are now expanded until nothing is left to expand, and a name
-  reaching itself stays an unresolved reference rather than a loop (#1044).
+  reaching itself stays an unresolved reference rather than a loop, as does one
+  whose value would pass 65536 characters, so a billion laughs cannot exhaust
+  memory (#1044).
 
 ## 0.3.0 - 2026-09-27
 
