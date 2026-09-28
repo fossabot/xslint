@@ -43,7 +43,10 @@
  * the checkout holds instead, which nothing here reads. A library matching the
  * root and linted alone is still judged, so one file of a project can still
  * draw what all of them do not. A named `xsl:output` supplies nothing, being
- * a format an `xsl:result-document` asks for.
+ * a format an `xsl:result-document` asks for. A default-mode template taking
+ * the element at the top of the document starts one too since #1046, which
+ * `src/roots.js` derives, and the corpora rise to 6, 10 and 4, each added
+ * report an identity transform or a template for the document element.
  *
  * One decision no pack defeats. The namespace half of `rooted` fires only on a
  * root *named* stylesheet or transform outside the XSLT namespace while
