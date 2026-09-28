@@ -219,16 +219,17 @@ const treesOf = function(corpus) {
 }
 
 /**
- * The names the XSLT tree binds at an element: the bindings in front of it
- * and of each ancestor below the top level, which is where a local variable
- * reaches, and what an `xsl:accumulator-rule` or an `xsl:catch` above it binds
- * of its own accord.
- * @param {Element} element - The element holding the reference
+ * The names the XSLT tree binds at the node a reference stands in: the
+ * bindings in front of it and of each ancestor below the top level, which is
+ * where a local variable reaches, and what an `xsl:accumulator-rule` or an
+ * `xsl:catch` above it binds of its own accord. A text value template stands
+ * in its own text node, so a binding beside that node is in front of it.
+ * @param {Node} start - The text node or element holding the reference
  * @return {Set.<string>} - The expanded names in scope, globals aside
  */
-const localsOf = function(element) {
+const localsOf = function(start) {
   const taken = new Set()
-  let node = element
+  let node = start
   while (node.parentNode?.nodeType === 1 && !xslt(node.parentNode, ROOTS)) {
     let sibling = node.previousSibling
     while (sibling !== null) {
@@ -319,7 +320,7 @@ const undefinedIn = function(found, known) {
   let loose = []
   if (references.length > 0) {
     const own = ownOf(found).map((one) => expandedOf(element, one))
-    const locals = localsOf(element)
+    const locals = localsOf(found.node.ownerElement ?? found.node)
     loose = references.filter((reference) => {
       const written = variableOf(found, reference)
       const name = expandedOf(element, written)
