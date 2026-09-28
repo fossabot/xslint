@@ -151,3 +151,8 @@
   input: |-
     <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="4.0"/>
   version: "4.0"
+- name: reads the shadow version where a template declares both spellings
+  input: |-
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0"><xsl:template match="/" version="3.0" _version="1.0"/></xsl:stylesheet>
+  at: //xsl:template
+  version: "1.0"

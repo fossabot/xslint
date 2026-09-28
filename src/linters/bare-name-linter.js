@@ -9,6 +9,7 @@ const {expressionsOf, whole} = require('../attributes')
 const {TOKENS} = require('../tokens')
 const {holding} = require('../tree')
 const {XSLT} = require('../xsl-version')
+const {attributeOf} = require('../expressions')
 const {logger} = require('../logger')
 
 /**
@@ -174,8 +175,7 @@ const selectable = function(variable) {
   const record = INDEXED.get(document).get(variable).find(
     (one) => BINDS.some((name) => whole(one, name)),
   )
-  const type = (variable.getAttribute('as') || variable.getAttribute('_as') ||
-    '').trim().split(':')
+  const type = attributeOf(variable, 'as').trim().split(':')
   const typed = type.length > 1 &&
     variable.lookupNamespaceURI(type[0]) === SCHEMA
   return !typed && record !== undefined && isValid(record) &&

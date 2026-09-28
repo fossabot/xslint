@@ -16,9 +16,10 @@ What it hands on is the stylesheet a processor compiles, not the one written: an
 zero or an empty string literal (#1057) — in any of the four spellings an XSLT element or a literal
 result element gives it, is removed with everything under it. A selector judging the text as written
 reported an `empty-choose` on a `choose` Saxon-HE 12.5 never compiles, and stayed quiet on one whose
-only `when` it excludes, which Saxon refuses as XTSE0010. The attribute is XSLT's from 2.0 on and a
-shadow from 3.0, at the version in force: xsltproc compiles an `xsl:if` carrying `use-when="false()"`
-in a 1.0 sheet and refuses the `xsl:sequence` inside it, so pruning there hid the defect it hits.
+only `when` it excludes, which Saxon refuses as XTSE0010. The attribute is XSLT's from 2.0 on, at
+the version in force, and a shadow at every version, only a 3.0 processor reading one (#1114):
+xsltproc compiles an `xsl:if` carrying `use-when="false()"` in a 1.0 sheet and refuses the
+`xsl:sequence` inside it, so pruning there hid the defect it hits.
 Any other condition, `not(true())` among them, is left standing, its answer being a processor's,
 and so is the root, a document with no element being one nothing reads.
 The pack harness builds its corpus here too, so a pack reads what a run reads (#1048).
@@ -31,7 +32,7 @@ Splits the corpus's expressions into valid (kept) and refused (reported), asking
 each record `expressionsOf` yields — the same derivation the code-based linters read, rather than a
 walk of its own over a list of attribute *names* got by subtracting the pattern-holding ones from
 `ATTRIBUTES`. That subtraction reached 286 of this repository's 453 expressions, so a `match` no
-grammar accepts, a `{1 +}` in an attribute value template, a 3.0 text value template and a shadow
+grammar accepts, a `{1 +}` in an attribute value template, a text value template and a shadow
 attribute were validated by nothing at all, while the code-based linters — staged over the whole
 corpus — read those same expressions and reported what they found in them, with only `defect`'s
 parse gate keeping a fix off it (#589). One expression stayed outside both readings until #654, the

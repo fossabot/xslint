@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+# A variable declaring its type in both spellings is typed by the shadow, XSLT
+# 3.0 ignoring the plain `as` beside it: `kids` holds elements, so the bare name
+# is fixed to the variable, and `label` holds a string, so only the report
+# stands (#1114).
+pack: confusing-variable-and-node
+found:
+  amount: 2
+  positions: [ [ 6, 26 ], [ 7, 26 ] ]
+  fixes: [ "$kids", null ]
+input: |-
+  <?xml version="1.0"?>
+  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="3.0" id="s">
+    <xsl:template match="othercredit">
+      <xsl:variable name="kids" as="xs:string" _as="element()*" select="contrib/*"/>
+      <xsl:variable name="label" as="element()*" _as="xs:string" select="label"/>
+      <xsl:copy-of select="kids"/>
+      <xsl:copy-of select="label"/>
+    </xsl:template>
+  </xsl:stylesheet>

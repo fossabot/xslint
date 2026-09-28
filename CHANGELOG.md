@@ -41,6 +41,15 @@ publication date only; detailed notes begin with the Unreleased section.
   `lint` stays pure and reports this only where its caller says which hrefs
   name no file (#209).
 
+- Read the shadow where an XSLT element writes an attribute in both spellings.
+  XSLT 3.0 ignores the plain attribute beside a shadow one, and Saxon writes
+  `shadow` for `<xsl:value-of select="'plain'" _select="'shadow'"/>`, while
+  xslint read the plain one: an invalid `select` beside a sound `_select` drew
+  `invalid-xpath-expression`, a `use-when`, a version, an href or a type was
+  taken from the ignored spelling, and the escaping fix deleted the plain
+  attribute. The shadow outranks it everywhere now, below 3.0 too, where
+  Saxon reads it as surely, and so does a text value template (#1114).
+
 ## 0.3.0 - 2026-09-27
 
 - Read the extension namespaces a simplified stylesheet declares.

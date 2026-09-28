@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+# Where an XSLT element writes an attribute in both spellings, XSLT 3.0 ignores
+# the plain one, and Saxon never parses it: the first `select` is text no
+# processor reads, while the shadow beside the second is the expression that
+# runs, so only it is refused (#1114).
+pack: invalid-xpath-expression
+found:
+  amount: 1
+  positions: [ [ 5, 56 ] ]
+input: |-
+  <?xml version="1.0"?>
+  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0">
+    <xsl:template match="/">
+      <xsl:value-of select="(((" _select="name(.)"/>
+      <xsl:value-of select="name(.)" _select="a intersect"/>
+    </xsl:template>
+  </xsl:stylesheet>

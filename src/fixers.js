@@ -35,10 +35,10 @@ const PLAIN = /^[^&<>{\u00A0]*$/
 
 /**
  * Fix for `using-disable-output-escaping`: delete the attribute, in whichever
- * of its two spellings the author wrote (#992), where the deletion emits what
- * the stylesheet emitted with it. That is an `xsl:text` spelling its own
- * output, and never an `xsl:value-of`, whose value the run supplies and whose
- * escaping therefore always matters (#990).
+ * spelling the author wrote and the shadow where both stand (#992, #1114),
+ * where the deletion emits what the stylesheet emitted with it. That is an
+ * `xsl:text` spelling its own output, and never an `xsl:value-of`, whose value
+ * the run supplies and whose escaping therefore always matters (#990).
  * @param {Element} node - The element carrying the attribute
  * @param {string} content - Raw source text of the file it stands in
  * @return {?object} - The fix, or nothing where the output would change
@@ -47,7 +47,7 @@ const disableOutputEscaping = function(node, content) {
   let fix = undefined
   if (node.localName === 'text' && PLAIN.test(node.textContent)) {
     fix = deletion(
-      node.getAttributeNode(ESCAPING) ?? node.getAttributeNode(`_${ESCAPING}`),
+      node.getAttributeNode(`_${ESCAPING}`) ?? node.getAttributeNode(ESCAPING),
       content,
     )
   }
@@ -108,16 +108,16 @@ const modeOrPriority = function(node, content) {
  * Fix for `incorrect-use-of-boolean-constants`: replace the string literal
  * test `'true'`/`'false'` with the boolean `true()`/`false()`. The check
  * declares it a suggestion, the rewrite changing the test's truth value —
- * which is the point. It rewrites the spelling the check read, the plain one
- * where it says anything and the shadow otherwise (#997).
+ * which is the point. It rewrites the spelling the check read, the shadow
+ * where one stands and the plain one otherwise (#997, #1114).
  * @param {Element} node - The `xsl:if`/`xsl:when` element
  * @param {string} content - Raw source text of the file it stands in
  * @return {object} - The fix
  */
 const booleanConstant = function(node, content) {
-  let test = node.getAttributeNode('_test')
-  if (node.getAttribute('test')) {
-    test = node.getAttributeNode('test')
+  let test = node.getAttributeNode('test')
+  if (node.hasAttribute('_test')) {
+    test = node.getAttributeNode('_test')
   }
   let constant = 'false()'
   if (test.value.includes('true')) {
