@@ -203,6 +203,8 @@ const {lintByParameter, names: parameterChecks} =
   require('./linters/parameter-linter')
 const {lintByElement, names: elementChecks} =
   require('./linters/element-linter')
+const {lintByVariable, names: variableChecks} =
+  require('./linters/variable-linter')
 const {lintByRootTemplate, names: rootTemplateChecks} =
   require('./linters/root-template-linter')
 const {lintByNodeSet, names: nodeSetChecks} =
@@ -255,6 +257,7 @@ const LINTERS = [
   {name: 'output-linter', run: lintByOutput, checks: outputChecks},
   {name: 'parameter-linter', run: lintByParameter, checks: parameterChecks},
   {name: 'element-linter', run: lintByElement, checks: elementChecks},
+  {name: 'variable-linter', run: lintByVariable, checks: variableChecks},
   {
     name: 'root-template-linter',
     run: lintByRootTemplate,

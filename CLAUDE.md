@@ -333,7 +333,8 @@ src/index.mjs             CLI entry (commander.js, ESM)
       xpath-linter.js            declarative checks/xpath/*.yaml (per file)
       corpus-linter.js           declarative checks/corpus/*.yaml (cross file)
       namespace, result-namespace, imports, output, parameter,
-      element, root-template     — the DOM, not one expression
+      element, variable,
+      root-template              — the DOM, not one expression
     src/linters/, expression — (expressions, suppressions) => defects:
       *-linter.js                code-based checks/format/*.yaml (one construct each)
 ```
@@ -473,10 +474,8 @@ quiet on a `parent::n` (#583). At any version it
 also reads a **text value template** — the braces of a text node
 whose nearest `expand-text`/`xsl:expand-text` is on — and a **shadow attribute**
 (`_select` for `select`), the same expressions the modern idiom hides outside an
-attribute (#606). A shadow overrules the plain attribute beside it, which XSLT
-ignores and Saxon never parses, so that one yields nothing, and `attributeOf`
-reads the shadow first too — below 3.0 as well, a 3.0 processor reading both
-there as Saxon does (#1114). The namespace decides and never the name: an attribute a
+attribute (#606). A shadow overrules the plain attribute beside it, in
+`attributeOf` too (#1114). The namespace decides and never the name: an attribute a
 literal result element happens to call `test` or
 `select` holds text destined for the result tree, so it is left alone — reading it
 as XPath let `--fix` rewrite the output — while the `xsl:use-when` beside it is
@@ -1035,6 +1034,7 @@ one of them.
 | `src/linters/output-linter.js` | `not-using-output`, asked of the import tree rather than the file and reported on the entry point alone, an `xsl:output` merging into whatever imports it |
 | `src/linters/corpus-linter.js` | Loads `checks/corpus/*.yaml`, the cross-file declarative kind |
 | `src/linters/bare-name-linter.js` | `confusing-variable-and-node` |
+| `src/linters/variable-linter.js` | `undefined-variable`, a `$name` no binding in scope declares, judged in the stylesheets an entry point's whole tree makes |
 | `src/linters/*-linter.js` | Code-based `checks/format/*.yaml`, one construct each (axis, namespace, count, name, ...); see the flow diagram |
 | `src/checks.js` | Shared for code-based linters: `metaOf`, `suppressed`, `defect`, `rawly` |
 | `src/source.js` | Raw-text walking shared by `checks` and `fixer`: `parted`, `offsetAt`, `placeAt`, `character`, `skip` |

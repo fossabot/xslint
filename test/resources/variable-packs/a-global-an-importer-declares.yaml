@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: undefined-variable
+found:
+  amount: 0
+  positions: [ ]
+  fixes: [ ]
+inputs:
+  - |-
+    <?xml version="1.0"?>
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
+      <xsl:import href="file1.xsl"/>
+      <xsl:variable name="shared" select="1"/>
+      <xsl:template match="/">
+        <xsl:value-of select="$imported"/>
+        <xsl:call-template name="shown"/>
+      </xsl:template>
+    </xsl:stylesheet>
+  - |-
+    <?xml version="1.0"?>
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
+      <xsl:param name="imported"/>
+      <xsl:template name="shown">
+        <xsl:value-of select="$shared"/>
+      </xsl:template>
+    </xsl:stylesheet>

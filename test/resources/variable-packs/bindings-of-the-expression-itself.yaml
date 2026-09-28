@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: undefined-variable
+found:
+  amount: 0
+  positions: [ ]
+  fixes: [ ]
+input: |-
+  <?xml version="1.0"?>
+  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0">
+    <xsl:template match="/">
+      <xsl:value-of select="for $item in item, $part in $item/part return $part"/>
+      <xsl:value-of select="let $count := 1 return $count"/>
+      <xsl:value-of select="some $one in item satisfies $one, every $all in item satisfies $all"/>
+      <xsl:value-of select="function($arg as function(item()) as item(), $more) {$arg($more)}"/>
+      <xsl:value-of select="for $Q{urn:my}deep in 1 return $Q{urn:my}deep"/>
+    </xsl:template>
+  </xsl:stylesheet>
