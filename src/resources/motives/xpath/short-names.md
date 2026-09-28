@@ -46,6 +46,11 @@ Correct:
 <xsl:variable name="eo:raw-marker" select="'r'"/>
 ```
 
+XSLT 3.0 writes a name `_name` as readily as `name`, the underscore form an
+attribute value template, and the name is what the template yields rather than
+its text: `_name="{'q'}"` is six characters declaring the one-character
+variable `q`.
+
 An `xsl:with-param` is left alone. It passes a name the declaration already
 fixed, so renaming has to happen where the parameter is declared, and reporting
 both would report one author's choice twice.

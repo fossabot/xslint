@@ -17,6 +17,17 @@ publication date only; detailed notes begin with the Unreleased section.
   element, or the document element a `/name` pattern spells, now marks an entry
   point too. A stylesheet started with `-it` from another name stays unjudged,
   being indistinguishable from a library of named templates (#1046).
+
+- Resolve an entity whose replacement text names another. Each reference was
+  replaced once, so DocBook's `&section.id;` reached the validator as
+  `generate-id(&section;)` and the expression holding it was dropped unread.
+  Declared values are now expanded until nothing is left to expand, and a name
+  reaching itself stays an unresolved reference rather than a loop, as does one
+  whose value would pass 65536 characters. A reference also stays standing
+  once replacing it would grow one value past 65536 characters or one document
+  past 2^20, so a billion laughs cannot exhaust memory however often a
+  stylesheet references it (#1044).
+
 - Report an unprefixed `name()` compared with a string in XSLT 1.0 again.
   `name-compared-to-string` withheld the whole report where the `*:name`
   wildcard it rewrites to cannot be spelled, so `name() = 'para'` went silent
