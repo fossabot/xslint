@@ -31,6 +31,74 @@ const REFUSED = [
   },
 ]
 
+/**
+ * Stylesheets whose entities name one another, each paired with the `select`
+ * its one `xsl:value-of` reads once every reference is resolved, again until
+ * nothing is left to expand. A name reaching itself stays the reference it
+ * is, and so does one outgrowing the cap: of ten laughs, `lol5` is the first
+ * past it, so `lol9` holds ten thousand references to it (#1044).
+ * @type {Array.<{name: string, file: string, select: string}>}
+ */
+const NESTED = [
+  {
+    name: 'resolves an inline entity naming another that names a third',
+    file: 'nested-inline.xsl',
+    select: 'count(//alpha | //beta)',
+  },
+  {
+    name: 'resolves an entity naming another behind a parameter entity',
+    file: 'nested-behind-a-parameter-entity.xsl',
+    select: 'generate-id((ancestor::section)[last()])',
+  },
+  {
+    name: 'leaves a reference standing where two entities name each other',
+    file: 'cyclic.xsl',
+    select: 'count(&pong;)',
+  },
+  {
+    name: 'leaves a reference standing where an entity names itself',
+    file: 'self-reaching.xsl',
+    select: 'count(&self;)',
+  },
+  {
+    name: 'leaves a reference standing where its value would outgrow the cap',
+    file: 'laughing.xsl',
+    select: `count(${'&lol5;'.repeat(10 ** 4)})`,
+  },
+]
+
+/**
+ * Stylesheets referencing `lol9` of `laughing.xsl` more often than one value
+ * or one document may grow by, each paired with what is read back once the
+ * rest are left standing. Each resolves to sixty thousand characters, so
+ * unbounded, twenty already join over a million (#1044).
+ * @type {Array.<{name: string, file: string,
+ *   read: function(Document): string, expected: string}>}
+ */
+const GROWN = [
+  {
+    name: 'leaves the references standing once an attribute would outgrow the cap',
+    file: 'laughing-in-an-attribute.xsl',
+    read: (doc) => doc.getElementsByTagName('xsl:value-of')[0]
+      .getAttribute('select'),
+    expected: `count(${'&lol5;'.repeat(10 ** 4)}${'&lol9;'.repeat(19)})`,
+  },
+  {
+    name: 'leaves the references standing once a text would outgrow the cap',
+    file: 'laughing-in-a-text.xsl',
+    read: (doc) => doc.getElementsByTagName('xsl:text')[0].textContent,
+    expected: `${'&lol5;'.repeat(10 ** 4)}${'&lol9;'.repeat(19)}`,
+  },
+  {
+    name: 'leaves the references standing once a document would outgrow the cap',
+    file: 'laughing-in-a-document.xsl',
+    read: (doc) => String(
+      Array.from(doc.getElementsByTagName('xsl:value-of')).filter(
+        (one) => one.getAttribute('select') === 'count(&lol9;)').length),
+    expected: '23',
+  },
+]
+
 describe('helpers', function() {
   it('refuses to parse a file that does not exist', function() {
     assert.throws(() => xml.parsedFromFile(path.join(os.tmpdir(), 'no.xml')))
@@ -113,4 +181,29 @@ describe('helpers', function() {
         ].join(' '),
       )
     })
+  NESTED.forEach(({name, file, select}) => {
+    it(name, function() {
+      this.timeout(5000)
+      const where = path.resolve(__dirname, 'resources', 'entities', file)
+      const content = fs.readFileSync(where, 'utf-8')
+      assert.equal(
+        xml.parsedFromString(content, subsetsOf(where, content))
+          .getElementsByTagName('xsl:value-of')[0].getAttribute('select'),
+        select,
+        'did not expand the replacement text of an entity until nothing was left',
+      )
+    })
+  })
+  GROWN.forEach(({name, file, read, expected}) => {
+    it(name, function() {
+      this.timeout(5000)
+      const where = path.resolve(__dirname, 'resources', 'entities', file)
+      const content = fs.readFileSync(where, 'utf-8')
+      assert.equal(
+        read(xml.parsedFromString(content, subsetsOf(where, content))),
+        expected,
+        'did not leave a reference standing where expanding it would outgrow the cap',
+      )
+    })
+  })
 })

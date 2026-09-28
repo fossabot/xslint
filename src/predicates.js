@@ -18,7 +18,7 @@
  * whole of it answered here since #881 (below).
  *
  * The compile is off the parse and never the text, kept against the text, so
- * each of the 56 distinct predicates in the tree is compiled once a run; 43
+ * each of the 56 distinct predicates in the tree is compiled once a run; 44
  * of them are. What refuses is as deliberate as what serves — a regex, whose
  * XPath flavour is not JavaScript's; a bare `normalize-space`, which is the
  * engine's own and reads a wider gap than XPath defines, where every
@@ -46,7 +46,7 @@
  * of its whole subtree, so a comparison reading one off a step answered
  * `undefined` against every element there is; `carrying` refuses a step in
  * a value position unless it names the attribute axis, which costs nothing
- * the tree spells — 43 of the 56 compile either way.
+ * the tree spells — 44 of the 56 compile either way.
  *
  * None of the three was the oracle's fault and all three were its blind
  * spot: `CANDIDATES` asks the engine what a spelling selects, so what it
@@ -168,6 +168,7 @@ const {PREFIXES} = require('./xpath')
 const {TOKENS, TRIVIA, normalized, unquoted} = require('./tokens')
 const {parsed} = require('./grammar')
 const {ASSUMED} = require('./syntax')
+const {saidOf} = require('./expressions')
 
 /**
  * A compiled predicate for each text it was asked of, built once and kept for
@@ -517,6 +518,56 @@ const stepped = function(tokens, node, under = undefined) {
 }
 
 /**
+ * What `xslint:attribute(., 'x')` says of an element, or undefined where the
+ * call is spelled any other way: it must be handed the element itself and a
+ * name a literal spells, the function reading an element's attributes and an
+ * attribute carrying none (#997).
+ * @param {Array} tokens - The tokens the tree was parsed from
+ * @param {object} node - A node of its tree
+ * @param {Array} kinds - The node kinds the context yields
+ * @return {(function(Node): Array.<string>|undefined)} - What it says of an
+ *  element, in either spelling, or undefined
+ */
+const said = function(tokens, node, kinds) {
+  let answer = undefined
+  if (calling(tokens, node, 'xslint:attribute') &&
+    node.children.length === 2 && node.children[0].kind === 'context' &&
+    kinds === ELEMENTS) {
+    const literal = held(tokens, node.children[1])
+    if (literal !== undefined && !literal.numeric) {
+      answer = (context) => saidOf(context, literal.value)
+    }
+  }
+  return answer
+}
+
+/**
+ * What `xslint:attribute` says of each element a path of steps reaches, or
+ * undefined where a step is outside the vocabulary or reaches anything but
+ * elements, the one kind the function reads.
+ * @param {Array} tokens - The tokens the tree was parsed from
+ * @param {object} node - A path node of its tree
+ * @return {(function(Node): Array.<string>|undefined)} - What it says of the
+ *  elements the path reaches, or undefined
+ */
+const saying = function(tokens, node) {
+  const steps = node.children.slice(0, -1)
+  const selects = steps.map((kid) => stepped(tokens, kid))
+  const says = said(tokens, node.children[node.children.length - 1], ELEMENTS)
+  let answer = undefined
+  if (steps.length > 0 && says !== undefined && slashed(tokens, node) &&
+    selects.every((one) => one !== undefined) &&
+    steps.every((kid) => !carrying(tokens, kid) &&
+      admitted(opening(tokens, kid).named, 'child').kinds === ELEMENTS)) {
+    answer = (context) => selects.reduce(
+      (standing, one) => standing.flatMap((where) => one(where)),
+      [context],
+    ).flatMap((where) => says(where))
+  }
+  return answer
+}
+
+/**
  * The strings an operand of a comparison carries, or undefined where it is
  * outside the vocabulary. An attribute step answers the values it selects and
  * `xslint:normalize-space` a single string, empty where what it reads is
@@ -569,6 +620,12 @@ const worded = function(tokens, node, kinds = ELEMENTS) {
     if (carries !== undefined) {
       answer = (context) => [normalized(carries(context)[0] ?? '')]
     }
+  } else if (calling(tokens, node, 'xslint:attribute')) {
+    answer = said(tokens, node, kinds)
+  } else if (node.kind === 'path' && node.children.length > 1 &&
+    calling(tokens, node.children[node.children.length - 1],
+      'xslint:attribute')) {
+    answer = saying(tokens, node)
   } else if (calling(tokens, node, 'local-name') &&
     node.children.length === 0) {
     answer = (context) => [context.localName]
@@ -674,17 +731,19 @@ const pathed = function(tokens, node) {
 }
 
 /**
- * Whether the node calls that function by its bare name. A prefixed or
- * `Q{...}` spelling is refused rather than resolved: no check writes one, and
- * a function of somebody else's carrying a standard name is not the standard
- * one (#557).
+ * Whether the node calls that function by the name it is asked for, spelled
+ * that way: another prefix or a `Q{...}` is refused rather than resolved, a
+ * function of somebody else's carrying a standard name being no standard one
+ * (#557). A prefixed name with no hyphen lexes as a user function rather
+ * than a name, which is how `xslint:attribute` reads (#997).
  * @param {Array} tokens - The tokens the tree was parsed from
  * @param {object} node - A node of its tree
  * @param {string} name - The function's name
  * @return {boolean} - True when the node calls it
  */
 const calling = function(tokens, node, name) {
-  return node.kind === 'call' && tokens[node.from].type === TOKENS.NAME &&
+  return node.kind === 'call' &&
+    [TOKENS.NAME, TOKENS.USER_FUNCTION].includes(tokens[node.from].type) &&
     tokens[node.from].value === name
 }
 

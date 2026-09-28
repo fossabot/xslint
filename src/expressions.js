@@ -104,39 +104,67 @@ const braced = function(template) {
 }
 
 /**
- * The value a shadow attribute names statically, or empty where it names none.
- * A shadow attribute is an attribute value template, so a plain value is its
- * own — `_version="2.0"` names 2.0 — and one whose braces hold a string
- * literal names what that literal holds. Anything else is a processor's answer
- * at run time, and empty is a value no name, version or href of one has.
+ * The values a shadow attribute names statically: its own where it holds no
+ * brace — `_version="2.0"` names 2.0 — what a string literal alone in its
+ * braces holds, and none where the run supplies it, a value unknown being no
+ * empty one: `_href="{$base}"` names a module, `_href="{''}"` none.
+ * @param {string} template - The attribute value
+ * @return {Array.<string>} - What it names, or nothing
+ */
+const statics = function(template) {
+  let named = [template]
+  if (template.includes('{') || template.includes('}')) {
+    const carried = braced(template)
+    named = []
+    if (carried.length === 1 && carried[0].type === TOKENS.STRING) {
+      named = [unquoted(carried[0])]
+    }
+  }
+  return named
+}
+
+/**
+ * The value a shadow attribute names statically, or empty where it names none,
+ * which a name, a version or an href of one never is.
  * @param {string} template - The attribute value
  * @return {string} - What it names, or empty where nothing static does
  */
 const staticOf = function(template) {
-  let value = template
-  if (template.includes('{') || template.includes('}')) {
-    const carried = braced(template)
-    value = ''
-    if (carried.length === 1 && carried[0].type === TOKENS.STRING) {
-      value = unquoted(carried[0])
-    }
-  }
-  return value
+  return statics(template)[0] ?? ''
 }
 
 /**
  * What an attribute of an XSLT element says: the plain spelling where the
- * document writes one, else what its shadow names statically. XSLT 3.0 writes
- * any such attribute `_x` as readily as `x`, and `_x` holds an attribute value
- * template rather than the value — `{'yes'}` where `yes` stood — so a reader
- * asking one spelling reads half the stylesheets there are (#992).
+ * document writes one, else what its shadow `_x` names statically, and
+ * nothing where neither says anything static. A reader asking one spelling
+ * reads half the stylesheets there are, and one taking a run-time value for
+ * an empty one reads `_name="{$n}"` as naming nothing (#992, #997).
+ * @param {Element} element - The element carrying the attribute
+ * @param {string} name - The attribute's name, in its plain spelling
+ * @return {Array.<string>} - What it says, or nothing
+ */
+const saidOf = function(element, name) {
+  const shadow = `_${name}`
+  let said = []
+  if (element.getAttribute(name)) {
+    said = [element.getAttribute(name)]
+  } else if (element.hasAttribute(shadow)) {
+    said = statics(element.getAttribute(shadow))
+  } else if (element.hasAttribute(name)) {
+    said = ['']
+  }
+  return said
+}
+
+/**
+ * What an attribute of an XSLT element says, `saidOf` read as one string and
+ * empty where neither spelling says anything static (#992).
  * @param {Element} element - The element carrying the attribute
  * @param {string} name - The attribute's name, in its plain spelling
  * @return {string} - What it says, or empty where neither spelling does
  */
 const attributeOf = function(element, name) {
-  return element.getAttribute(name) ||
-    staticOf(element.getAttribute(`_${name}`) || '')
+  return saidOf(element, name)[0] ?? ''
 }
 
 /**
@@ -173,5 +201,6 @@ module.exports = {
   attributeOf,
   enclosed,
   nameOf,
+  saidOf,
   staticOf,
 }

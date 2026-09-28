@@ -392,8 +392,9 @@ describe('xslint', function() {
   it('should lint the parseable stylesheets and report the malformed ones', function() {
     const stdout = runXslint(['test/resources/malformed']);
     [
-      'Processed files: 2',
-      'bad.xsl(1:1)',
+      'Processed files: 3',
+      'bad.xsl(8:13)',
+      'unbound.xsl(6:1) The stylesheet uses a namespace prefix',
       'malformed-stylesheet',
       'good.xsl',
       'invalid-xpath-expression',

@@ -20,6 +20,12 @@ nothing. Nothing about the element says which name was meant, so the fix is
 always to write it rather than to remove the attribute: an `xsl:key` without a
 key name has no reason to exist.
 
+XSLT 3.0 hides it once more, writing the name `_name` as readily as `name`, the
+underscore form an attribute value template evaluated before the stylesheet
+compiles. So `_name=""` and `_name="{''}"` name nothing exactly as `name=""`
+does, while `_name="{$prefix}"` names whatever that static parameter holds and
+is left alone.
+
 Incorrect:
 
 ```xsl

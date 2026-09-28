@@ -513,9 +513,7 @@ run's report down (#597); no check reports that malformed reference yet (#668). 
 the raw text of the file it stands in beside its node, because a fix that cuts one reads its span
 from the source rather than rebuilding the element (#793). An href spelled `plugin:<id>:<path>`,
 DITA-OT's, resolves to the linted file standing at `<id>/<path>` (#1004). Whether a file stands
-behind an href is not asked here but of `absentOf` in `src/helpers.js`, which `xslint()` calls
-before `lint`, so `broken-href` in `import-linter` reads a set it is handed and `lint` stays pure
-(#209).
+behind one is asked of `absentOf` in `src/helpers.js` before `lint`, which stays pure (#209).
 
 ## `src/fixers.js`
 
@@ -610,7 +608,8 @@ engine would be answering two different questions.
 
 ## `src/helpers.js`
 
-XML parsing (expands every entity it reads a declaration of, #1010), YAML parsing, file recursion.
+XML parsing (expands every entity it reads a declaration of, #1010, and one naming another to the
+end, #1044), YAML parsing, file recursion.
 What a replacement text stands for once it spells markup, why a reference is neither text nor a
 place a fix may be written, and which sequences a document may not hold where `@xmldom/xmldom`
 would repair one rather than refuse it, stand at the top of the module itself

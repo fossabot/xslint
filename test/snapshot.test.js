@@ -186,7 +186,10 @@ const REFUSED = {
   'broken-href':
     'XTSE0165, an xsl:import or xsl:include naming no file to retrieve',
   'malformed-stylesheet':
-    'not well-formed XML, so no parser reaches a tree through it',
+    [
+      'not well-formed XML, or a prefix nothing declares, so no parser',
+      'reaches a tree through it',
+    ].join(' '),
   'mode-or-priority-without-match':
     'XTSE0500, a mode or a priority on a template with nothing to match',
   'duplicate-param-name':
