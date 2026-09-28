@@ -187,8 +187,8 @@ const CHOICES = [
  * What a run over one stylesheet reports under each way the command line and
  * the configuration file name a preset: the flags, the file, the checks left
  * in the report, and the way. A run names none and reports `recommended`; a
- * flag outranks the file, and a check the file re-grades joins the run
- * (#1094).
+ * flag outranks the file, a check the file names exactly joins the run, and
+ * a glob re-grades only the checks already in it (#1094).
  * @type {Array.<Array>}
  */
 const PRESETED = [
@@ -203,6 +203,15 @@ const PRESETED = [
     'a check the config re-grades'],
   [[], 'rules:\n  unused-function: off\n', [],
     'a check of the preset the config turns off'],
+  [[], 'rules:\n  "*": warning\n', ['unused-function'],
+    'a glob re-grading every check'],
+  [[], 'rules:\n  "unused-*": error\n', ['unused-function'],
+    'a glob re-grading the dead code'],
+  [[], 'rules:\n  "*": warning\n  short-names: error\n',
+    ['unused-function', 'short-names'], 'a check named exactly beside a glob'],
+  [['--preset=all'], 'rules:\n  "*": warning\n',
+    ['unused-function', 'short-names', 'unused-variable'],
+    'a glob over the whole catalog'],
 ]
 
 describe('xslint', function() {
@@ -536,6 +545,16 @@ describe('xslint', function() {
       ]).stderr,
       /Preset 'everything' does not exist, use one of recommended, all/,
       'failed on a preset it cannot find without naming it',
+    )
+  })
+  it('should refuse a preset that does not exist before it walks a path', function() {
+    assert.doesNotMatch(
+      xslintStreams([
+        'test/resources/presets/a-short-name-beside-dead-code.xsl',
+        '--preset=everything', '--log-level=info',
+      ]).stderr,
+      /Directories and files to process/,
+      'walked the paths before refusing a preset naming no check list',
     )
   })
   it('should name every preset in its help screen', function() {

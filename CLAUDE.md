@@ -964,8 +964,10 @@ the 22 and could only ever ask whether the string appeared.
 - **Only**: `--only=<rule-substring>` (or `only:`, which the flag replaces)
   reports only the checks it names; a suppression outranks it (#1030).
 - **Preset**: `--preset` (or `preset:`) names where a run starts, `recommended`
-  unless `all`; `--only` replaces it, a re-grade in `rules:` adds to it, and a
-  suppression or `off` outranks both. An unknown one fails the run (#1094).
+  unless `all`; `--only` replaces it, a re-grade in `rules:` naming a check
+  exactly adds to it while a glob re-grades only what already runs, and a
+  suppression or `off` outranks both. An unknown one fails the run before
+  discovery (#1094).
 - **Config**: `.xslint.yml` (found by walking up, or `--config <path>`) can turn
   rules `off`, re-grade severity, `exclude:` file globs, and default
   `max-warnings`/`log-level`/`quiet`. Flags override the file overrides

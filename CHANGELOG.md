@@ -17,8 +17,12 @@ publication date only; detailed notes begin with the Unreleased section.
   whole catalog draws 10,958. `unused-variable` is not among them: its reports
   hold, but they ask for cleanup rather than name a bug, and they were 234 of
   the 291 it would add. `--preset all`, or `preset: all` in `.xslint.yml`,
-  restores the whole catalog. `--only` still
-  reaches any check, and a check `rules` re-grades joins the run (#1094).
+  restores the whole catalog. `--only` still reaches any check, and a check
+  `rules` names exactly joins the run, while a glob such as `"unused-*"`
+  re-grades only the checks already in it. The `lint()` API defaults to
+  `recommended` too, so a caller passing no `preset`, an editor integration
+  among them, reports far less after upgrading; pass `preset: 'all'` to keep
+  the whole catalog (#1094).
 - Report an unprefixed `name()` compared with a string in XSLT 1.0 again.
   `name-compared-to-string` withheld the whole report where the `*:name`
   wildcard it rewrites to cannot be spelled, so `name() = 'para'` went silent

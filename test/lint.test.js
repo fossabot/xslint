@@ -168,6 +168,10 @@ const PRESETED = [
     'a re-grade outside the preset',
   ],
   [
+    {overrides: {'unused-function': 'warning'}}, ['unused-function'],
+    'a re-grade inside the preset',
+  ],
+  [
     {overrides: {'unused-variable': 'warning'}},
     ['unused-function', 'unused-variable'], 'a dead variable re-graded',
   ],

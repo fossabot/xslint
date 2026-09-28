@@ -226,8 +226,10 @@ quiet: false                            # default for --quiet
   says `all`. Passing `--preset` replaces it.
 - **`rules`** maps a check name — or a glob such as `unused-*` — to
   `off`, `warning`, or `error`. `off` disables the check (like `--suppress`);
-  `warning` and `error` re-grade its severity, and run it even where the preset
-  leaves it out, which is how one style check joins a `recommended` run.
+  `warning` and `error` re-grade its severity. A check named exactly also runs
+  where the preset leaves it out, which is how one style check joins a
+  `recommended` run; a glob re-grades only the checks already in the run, so
+  `"*": warning` or `"unused-*": error` adds none.
 - **`exclude`** lists globs, relative to the config file's own directory, whose
   matching files are not linted. A pattern covering everything under a
   directory — `dir/**` — also stops the walk descending it, so an exclusion
@@ -244,7 +246,8 @@ Unknown top-level keys, rule names that match no check, and values of the wrong
 type (a non-numeric `max-warnings`, a non-list `exclude` or `only`, a
 non-boolean `quiet`, a non-string `log-level` or `preset`) are reported and
 ignored, so typos do not pass silently. A preset that does not exist fails the
-run instead, since a run over no checks would read as a clean report. An
+run instead, before a file is read, since a run over no checks would read as a
+clean report. An
 `exclude` glob is named the same way when a run walks a directory and the glob
 excludes nothing anywhere under it.
 
@@ -461,7 +464,8 @@ const {contents} = fixed(sources, defects)
 
 `lint(sources, {suppress, overrides, only, preset})` runs the validators and
 linters of a preset, `recommended` unless named, over the `{file, content}`
-sources, honors inline `xslint-disable` directives, and hands
+sources, honors inline `xslint-disable` directives, runs every check
+`overrides` names beside the preset, and hands
 the defects back in the order the reports print them — file, line, column, rule;
 `fixed(sources, defects, suggestions)` returns the rewritten content per file.
 

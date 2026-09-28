@@ -777,6 +777,12 @@ const xslint = function(pths, options) {
   if (options.quiet == null && options.logLevel == null) {
     logger.setLevel(leveled(config.quiet, config.logLevel))
   }
+  const preset = options.preset ?? config.preset ?? PRESET
+  const listed = presetted(preset)
+  let only = config.only
+  if (options.only?.length > 0) {
+    only = options.only
+  }
   const disabled = []
   const overrides = {}
   for (const [pattern, severity] of Object.entries(config.rules)) {
@@ -787,7 +793,9 @@ const xslint = function(pths, options) {
     for (const check of matched) {
       if (severity === 'off') {
         disabled.push(check)
-      } else {
+      } else if (
+        check === pattern || only.length > 0 || listed.includes(check)
+      ) {
         overrides[check] = severity
       }
     }
@@ -823,15 +831,11 @@ const xslint = function(pths, options) {
       content: content,
       subsets: subsetsOf(stylesheet, content),
     }))
-  let only = config.only
-  if (options.only?.length > 0) {
-    only = options.only
-  }
   let reported = lint(sources, {
     suppress: [...options.suppress, ...disabled],
     overrides: overrides,
     only: only,
-    preset: options.preset ?? config.preset ?? PRESET,
+    preset: preset,
   })
   if (options.fix || options.fixDryRun || options.fixSuggestions) {
     /**
