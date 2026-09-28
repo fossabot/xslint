@@ -15,8 +15,9 @@ const {logger} = require('../logger')
 const CHECK = 'malformed-stylesheet'
 
 /**
- * Defect metadata of the check.
- * @type {{severity: string, message: string}}
+ * Defect metadata of the check: the message for a syntax fault, and the one
+ * for a prefix nothing binds, which no amount of fixing syntax repairs (#1019).
+ * @type {{severity: string, message: string, namespace: string}}
  */
 const META = kinds.validation[CHECK]
 
@@ -58,9 +59,10 @@ const compiled = function(xsl) {
 
 /**
  * Build the corpus from raw stylesheet sources, validating that each one is
- * well-formed XML. A source that does not parse is reported as a defect and
- * left out of the corpus, so the validators and linters that follow run only
- * over the stylesheets that parse, each as a processor compiles it.
+ * well-formed XML. A source that does not parse is reported as a defect where
+ * the parser met its fault, and left out of the corpus, so the validators and
+ * linters that follow run only over the stylesheets that parse, each as a
+ * processor compiles it.
  * @param {Array.<{file: string, content: string, subsets: Map}>} sources -
  *  Raw stylesheets, each with the external subsets its entities name
  * @param {Array.<string>} suppressions - Array of suppressed checks
@@ -79,15 +81,19 @@ const validate = function(sources, suppressions = []) {
         file: file, content: content,
         xsl: compiled(xml.parsedFromString(content, subsets)),
       })
-    } catch {
+    } catch (err) {
       if (!suppressed) {
+        let message = META.message
+        if (err.namespace) {
+          message = META.namespace
+        }
         defects.push({
           name: CHECK,
           severity: META.severity,
-          message: META.message,
+          message: message,
           file: file,
-          line: 1,
-          pos: 1,
+          line: err.line,
+          pos: err.pos,
         })
       }
     }

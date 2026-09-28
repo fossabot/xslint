@@ -22,6 +22,8 @@ in a 1.0 sheet and refuses the `xsl:sequence` inside it, so pruning there hid th
 Any other condition, `not(true())` among them, is left standing, its answer being a processor's,
 and so is the root, a document with no element being one nothing reads.
 The pack harness builds its corpus here too, so a pack reads what a run reads (#1048).
+A refusal stands where the parser stopped rather than at 1:1, and one naming a prefix nothing binds
+carries the check's `namespace` message rather than its syntax one (#1019).
 
 ## `src/validators/xpath-validator.js`
 

@@ -210,22 +210,74 @@ const ENTITIES = [
 ]
 
 /**
- * XML parser. Its error handler raises on any well-formedness problem the
- * parser reports, the recoverable ones included, so a not-well-formed document
- * never parses: the level is not consulted, `@xmldom/xmldom` grading an
- * unquoted attribute a `warning` and then repairing it (#574). An entity
- * complaint is the exception, `ENTITIES` saying why.
- * @return {DOMParser} - Configured parser
+ * The refusal `@xmldom/xmldom` raises for a prefix no declaration in scope
+ * binds, `xmlns` on an element among them. Its other namespace refusals are
+ * a declaration binding a reserved prefix wrongly, which declaring more
+ * cannot repair, so they stay syntax faults (#1019).
+ * @type {string}
  */
-const parserFor = function() {
-  return new DOMParser({
-    onError: (level, message) => {
-      const text = message.trim()
-      if (!ENTITIES.some((one) => text.startsWith(one))) {
-        throw new Error(text)
-      }
-    },
-  })
+const UNBOUND = 'NamespaceError: prefix is non-null and namespace is null'
+
+/**
+ * What a document nothing is wrong with earns: no reason at all.
+ * @type {{reason: string, line: number, pos: number, namespace: boolean}}
+ */
+const SOUND = {reason: '', line: 1, pos: 1, namespace: false}
+
+/**
+ * A refusal of a document, carrying where it stands and whether the fault is a
+ * prefix nothing binds rather than a syntax error, so a report names the place
+ * and the remedy the parser saw rather than the opening of the file (#1019).
+ * @param {object} fault - Why the document is refused, where, and whether the
+ *  fault is a namespace one
+ * @return {Error} - The refusal to throw
+ */
+const refusal = function(fault) {
+  return Object.assign(new Error(fault.reason), fault)
+}
+
+/**
+ * Where the parser stands when it complains. `@xmldom/xmldom` counts a
+ * document holding no element as line zero with no column, and a report
+ * stands on a line and column that exist.
+ * @param {{lineNumber: number, columnNumber: number}} locator - Parser position
+ * @return {{line: number, pos: number}} - Where the complaint stands
+ */
+const located = function(locator) {
+  return {line: locator.lineNumber || 1, pos: locator.columnNumber || 1}
+}
+
+/**
+ * The document XML text spells, refusing it on any complaint the parser makes,
+ * the recoverable ones included and the level not consulted (#574), an entity
+ * complaint excepted as `ENTITIES` says. The parser rethrows what its handler
+ * raises as a message of its own, so the first complaint is kept aside and
+ * thrown once the parse gives up, where it stood (#1019).
+ * @param {string} text - XML as string
+ * @param {function(object): {line: number, pos: number}} where - Where a
+ *  complaint stands, given the parser's locator
+ * @return {Document} - Parsed XML as Document
+ */
+const documentOf = function(text, where = located) {
+  let fault = SOUND
+  let doc
+  try {
+    doc = new DOMParser({
+      onError: (level, message, context) => {
+        const reason = message.trim()
+        if (!ENTITIES.some((one) => reason.startsWith(one))) {
+          fault = {
+            reason: reason, ...where(context.locator),
+            namespace: reason.includes(UNBOUND),
+          }
+          throw new Error(reason)
+        }
+      },
+    }).parseFromString(text, 'text/xml')
+  } catch {
+    throw refusal(fault)
+  }
+  return doc
 }
 
 /**
@@ -397,8 +449,10 @@ const placed = function(node, at) {
  */
 const grafted = function(text, at) {
   const nodes = []
-  const doc = parserFor().parseFromString(
-    `<${HOST}${scoped(at)}>${text}</${HOST}>`, 'text/xml')
+  const doc = documentOf(
+    `<${HOST}${scoped(at)}>${text}</${HOST}>`,
+    () => ({line: at.lineNumber, pos: at.columnNumber}),
+  )
   for (let kid = doc.documentElement.firstChild; kid; kid = kid.nextSibling) {
     nodes.push(placed(at.ownerDocument.importNode(kid, true), at))
   }
@@ -568,11 +622,15 @@ const CLOSE = ']]>'
  * @param {number} at - Offset the sequence begins at
  * @param {string} what - How the message should name the sequence
  * @param {string} why - What is wrong with it standing there
- * @return {string} - The one-sentence complaint
+ * @return {{reason: string, line: number, pos: number, namespace: boolean}} -
+ *  The one-sentence complaint, and where it stands
  */
 const complaint = function(str, at, what, why) {
   const {line, pos} = placeAt(str, at)
-  return `the ${what} at ${line}:${pos} ${why}`
+  return {
+    reason: `the ${what} at ${line}:${pos} ${why}`,
+    line: line, pos: pos, namespace: false,
+  }
 }
 
 /**
@@ -589,7 +647,7 @@ const entitled = function(name, entities, loose) {
 }
 
 /**
- * The complaint the sequence standing at that offset earns, or an empty string
+ * The complaint the sequence standing at that offset earns, or `SOUND`
  * when it earns none. `@xmldom/xmldom` lets three stand: a bare `&`, which it
  * rewrites to `&amp;` (#574), a reference to an entity nothing declares, and a
  * `]]>` closing no section (#691) — that last one content's alone, an
@@ -598,10 +656,10 @@ const entitled = function(name, entities, loose) {
  * @param {number} at - Offset to weigh
  * @param {boolean} data - Whether the run is character data
  * @param {function(string): boolean} reaches - Whether a name resolves
- * @return {string} - The complaint, or an empty string when there is none
+ * @return {object} - The complaint, or `SOUND` when there is none
  */
 const amiss = function(str, at, data, reaches) {
-  let found = ''
+  let found = SOUND
   if (str[at] === '&') {
     const opens = OPENS.exec(str.slice(at))
     if (!opens) {
@@ -628,7 +686,7 @@ const amiss = function(str, at, data, reaches) {
  * @param {Node} node - The attribute or text node spanning the run
  * @param {boolean} data - Whether the run is character data
  * @param {function(string): boolean} reaches - Whether a name resolves
- * @return {string} - The complaint, or an empty string when there is none
+ * @return {object} - The complaint, or `SOUND` when there is none
  */
 const strayed = function(str, node, data, reaches) {
   const opening = offsetAt(str, node.lineNumber, node.columnNumber)
@@ -638,8 +696,8 @@ const strayed = function(str, node, data, reaches) {
     stop = str[opening]
     at = opening + 1
   }
-  let found = ''
-  while (!found && at < str.length && str[at] !== stop) {
+  let found = SOUND
+  while (!found.reason && at < str.length && str[at] !== stop) {
     found = amiss(str, at, data, reaches)
     at += 1
   }
@@ -647,23 +705,24 @@ const strayed = function(str, node, data, reaches) {
 }
 
 /**
- * The complaint the first sequence a document must not hold earns, or an empty
- * string when it holds none. The runs are reached through the tree rather than
+ * The complaint the first sequence a document must not hold earns, or `SOUND`
+ * when it holds none. The runs are reached through the tree rather than
  * scanned out of the source, and by a pass of this function's own rather than
  * `walked`'s, which drops the namespace declarations (#691, #877).
  * @param {string} str - XML source
  * @param {Node} node - The document, or a node within it
  * @param {function(string): boolean} reaches - Whether a name resolves
- * @return {string} - The complaint, or an empty string when there is none
+ * @return {object} - The complaint, or `SOUND` when there is none
  */
 const forbidden = function(str, node, reaches) {
-  let found = ''
+  let found = SOUND
   if (node.attributes) {
-    for (let index = 0; !found && index < node.attributes.length; index++) {
+    for (let index = 0; !found.reason && index < node.attributes.length;
+      index++) {
       found = strayed(str, node.attributes.item(index), false, reaches)
     }
   }
-  for (let kid = node.firstChild; !found && kid; kid = kid.nextSibling) {
+  for (let kid = node.firstChild; !found.reason && kid; kid = kid.nextSibling) {
     if (kid.nodeType === 3) {
       found = strayed(str, kid, true, reaches)
     } else if (kid.nodeType === 1) {
@@ -687,20 +746,21 @@ const xmlFromString = function(str, subsets = new Map()) {
   const entities = declaredEntities(inlined(text, subsets))
   const loose = external(text)
   try {
-    const doc = parserFor().parseFromString(text, 'text/xml')
+    const doc = documentOf(text)
     const refused = forbidden(
       text, doc, (name) => entitled(name, entities, loose))
-    if (refused) {
-      throw new Error(refused)
+    if (refused.reason) {
+      throw refusal(refused)
     }
     if (entities.size || loose) {
       expand(doc.documentElement, entities, spelled(text))
     }
     return doc
   } catch (err) {
-    throw new Error(
-      `Couldn't parse XML:\n${text}\n\nCause: ${err.message}`, {cause: err},
-    )
+    throw refusal({
+      reason: `Couldn't parse XML:\n${text}\n\nCause: ${err.reason}`,
+      line: err.line, pos: err.pos, namespace: err.namespace,
+    })
   }
 }
 
