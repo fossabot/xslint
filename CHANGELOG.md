@@ -7,6 +7,17 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Entries for releases before this file was introduced record their npm
 publication date only; detailed notes begin with the Unreleased section.
 
+## Unreleased
+
+- Judge an identity transform in `not-using-output`. Since #1031 the check
+  judged a stylesheet nothing imports only when a template of it matched the
+  document root or was `xsl:initial-template`, so a standalone identity
+  transform, which the built-in rule enters through its `node()` template, went
+  unjudged. A template in the default mode taking any element, or the document
+  element a `/name` pattern spells, now marks an entry point too. A stylesheet
+  started with `-it` from another name stays unjudged, being indistinguishable
+  from a library of named templates (#1046).
+
 ## 0.3.0 - 2026-09-27
 
 - Read the extension namespaces a simplified stylesheet declares.

@@ -59,6 +59,7 @@ src/main/plugins/org.dita.base/xsl/common/uri-utils.xsl:97:5 short-names
 src/main/plugins/org.dita.base/xsl/common/uri-utils.xsl:98:5 short-names
 src/main/plugins/org.dita.base/xsl/job-helper.xsl:9:1 missing-id-in-stylesheet
 src/main/plugins/org.dita.base/xsl/preprocess/clean-map.xsl:9:1 missing-id-in-stylesheet
+src/main/plugins/org.dita.base/xsl/preprocess/clean-map.xsl:9:1 not-using-output
 src/main/plugins/org.dita.base/xsl/preprocess/conrefImpl.xsl:10:1 missing-id-in-stylesheet
 src/main/plugins/org.dita.base/xsl/preprocess/conrefImpl.xsl:10:1 too-many-templates
 src/main/plugins/org.dita.base/xsl/preprocess/conrefImpl.xsl:57:3 unused-named-template

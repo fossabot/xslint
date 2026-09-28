@@ -9,11 +9,21 @@
  * was `root-template-linter`'s own question until #1004 asked it of the import
  * tree too, and a linter requires no other, so it stands in the core both of
  * them consume.
+ *
+ * A module is entered where the document node reaches it, and the built-in
+ * rule hands that node's children on, so a default-mode template taking
+ * whatever element stands at the top — any element at all, or the one a
+ * `/name` spells — is a place too (#1046). A default-mode template naming
+ * elements is not, nor is a named one. Over the pinned corpora the first drew
+ * seven stylesheets more, five of them libraries nothing imports, and reads a
+ * library linted alone besides; the second drew eight, one a program started
+ * with `-it`.
  */
 
 const {expressionsOf, whole} = require('./attributes')
 const {attributeOf} = require('./expressions')
-const {gathered, isValid} = require('./syntax')
+const {gathered, isValid, parseOf, tokensOf} = require('./syntax')
+const {GAP, TOKENS, TRIVIA} = require('./tokens')
 const {holding, named} = require('./tree')
 const {XSLT} = require('./xsl-version')
 
@@ -23,6 +33,26 @@ const {XSLT} = require('./xsl-version')
  * @type {string}
  */
 const INITIAL = 'initial-template'
+
+/**
+ * The modes a template is in when the initial mode is the default one: none
+ * named at all, or one of these among the modes it names.
+ * @type {Array.<string>}
+ */
+const DEFAULTS = ['#default', '#all']
+
+/**
+ * The node tests, spelled as their solid tokens, that every element answers.
+ * @type {Array.<string>}
+ */
+const EVERY = ['*', 'node()', 'element()', 'element(*)']
+
+/**
+ * The token types a name test is spelled with, a wildcard standing for either
+ * half of the name and a URI for its prefix.
+ * @type {Array.<string>}
+ */
+const NAMING = [TOKENS.NAME, TOKENS.MULTI, TOKENS.COLON, TOKENS.URI]
 
 /**
  * Whether the pattern matches the root of the document. A pattern is a union
@@ -41,21 +71,96 @@ const rooted = function(found) {
 }
 
 /**
- * Every template of the stylesheet whose pattern matches the root. A pattern
+ * Whether the template is in the mode a transformation starts in, in either
+ * spelling of its `mode`.
+ * @param {Element} template - An `xsl:template`
+ * @return {boolean} - True when the default mode is one of its modes
+ */
+const unmoded = function(template) {
+  const modes = attributeOf(template, 'mode').split(new RegExp(`${GAP}+`))
+  return modes.every((mode) => mode === '') ||
+    modes.some((mode) => DEFAULTS.includes(mode))
+}
+
+/**
+ * The node test of a step, as its solid tokens: the axis left out, which a
+ * pattern allows only where it adds nothing here, and the predicates too.
+ * @param {{node: Node, expression: string, pattern: boolean}} found - Record
+ * @param {object} step - A `step` of its tree
+ * @return {Array.<{type: string, value: string}>} - The tokens of the test
+ */
+const testOf = function(found, step) {
+  const solid = tokensOf(found, step)
+    .filter((token) => !TRIVIA.includes(token.type) &&
+      token.type !== TOKENS.CHILD)
+  let cut = solid.findIndex((token) => token.type === TOKENS.LBRACKET)
+  if (cut < 0) {
+    cut = solid.length
+  }
+  return solid.slice(0, cut)
+}
+
+/**
+ * Whether every element answers the node test of a step.
+ * @param {{node: Node, expression: string, pattern: boolean}} found - Record
+ * @param {object} step - A `step` of its tree
+ * @return {boolean} - True when the test admits any element
+ */
+const universal = function(found, step) {
+  return EVERY.includes(testOf(found, step).map((one) => one.value).join(''))
+}
+
+/**
+ * Whether the pattern takes the element at the top of the document: a branch
+ * of it, and not one in brackets, holding one step and no predicate that every
+ * element answers, or one name test opening at the root (#1046).
+ * @param {{node: Node, expression: string, pattern: boolean}} found - The
+ *  pattern, whole, as `expressionsOf` yields it
+ * @return {boolean} - True when a branch of it takes that element
+ */
+const topmost = function(found) {
+  let branches = [parseOf(found).tree]
+  if (branches[0].kind === 'pattern') {
+    branches = branches[0].children
+  }
+  return branches.some((branch) => {
+    const step = branch.children[0]
+    return branch.children.length === 1 && (
+      (step.children.length === 0 && universal(found, step)) ||
+      (tokensOf(found, branch).find(
+        (token) => !TRIVIA.includes(token.type),
+      ).type === TOKENS.SLASH &&
+        testOf(found, step).every((one) => NAMING.includes(one.type)))
+    )
+  })
+}
+
+/**
+ * Every template of the stylesheet whose pattern passes the test. A pattern
  * the grammar refuses is passed over: what it would match cannot be read, and
  * the same run already reports it as invalid.
  * @param {Document} xsl - XSL document parsed as {@link Document}
- * @return {Array.<Element>} - The root templates found
+ * @param {function(object): boolean} test - What the pattern is asked
+ * @return {Array.<Element>} - The templates found
  */
-const roots = function(xsl) {
+const matching = function(xsl, test) {
   return expressionsOf(xsl)
     .filter(
       (found) => whole(found, 'match') &&
         holding(found.node).localName === 'template' &&
         holding(found.node).namespaceURI === XSLT &&
-        isValid(found) && rooted(found),
+        isValid(found) && test(found),
     )
     .map((found) => holding(found.node))
+}
+
+/**
+ * Every template of the stylesheet whose pattern matches the root.
+ * @param {Document} xsl - XSL document parsed as {@link Document}
+ * @return {Array.<Element>} - The root templates found
+ */
+const roots = function(xsl) {
+  return matching(xsl, rooted)
 }
 
 /**
@@ -71,13 +176,15 @@ const initial = function(template) {
 
 /**
  * Whether a transformation can start at the module: a template of it matches
- * the root of the document, or is the initial one (#1004).
+ * the root of the document, or is the initial one (#1004), or takes the
+ * element at the top of it in the default mode (#1046).
  * @param {Document} xsl - XSL document parsed as {@link Document}
  * @return {boolean} - True when the module is an entry point
  */
 const entered = function(xsl) {
   return roots(xsl).length > 0 ||
-    (named(xsl).buckets.get(`${XSLT} template`) ?? []).some(initial)
+    (named(xsl).buckets.get(`${XSLT} template`) ?? []).some(initial) ||
+    matching(xsl, topmost).some(unmoded)
 }
 
 module.exports = {

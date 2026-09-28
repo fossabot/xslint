@@ -882,6 +882,7 @@ xsl/common/gentext.xsl:785:5 use-single-option-for-choose
 xsl/common/gentext.xsl:805:5 use-choose-without-otherwise
 xsl/common/gentext.xsl:834:5 use-choose-without-otherwise
 xsl/common/insertfile.xsl:2:1 missing-id-in-stylesheet
+xsl/common/insertfile.xsl:2:1 not-using-output
 xsl/common/insertfile.xsl:50:35 unabbreviated-axis fix ""
 xsl/common/insertfile.xsl:75:13 unabbreviated-axis fix ""
 xsl/common/insertfile.xsl:76:13 unabbreviated-axis fix ""
