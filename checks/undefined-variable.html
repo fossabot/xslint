@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>undefined-variable</title>
+  <style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #24292e;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 32px;
+  }
+  h1 { font-size: 2rem; font-weight: 600; margin-bottom: 4px; }
+  h2 { font-size: 1.3rem; font-weight: 600; margin: 20px 0 8px; }
+  a { color: #0366d6; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p { margin: 8px 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 0.9rem; }
+  th {
+    text-align: left;
+    padding: 10px 12px;
+    background: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    font-weight: 600;
+  }
+  td { padding: 10px 12px; border: 1px solid #e1e4e8; vertical-align: top; }
+  tr:hover td { background: #f6f8fa; }
+  .severity-warning {
+    background: #fff8c5;
+    color: #9a6700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .severity-error {
+    background: #ffebe9;
+    color: #cf222e;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .fix-safe {
+    background: #dafbe1;
+    color: #1a7f37;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .fix-suggestion {
+    background: #fbefff;
+    color: #8250df;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .fix-note {
+    background: #f6f8fa;
+    border-left: 4px solid #57606a;
+    padding: 8px 12px;
+    margin: 0 0 24px;
+    font-size: 0.9rem;
+  }
+  .back { display: inline-block; margin-bottom: 24px; font-size: 0.9rem; }
+  .meta { display: flex; gap: 12px; align-items: flex-start; margin: 12px 0 24px; flex-wrap: wrap; }
+  .xpath {
+    background: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.75rem;
+    word-break: break-all;
+    flex: 1;
+  }
+  pre { margin: 12px 0; border-radius: 6px; overflow-x: auto; }
+  code { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+  .check-content h1 { font-size: 1.6rem; margin-bottom: 8px; }
+</style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+<body>
+  <a class="back" href="../index.html">← all checks</a>
+  <div class="meta">
+    <span class="severity-error">error</span>
+    <code class="xpath">checked over the tokens, not an XPath rule</code>
+  </div>
+  <div class="check-content">
+<h1>Undefined variable</h1>
+<p>A variable reference that no binding in scope declares is a static error,
+<code>XPST0008</code>, and every processor refuses the whole stylesheet for it before it
+transforms a single node. One misspelled name in one template of a large
+module is enough, and the message names only the first such reference, so a
+file can hide several behind the one that is reported.</p>
+<p>A variable is in scope in the places XSLT gives it and nowhere else. A local
+<code>xsl:variable</code> or <code>xsl:param</code> reaches the siblings that follow it and
+everything they hold, so a variable declared inside an <code>xsl:if</code> or an
+<code>xsl:when</code> is gone at the closing tag, a variable read above its declaration
+is not yet bound, and a parameter of one template is not in scope in another.
+A template&#39;s own parameters do not reach its <code>match</code> pattern either, which
+sees the globals alone, and a parameter&#39;s default sees only the parameters in
+front of it. A <code>for</code>, <code>let</code>, <code>some</code> or <code>every</code> clause and an inline function
+bind their names inside the expression, an <code>xsl:accumulator-rule</code> binds
+<code>$value</code>, and an <code>xsl:catch</code> binds the <code>err:</code> names. A global binding, a
+top-level <code>xsl:variable</code> or <code>xsl:param</code>, is in scope everywhere in the
+stylesheet, whichever module declares it and whichever way the import between
+the two runs. A name spelled with a prefix is the namespace that prefix binds,
+so <code>$my:limit</code> and <code>$limit</code> are two different variables.</p>
+<p>A module is judged against the stylesheet it belongs to: a module where a
+transformation starts, holding a template that matches the root or the
+initial template and pulled in by no other, together with every module it
+imports and includes. A module no such stylesheet holds is a library whose
+globals may come from whatever imports it, and a stylesheet pulling in a
+module the linted files do not hold, or using a package, may take a global
+from there, so a reference past its locals is left alone in either.</p>
+<p>Incorrect:</p>
+<pre><code class="language-xsl">&lt;xsl:template match=&quot;/&quot;&gt;
+  &lt;xsl:param name=&quot;title&quot;/&gt;
+  &lt;xsl:if test=&quot;$title&quot;&gt;
+    &lt;xsl:variable name=&quot;heading&quot; select=&quot;upper-case($title)&quot;/&gt;
+  &lt;/xsl:if&gt;
+  &lt;h1&gt;
+    &lt;xsl:value-of select=&quot;$heading&quot;/&gt;
+  &lt;/h1&gt;
+&lt;/xsl:template&gt;
+</code></pre>
+<p>Correct:</p>
+<pre><code class="language-xsl">&lt;xsl:template match=&quot;/&quot;&gt;
+  &lt;xsl:param name=&quot;title&quot;/&gt;
+  &lt;xsl:variable name=&quot;heading&quot; select=&quot;upper-case($title)&quot;/&gt;
+  &lt;xsl:if test=&quot;$title&quot;&gt;
+    &lt;h1&gt;
+      &lt;xsl:value-of select=&quot;$heading&quot;/&gt;
+    &lt;/h1&gt;
+  &lt;/xsl:if&gt;
+&lt;/xsl:template&gt;
+</code></pre>
+<p>The fix is one of three, and only the author knows which. A misspelled name
+is corrected to the binding it meant, which is usually a character or two
+away. A variable read outside the block declaring it moves up to a level
+whose siblings include the reference. A value a caller is meant to supply
+becomes an <code>xsl:param</code> of the template reading it, with an <code>xsl:with-param</code>
+at every call.</p>
+
+  </div>
+</body>
+</html>
