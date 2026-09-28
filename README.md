@@ -29,10 +29,13 @@ Given a stylesheet like this:
 
 ```xml
 <?xml version="1.0"?>
-<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:my="urn:my">
+  <xsl:function name="my:upper">
+    <xsl:param name="text"/>
+    <xsl:sequence select="upper-case($text)"/>
+  </xsl:function>
   <xsl:template match="//book">
     <xsl:variable name="x" select="title"/>
-    <xsl:variable name="author" select="creator"/>
     <xsl:value-of select="$x"/>
   </xsl:template>
 </xsl:stylesheet>
@@ -41,18 +44,18 @@ Given a stylesheet like this:
 xslint points at each problem with its exact position and how to fix it:
 
 ```text
-[WARNING] sheet.xsl(5:5) A variable is declared but never referenced by $name across the corpus. Remove it or use it. (unused-variable)
+[WARNING] sheet.xsl(3:3) A stylesheet function is never called in any expression across the corpus. Remove it or call it. (unused-function)
 ```
 
 A run reports the `recommended` preset unless told otherwise: what a processor
 refuses, and the dead code whose report is almost never wrong. Ask for the whole
-catalog, style checks included, with `--preset all`:
+catalog, style checks and unused variables included, with `--preset all`:
 
 ```text
 [WARNING] sheet.xsl(2:1) The stylesheet element has no @id attribute. Declare it to specify the unique identifier explicitly. (missing-id-in-stylesheet)
-[WARNING] sheet.xsl(3:24) A pattern alternative opens with //, which at most demands a document-node root. Drop it, and set an explicit priority if the template must rank as before. (starts-with-double-slash)
-[WARNING] sheet.xsl(4:5) A variable, parameter, function, or template has a single-character name. Use a descriptive name that reveals intent. (short-names)
-[WARNING] sheet.xsl(5:5) A variable is declared but never referenced by $name across the corpus. Remove it or use it. (unused-variable)
+[WARNING] sheet.xsl(3:3) A stylesheet function is never called in any expression across the corpus. Remove it or call it. (unused-function)
+[WARNING] sheet.xsl(7:24) A pattern alternative opens with //, which at most demands a document-node root. Drop it, and set an explicit priority if the template must rank as before. (starts-with-double-slash)
+[WARNING] sheet.xsl(8:5) A variable, parameter, function, or template has a single-character name. Use a descriptive name that reveals intent. (short-names)
 ```
 
 In CI, use the [GitHub Action](https://github.com/xslint/xslint-action) to
@@ -88,7 +91,7 @@ positives from its validators**: 3,279 pieces of literal text outside
 `xsl:text`, 639 `xsl:choose` blocks with no `xsl:otherwise`, and 583 template
 and function parameters nothing reads. Real stylistic and logical findings in
 code that has shipped for decades. The `recommended` preset a run reports by
-default draws 291 of them.
+default draws 57 of them.
 
 Every figure above is read off the reports committed under
 `test/resources/corpora/`, which a nightly job re-lints at the pinned commits
@@ -157,8 +160,8 @@ command line is read whatever those files say about it.
 
 A run reports the checks of one preset. `recommended`, the default, holds what
 a processor refuses and the dead code whose report is almost never wrong;
-`all` holds every check in the catalog, style checks included. The
-[check catalog][checks] marks the preset each check belongs to:
+`all` holds every check in the catalog, style checks and unused variables
+included. The [check catalog][checks] marks the preset each check belongs to:
 
 ```bash
 xslint --preset all

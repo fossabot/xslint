@@ -32,7 +32,7 @@
         "reference": "variable",
         "scoped": true,
         "severity": "warning",
-        "preset": "recommended",
+        "preset": "all",
         "message": "A variable is declared but never referenced by $name across the corpus. Remove it or use it."
       }
     },

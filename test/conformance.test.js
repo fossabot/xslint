@@ -407,11 +407,11 @@ const RETIRED = [
 /**
  * The most reports the recommended preset may draw over each corpus: the
  * geometric middle of what it draws and what it would draw holding
- * `use-choose-without-otherwise` as well, the candidate its measurement
- * refused, so a noisy check joining it turns this red (#1094).
+ * `unused-variable` again, the check moved out for its volume, so a noisy
+ * check joining it turns this red (#1094).
  * @type {{[corpus: string]: number}}
  */
-const QUIET = {docbook: 251, tei: 209, ditaot: 58}
+const QUIET = {docbook: 77, tei: 32, ditaot: 15}
 
 /**
  * How far under its bar a reading may stand before the bar has stopped being

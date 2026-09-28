@@ -156,17 +156,24 @@ const SKIPPED = [
  * @type {Array.<Array>}
  */
 const PRESETED = [
-  [{}, ['unused-variable'], 'no preset named'],
-  [{preset: 'recommended'}, ['unused-variable'], 'the recommended preset'],
-  [{preset: 'all'}, ['short-names', 'unused-variable'], 'the whole catalog'],
+  [{}, ['unused-function'], 'no preset named'],
+  [{preset: 'recommended'}, ['unused-function'], 'the recommended preset'],
+  [
+    {preset: 'all'}, ['unused-function', 'short-names', 'unused-variable'],
+    'the whole catalog',
+  ],
   [{only: ['short']}, ['short-names'], 'a choice outside the preset'],
   [
-    {overrides: {'short-names': 'error'}}, ['short-names', 'unused-variable'],
+    {overrides: {'short-names': 'error'}}, ['unused-function', 'short-names'],
     'a re-grade outside the preset',
   ],
   [
+    {overrides: {'unused-variable': 'warning'}},
+    ['unused-function', 'unused-variable'], 'a dead variable re-graded',
+  ],
+  [
     {overrides: {'short-names': 'error'}, suppress: ['short']},
-    ['unused-variable'], 'a re-graded check suppressed',
+    ['unused-function'], 'a re-graded check suppressed',
   ],
   [{suppress: ['unused']}, [], 'a suppression inside the preset'],
   [
@@ -180,7 +187,7 @@ describe('lint (programmatic API)', function() {
     it(`reports what ${what} runs`, function() {
       assert.deepEqual(
         lint(
-          [source('presets/a-short-name-beside-a-dead-variable.xsl')], options,
+          [source('presets/a-short-name-beside-dead-code.xsl')], options,
         ).map((defect) => defect.name),
         expected,
         [
@@ -194,7 +201,7 @@ describe('lint (programmatic API)', function() {
   it('refuses a preset that does not exist', function() {
     assert.throws(
       () => lint(
-        [source('presets/a-short-name-beside-a-dead-variable.xsl')],
+        [source('presets/a-short-name-beside-dead-code.xsl')],
         {preset: 'fastidious'},
       ),
       /Preset 'fastidious' does not exist/,

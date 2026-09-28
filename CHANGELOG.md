@@ -13,8 +13,11 @@ publication date only; detailed notes begin with the Unreleased section.
   check in the catalog, so the first run over a real project buried the few
   defects a processor refuses under thousands of style findings. The default
   now holds every check graded an error and the dead-code checks that proved
-  almost never wrong over DocBook-XSL, TEI and DITA-OT; `--preset all`, or
-  `preset: all` in `.xslint.yml`, restores the whole catalog. `--only` still
+  almost never wrong over DocBook-XSL, TEI and DITA-OT, 57 reports where the
+  whole catalog draws 10,958. `unused-variable` is not among them: its reports
+  hold, but they ask for cleanup rather than name a bug, and they were 234 of
+  the 291 it would add. `--preset all`, or `preset: all` in `.xslint.yml`,
+  restores the whole catalog. `--only` still
   reaches any check, and a check `rules` re-grades joins the run (#1094).
 - Report an unprefixed `name()` compared with a string in XSLT 1.0 again.
   `name-compared-to-string` withheld the whole report where the `*:name`

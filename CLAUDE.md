@@ -546,7 +546,8 @@ place's rather than the check's — and is the one place a tier is spelled,
 Every check carries `preset:` too, `recommended` or `all`, naming the preset a
 run starts from that first holds it (#1094). `recommended` is the default: every
 `error` a processor refuses a stylesheet over, and the dead code whose report
-held on every reading over the three corpora. `test/conformance.test.js` holds
+held on every reading over the three corpora, less `unused-variable`, whose
+reports hold but ask for cleanup. `test/conformance.test.js` holds
 both halves, and a ratchet, `QUIET`, on what the preset draws over each corpus.
 
 ## Adding a rule

@@ -660,10 +660,13 @@ standing within `NEARBY` characters of the file's own name, so the drift above i
 reading and not as so many lines: the gate cannot tell what a ticket once measured from what the
 file stands at today, and a history spelled the other way is a stale claim it rightly fails.
 
-`QUIET` is the ratchet on the `recommended` preset, counted off the committed corpus reports: 152,
-113 and 26 reports over DocBook-XSL, TEI and DITA-OT when #1094 drew it. The defect it catches is a
+`QUIET` is the ratchet on the `recommended` preset, counted off the committed corpus reports: 39,
+9 and 9 reports over DocBook-XSL, TEI and DITA-OT once `unused-variable` left it, 234 of the 291 the
+first draft drew being that one check's cleanup rather than a bug. The defect the bar catches is a
 noisy check joining the preset, so each bar stands at the geometric middle of those readings and the
-ones `use-choose-without-otherwise` gives when added, 415, 386 and 129, the nearest candidate left out.
+ones `unused-variable` gives when put back, 152, 113 and 26. The nearest candidate the first draft
+left out, `use-choose-without-otherwise`, gives 302, 282 and 112 and is caught by all three, while
+its own middle over TEI, 50, would stand past `SLACK` times the reading under it.
 
 ## `test/guides.test.js`
 

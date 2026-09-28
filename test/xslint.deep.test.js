@@ -192,14 +192,16 @@ const CHOICES = [
  * @type {Array.<Array>}
  */
 const PRESETED = [
-  [[], '', ['unused-variable'], 'nothing named'],
-  [['--preset=all'], '', ['short-names', 'unused-variable'], 'the flag'],
-  [[], 'preset: all\n', ['short-names', 'unused-variable'], 'the config'],
-  [['--preset=recommended'], 'preset: all\n', ['unused-variable'],
+  [[], '', ['unused-function'], 'nothing named'],
+  [['--preset=all'], '', ['unused-function', 'short-names', 'unused-variable'],
+    'the flag'],
+  [[], 'preset: all\n', ['unused-function', 'short-names', 'unused-variable'],
+    'the config'],
+  [['--preset=recommended'], 'preset: all\n', ['unused-function'],
     'a flag outranking the config'],
-  [[], 'rules:\n  short-names: warning\n', ['short-names', 'unused-variable'],
+  [[], 'rules:\n  short-names: warning\n', ['unused-function', 'short-names'],
     'a check the config re-grades'],
-  [[], 'rules:\n  unused-variable: off\n', [],
+  [[], 'rules:\n  unused-function: off\n', [],
     'a check of the preset the config turns off'],
 ]
 
@@ -501,7 +503,7 @@ describe('xslint', function() {
       const cfg = path.join(dir, '.xslint.yml')
       fs.writeFileSync(cfg, content)
       const {stdout} = xslintStreams([
-        'test/resources/presets/a-short-name-beside-a-dead-variable.xsl',
+        'test/resources/presets/a-short-name-beside-dead-code.xsl',
         '--format=json', `--config=${cfg}`, ...flags,
       ])
       fs.rmSync(dir, {recursive: true, force: true})
@@ -519,7 +521,7 @@ describe('xslint', function() {
   it('should fail on a preset that does not exist', function() {
     assert.equal(
       xslintStatus([
-        'test/resources/presets/a-short-name-beside-a-dead-variable.xsl',
+        'test/resources/presets/a-short-name-beside-dead-code.xsl',
         '--preset=everything',
       ]),
       1,
@@ -529,7 +531,7 @@ describe('xslint', function() {
   it('should name the preset it cannot find', function() {
     assert.match(
       xslintStreams([
-        'test/resources/presets/a-short-name-beside-a-dead-variable.xsl',
+        'test/resources/presets/a-short-name-beside-dead-code.xsl',
         '--preset=everything',
       ]).stderr,
       /Preset 'everything' does not exist, use one of recommended, all/,
