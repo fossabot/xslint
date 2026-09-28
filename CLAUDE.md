@@ -547,6 +547,13 @@ offers lands in — `safe`, `suggestion`, or both where the tier is the standing
 place's rather than the check's — and is the one place a tier is spelled,
 `src/xslint.js` stamping every defect from it (#899).
 
+Every check carries `preset:` too, `recommended` or `all`, naming the preset a
+run starts from that first holds it (#1094). `recommended` is the default: every
+`error` a processor refuses a stylesheet over, and the dead code whose report
+held on every reading over the three corpora, less `unused-variable`, whose
+reports hold but ask for cleanup. `test/conformance.test.js` holds
+both halves, and a ratchet, `QUIET`, on what the preset draws over each corpus.
+
 ## Adding a rule
 
 Names are kebab-case with no `template-match-` (or other noise) prefix. Every
@@ -963,6 +970,11 @@ the 22 and could only ever ask whether the string appeared.
   validator and linter.
 - **Only**: `--only=<rule-substring>` (or `only:`, which the flag replaces)
   reports only the checks it names; a suppression outranks it (#1030).
+- **Preset**: `--preset` (or `preset:`) names where a run starts, `recommended`
+  unless `all`; `--only` replaces it, a re-grade in `rules:` naming a check
+  exactly adds to it while a glob re-grades only what already runs, and a
+  suppression or `off` outranks both. An unknown one fails the run before
+  discovery (#1094).
 - **Config**: `.xslint.yml` (found by walking up, or `--config <path>`) can turn
   rules `off`, re-grade severity, `exclude:` file globs, and default
   `max-warnings`/`log-level`/`quiet`. Flags override the file overrides

@@ -2,4 +2,5 @@
 # SPDX-License-Identifier: MIT
 ---
 severity: error
+preset: recommended
 message: "The @href names no file on disk, so no processor will load this stylesheet. Point it at the module, or restore the file."

@@ -2,4 +2,5 @@
 # SPDX-License-Identifier: MIT
 ---
 severity: warning
+preset: all
 message: "An expression opens a path with //, which scans the whole document each time it runs. Name the path, use xsl:key, or bind the scan once in a top-level variable."

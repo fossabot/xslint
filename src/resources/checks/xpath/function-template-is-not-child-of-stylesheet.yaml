@@ -3,4 +3,5 @@
 ---
 xpath: (/xsl:stylesheet | /xsl:transform | /xsl:package)/*//(xsl:function | xsl:template)[not(ancestor::xsl:override)]
 severity: error
+preset: recommended
 message: "An xsl:function or xsl:template is nested inside another element. Move it up to the top level, as a child of the stylesheet element."

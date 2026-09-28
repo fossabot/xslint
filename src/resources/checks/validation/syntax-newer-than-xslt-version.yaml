@@ -2,4 +2,5 @@
 # SPDX-License-Identifier: MIT
 ---
 severity: error
+preset: recommended
 message: "This XPath syntax belongs to a later XSLT version than the one in force, so a conformant processor rejects it. Raise the version, or respell the construct."

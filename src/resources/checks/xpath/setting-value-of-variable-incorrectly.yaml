@@ -3,4 +3,5 @@
 ---
 xpath: //(xsl:variable | xsl:param | xsl:with-param)[not(@select) and not(@_select) and (count(*) = 1) and (count(xsl:value-of[@select or @_select][not(@separator) and not(@_separator)]) = 1) and not(text()[xslint:normalize-space(.) or ancestor::*[@xml:space][1]/@xml:space = 'preserve'])]
 severity: warning
+preset: all
 message: A variable or parameter is assigned via a nested xsl:value-of instead of the select attribute. Use select syntax instead.

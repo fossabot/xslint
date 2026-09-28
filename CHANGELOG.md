@@ -9,6 +9,21 @@ publication date only; detailed notes begin with the Unreleased section.
 
 ## Unreleased
 
+- Report only the `recommended` preset by default. A run used to report every
+  check in the catalog, so the first run over a real project buried the few
+  defects a processor refuses under thousands of style findings. The default
+  now holds every check graded an error and the dead-code checks that proved
+  almost never wrong over DocBook-XSL, TEI and DITA-OT, 214 reports where the
+  whole catalog draws 11,121. `unused-variable` is not among them: its reports
+  hold, but they ask for cleanup rather than name a bug, and they would be 234
+  of the 448 the preset drew with them. `--preset all`, or `preset: all` in `.xslint.yml`,
+  restores the whole catalog. `--only` still reaches any check, and a check
+  `rules` names exactly joins the run, while a glob such as `"unused-*"`
+  re-grades only the checks already in it. The `lint()` API defaults to
+  `recommended` too, so a caller passing no `preset`, an editor integration
+  among them, reports far less after upgrading; pass `preset: 'all'` to keep
+  the whole catalog (#1094).
+
 - Add the `undefined-variable` check (error): a `$name` no binding in scope
   declares is a static error every processor raises before it transforms
   anything. A global counts across the whole import tree, a local only from

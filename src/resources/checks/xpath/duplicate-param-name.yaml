@@ -6,4 +6,5 @@ xpath: >-
   xslint:name($sibling, 'name') = xslint:name(., 'name') and
   not(xslint:conditional($sibling) or xslint:conditional(.))]
 severity: error
+preset: recommended
 message: Two xsl:param siblings share a @name. Each parameter of a template, function, or stylesheet must have a distinct name.

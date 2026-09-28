@@ -2,5 +2,6 @@
 # SPDX-License-Identifier: MIT
 ---
 severity: warning
+preset: all
 message: string-length(...) is compared with 0 to test emptiness, which measures the whole string. Compare the value with '' instead.
 fix: suggestion
