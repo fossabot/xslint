@@ -54,7 +54,7 @@
       },
       "name-compared-to-string": {
         "severity": "warning",
-        "message": "name() or local-name() is compared with a string, which is prefix-fragile and slower than a node test. Use self::name instead.",
+        "message": "name() or local-name() is compared with a string, which is prefix-fragile and slower than a node test. Match the element with a node test on the self axis instead.",
         "fix": "suggestion"
       },
       "not-creating-element-correctly": {

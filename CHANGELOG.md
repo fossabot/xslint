@@ -15,9 +15,15 @@ publication date only; detailed notes begin with the Unreleased section.
   transform, which the built-in rule enters through its `node()` template, went
   unjudged. A template in the default mode, in any of its spellings, taking any
   element, or the document element a `/name` pattern spells, now marks an entry
-  point too. A stylesheet
-  started with `-it` from another name stays unjudged, being indistinguishable
-  from a library of named templates (#1046).
+  point too. A stylesheet started with `-it` from another name stays unjudged,
+  being indistinguishable from a library of named templates (#1046).
+- Report an unprefixed `name()` compared with a string in XSLT 1.0 again.
+  `name-compared-to-string` withheld the whole report where the `*:name`
+  wildcard it rewrites to cannot be spelled, so `name() = 'para'` went silent
+  in every 1.0 stylesheet, sixteen DocBook-XSL rows among them. The report
+  stands now with no fix, and a `local-name()` in 1.0 is still left alone.
+  Its message no longer spells the `self::name` rewrite, which 1.0 gets
+  right only where the source elements are in no namespace (#1042).
 
 ## 0.3.0 - 2026-09-27
 

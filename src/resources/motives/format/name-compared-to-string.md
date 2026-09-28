@@ -28,8 +28,10 @@ matches a prefixed `d:pubdate` the string never did. An
 <xsl:if test="name() = 'pubdate'">                →  <xsl:if test="self::*:pubdate">
 ```
 
-XSLT 1.0 has no wildcard for it, so there an unprefixed comparison stands as
-written.
+XSLT 1.0 has no wildcard for it, yet the comparison is as fragile there, so
+the node test is chosen by hand from what the source holds: `self::pubdate`
+where its elements are in no namespace, and a prefix the stylesheet binds to
+their namespace where they are in one, `self::d:pubdate` for DocBook 5.
 
 Either quote spells the same string and both classes of equality comparison ask
 the same question, so `name() = 'div'`, `name() = "div"` and the value comparison
