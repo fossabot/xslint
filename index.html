@@ -123,7 +123,7 @@
   that has shipped for decades.</p>
 
   <h2>Checks</h2>
-  <p>70 checks, each with its rationale:</p>
+  <p>71 checks, each with its rationale:</p>
   <table>
     <thead>
       <tr>
@@ -403,6 +403,12 @@
     <td>validation</td>
     <td><span class="severity-error">error</span></td>
     <td>This XPath syntax belongs to a later XSLT version than the one in force, so a conformant processor rejects it. Raise the version, or respell the construct.</td>
+  </tr>
+  <tr>
+    <td><a href="checks/broken-href.html">broken-href</a></td>
+    <td>format</td>
+    <td><span class="severity-error">error</span></td>
+    <td>The @href names no file on disk, so no processor will load this stylesheet. Point it at the module, or restore the file.</td>
   </tr>
   <tr>
     <td><a href="checks/circular-import.html">circular-import</a></td>
