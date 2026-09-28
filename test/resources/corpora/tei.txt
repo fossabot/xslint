@@ -1702,9 +1702,24 @@ docx/misc/check-docx-and-annotate.xsl:2:1 missing-id-in-stylesheet
 docx/misc/check-docx-and-annotate.xsl:2:1 too-many-templates
 docx/misc/check-docx-and-annotate.xsl:26:17 redundant-namespace-declarations fix ""
 docx/misc/check-docx-and-annotate.xsl:33:5 setting-value-of-variable-incorrectly
+docx/misc/check-docx-and-annotate.xsl:34:38 undefined-variable
+docx/misc/check-docx-and-annotate.xsl:44:53 undefined-variable
 docx/misc/check-docx-and-annotate.xsl:47:9 unused-variable
+docx/misc/check-docx-and-annotate.xsl:48:74 undefined-variable
+docx/misc/check-docx-and-annotate.xsl:61:50 undefined-variable
+docx/misc/check-docx-and-annotate.xsl:169:21 undefined-variable
+docx/misc/check-docx-and-annotate.xsl:170:64 undefined-variable
+docx/misc/check-docx-and-annotate.xsl:173:44 undefined-variable
 docx/misc/check-docx-and-annotate.xsl:175:46 unabbreviated-axis fix ""
+docx/misc/check-docx-and-annotate.xsl:188:21 undefined-variable
+docx/misc/check-docx-and-annotate.xsl:189:64 undefined-variable
+docx/misc/check-docx-and-annotate.xsl:192:44 undefined-variable
 docx/misc/check-docx-and-annotate.xsl:195:50 unabbreviated-axis fix ""
+docx/misc/check-docx-and-annotate.xsl:208:21 undefined-variable
+docx/misc/check-docx-and-annotate.xsl:209:64 undefined-variable
+docx/misc/check-docx-and-annotate.xsl:212:44 undefined-variable
+docx/misc/check-docx-and-annotate.xsl:222:44 undefined-variable
+docx/misc/check-docx-and-annotate.xsl:233:44 undefined-variable
 docx/misc/checkword.xsl:2:1 missing-id-in-stylesheet
 docx/misc/checkword.xsl:32:13 short-names
 docx/misc/checkword.xsl:37:35 count-compared-to-zero fix "empty(key('S',$v))"

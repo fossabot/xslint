@@ -135,6 +135,10 @@
         "message": "Verbose axis specifiers child::, attribute::, parent::node(), or self::node() are used. Replace them with the node name alone, @, .., or . respectively.",
         "fix": "safe"
       },
+      "undefined-variable": {
+        "severity": "error",
+        "message": "A variable is referenced where no binding in scope declares it. Declare it, or correct the name to one in scope."
+      },
       "unused-function-template-parameter": {
         "severity": "warning",
         "message": "A parameter is declared but never referenced in the function or template body. Remove it or use it."

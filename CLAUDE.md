@@ -333,7 +333,8 @@ src/index.mjs             CLI entry (commander.js, ESM)
       xpath-linter.js            declarative checks/xpath/*.yaml (per file)
       corpus-linter.js           declarative checks/corpus/*.yaml (cross file)
       namespace, result-namespace, imports, output, parameter,
-      element, root-template     — the DOM, not one expression
+      element, variable,
+      root-template              — the DOM, not one expression
     src/linters/, expression — (expressions, suppressions) => defects:
       *-linter.js                code-based checks/format/*.yaml (one construct each)
 ```
@@ -397,8 +398,8 @@ from `src/xpath.js`, the fontoxpath environment.
 and hands the defects back in one total order rather than in the order the
 walk or the wiring happened to give (#638). The command-line `xslint(paths,
 options)` in the same module wraps it — resolves config, reads the `.xsl`
-files, what their parameter entities name and which relative hrefs name no
-file (#1010, #209), calls `lint`, applies
+files, what their parameter entities name and the hrefs missing
+(#1010, #209), calls `lint`, applies
 `--fix`, reports, and sets the exit code as
 `process.exitCode`, a `no-restricted-syntax` selector banning the
 `process.exit` that ends the process where it stands and abandons every write
@@ -823,8 +824,8 @@ reports under `test/resources/corpora/` and `REFUSED` in
 Each linter owns a `test/resources/<name>-packs/` directory, auto-discovered by
 its harness — no registration. A pack is `pack` (the check name), `found`, and
 `input` (or `inputs` for corpus/import packs, which reference each other as
-`file<index>.xsl`), and an import pack may name the hrefs no file stands behind
-as `absent`. `found` carries `amount` and `positions` — `[line, col]`, or
+`file<index>.xsl`; an import pack's `absent` lists missing hrefs).
+`found` carries `amount` and `positions` — `[line, col]`, or
 `[fileIndex, line, col]` for cross-file packs, or `[line, col, other-check]` for
 a co-firing check. A code-based linter's pack also carries `found.fixes` aligned
 with `positions` (the expected `fix.replacement`, `null` for report-only). A
@@ -1034,6 +1035,7 @@ one of them.
 | `src/linters/output-linter.js` | `not-using-output`, asked of the import tree rather than the file and reported on the entry point alone, an `xsl:output` merging into whatever imports it |
 | `src/linters/corpus-linter.js` | Loads `checks/corpus/*.yaml`, the cross-file declarative kind |
 | `src/linters/bare-name-linter.js` | `confusing-variable-and-node` |
+| `src/linters/variable-linter.js` | `undefined-variable`, a `$name` no binding in scope declares, judged in the stylesheets an entry point's whole tree makes |
 | `src/linters/*-linter.js` | Code-based `checks/format/*.yaml`, one construct each (axis, namespace, count, name, ...); see the flow diagram |
 | `src/checks.js` | Shared for code-based linters: `metaOf`, `suppressed`, `defect`, `rawly` |
 | `src/source.js` | Raw-text walking shared by `checks` and `fixer`: `parted`, `offsetAt`, `placeAt`, `character`, `skip` |
