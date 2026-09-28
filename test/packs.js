@@ -46,7 +46,8 @@ const graded = function(name) {
  * The corpus a pack stands for: one `test.xsl` where it gives an `input`, or a
  * `file<index>.xsl` for each entry where it gives `inputs` and the check it is
  * about reads across files — built by the validator a run builds one with, so
- * a pack reads each stylesheet as a processor compiles it (#1048).
+ * a pack reads each stylesheet as a processor compiles it (#1048). Its
+ * `absent` names the hrefs no file stands behind, the disk a run reads (#209).
  * @param {object} yml - The parsed pack
  * @return {Array.<{file: string, content: string, xsl: Document}>} - The corpus
  */
@@ -58,6 +59,7 @@ const corpusOf = function(yml) {
   return validate(held.map((one, index) => ({
     file: `file${index}.xsl`,
     content: one.content,
+    absent: new Set(yml.absent ?? []),
   }))).corpus
 }
 

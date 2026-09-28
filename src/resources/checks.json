@@ -37,6 +37,11 @@
       }
     },
     "format": {
+      "broken-href": {
+        "severity": "error",
+        "preset": "recommended",
+        "message": "The @href names no file on disk, so no processor will load this stylesheet. Point it at the module, or restore the file."
+      },
       "circular-import": {
         "severity": "error",
         "preset": "recommended",

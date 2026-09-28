@@ -411,7 +411,7 @@ const RETIRED = [
  * check joining it turns this red (#1094).
  * @type {{[corpus: string]: number}}
  */
-const QUIET = {docbook: 77, tei: 32, ditaot: 15}
+const QUIET = {docbook: 215, tei: 72, ditaot: 18}
 
 /**
  * How far under its bar a reading may stand before the bar has stopped being

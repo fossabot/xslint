@@ -176,11 +176,11 @@ const staticOf = function(template) {
 }
 
 /**
- * What an attribute of an XSLT element says: the plain spelling where the
- * document writes one, else what its shadow `_x` names statically, and
- * nothing where neither says anything static. A reader asking one spelling
- * reads half the stylesheets there are, and one taking a run-time value for
- * an empty one reads `_name="{$n}"` as naming nothing (#992, #997).
+ * What an attribute of an XSLT element says: what its shadow `_x` names
+ * statically where the document writes one, else the plain spelling, and
+ * nothing where neither says anything static. XSLT ignores any `x` beside a
+ * shadow, as Saxon does (#1114), and one taking a run-time value for an
+ * empty one reads `_name="{$n}"` as naming nothing (#992, #997).
  * @param {Element} element - The element carrying the attribute
  * @param {string} name - The attribute's name, in its plain spelling
  * @return {Array.<string>} - What it says, or nothing
@@ -188,12 +188,10 @@ const staticOf = function(template) {
 const saidOf = function(element, name) {
   const shadow = `_${name}`
   let said = []
-  if (element.getAttribute(name)) {
-    said = [element.getAttribute(name)]
-  } else if (element.hasAttribute(shadow)) {
+  if (element.hasAttribute(shadow)) {
     said = statics(element.getAttribute(shadow))
   } else if (element.hasAttribute(name)) {
-    said = ['']
+    said = [element.getAttribute(name)]
   }
   return said
 }
@@ -203,7 +201,7 @@ const saidOf = function(element, name) {
  * empty where neither spelling says anything static (#992).
  * @param {Element} element - The element carrying the attribute
  * @param {string} name - The attribute's name, in its plain spelling
- * @return {string} - What it says, or empty where neither spelling does
+ * @return {string} - What it says, or empty where the one read says nothing
  */
 const attributeOf = function(element, name) {
   return saidOf(element, name)[0] ?? ''

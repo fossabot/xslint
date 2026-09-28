@@ -415,6 +415,18 @@ describe('xslint', function() {
       ].join(' '),
     )
   })
+  it('should report every import the disk holds no file for', function() {
+    assert.equal(
+      runXslint(['test/resources/hrefs/importing.xsl'])
+        .split('(broken-href)').length - 1,
+      3,
+      [
+        'reported other than the three relative hrefs naming no file, where a',
+        'URL, an absolute path, a plugin, a fragment and a backslashed path',
+        'are a catalog\'s or a processor\'s to resolve (#209)',
+      ].join(' '),
+    )
+  })
   it('should lint the parseable stylesheets and report the malformed ones', function() {
     const stdout = runXslint(['--preset', 'all', 'test/resources/malformed']);
     [

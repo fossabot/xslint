@@ -91,7 +91,8 @@
 const fs = require('fs')
 const path = require('path')
 const {DOMParser} = require('@xmldom/xmldom')
-const {GAP} = require('./tokens')
+const {GAP, WHITESPACE} = require('./tokens')
+const {staticOf} = require('./expressions')
 const {NAMED, parted, offsetAt, placeAt} = require('./source')
 const {delimited, escaped} = require('./fixes')
 
@@ -262,6 +263,54 @@ const subsetsOf = function(file, str) {
       .filter(([, whole]) => fs.existsSync(whole) &&
         fs.statSync(whole).isFile())
       .map(([literal, whole]) => [literal, fs.readFileSync(whole, 'utf-8')]),
+  )
+}
+
+/**
+ * An `href` or `_href` attribute, capturing the underscore a shadow carries
+ * and the value either quote holds.
+ * @type {RegExp}
+ */
+const HREF = new RegExp(
+  [
+    `(?<![\\w:.-])(_?)href${GAP}*=${GAP}*`,
+    `(?:"([^"]*)"|'([^']*)')`,
+  ].join(''), 'g')
+
+/**
+ * An href this run can resolve alone: no scheme, no leading slash, and none
+ * of the characters a URI escapes or a catalog or processor reads its own way.
+ * @type {RegExp}
+ */
+const RELATIVE = new RegExp(
+  `^(?![A-Za-z][A-Za-z0-9+.-]*:)[^/?#%\\\\${WHITESPACE}][^?#%\\\\${WHITESPACE}]*$`,
+)
+
+/**
+ * The relative hrefs a stylesheet writes that no file stands behind, read
+ * relative to it, by the value as written, or the literal a shadow quotes. A
+ * URL, an absolute path and a `plugin:` URI are a catalog's to resolve and
+ * never named here, and a value spelled otherwise than it parses matches no
+ * href a check reads (#209).
+ * @param {string} file - Path of the stylesheet
+ * @param {string} str - XML source
+ * @return {Set.<string>} - The hrefs naming no file
+ */
+const absentOf = function(file, str) {
+  return new Set(
+    [...str.matchAll(HREF)]
+      .map((match) => {
+        let href = match[2] ?? match[3]
+        if (match[1]) {
+          href = staticOf(href)
+        }
+        return href
+      })
+      .filter((href) => RELATIVE.test(href))
+      .filter((href) => {
+        const whole = path.resolve(path.dirname(file), href)
+        return !fs.existsSync(whole) || !fs.statSync(whole).isFile()
+      }),
   )
 }
 
@@ -924,6 +973,7 @@ const slashed = function(pth, base) {
 }
 
 module.exports = {
+  absentOf,
   allFilesFrom,
   brought,
   SEALED,

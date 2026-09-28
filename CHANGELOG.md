@@ -13,10 +13,10 @@ publication date only; detailed notes begin with the Unreleased section.
   check in the catalog, so the first run over a real project buried the few
   defects a processor refuses under thousands of style findings. The default
   now holds every check graded an error and the dead-code checks that proved
-  almost never wrong over DocBook-XSL, TEI and DITA-OT, 73 reports where the
-  whole catalog draws 10,980. `unused-variable` is not among them: its reports
-  hold, but they ask for cleanup rather than name a bug, and they were 234 of
-  the 291 it would add. `--preset all`, or `preset: all` in `.xslint.yml`,
+  almost never wrong over DocBook-XSL, TEI and DITA-OT, 214 reports where the
+  whole catalog draws 11,121. `unused-variable` is not among them: its reports
+  hold, but they ask for cleanup rather than name a bug, and they would be 234
+  of the 448 the preset drew with them. `--preset all`, or `preset: all` in `.xslint.yml`,
   restores the whole catalog. `--only` still reaches any check, and a check
   `rules` names exactly joins the run, while a glob such as `"unused-*"`
   re-grades only the checks already in it. The `lint()` API defaults to
@@ -47,6 +47,23 @@ publication date only; detailed notes begin with the Unreleased section.
   stands now with no fix, and a `local-name()` in 1.0 is still left alone.
   Its message no longer spells the `self::name` rewrite, which 1.0 gets
   right only where the source elements are in no namespace (#1042).
+- Report an `xsl:import` or `xsl:include` whose `href` names no file. A
+  processor refuses such a stylesheet with XTSE0165, and nothing said so until
+  the transformation ran. The new `broken-href` error judges only a relative
+  `href`, read against the file holding it; a URL, an absolute path, a
+  `plugin:` URI, an `xml:base` in scope and a `use-when` that may drop the
+  import are left alone. The command line reads the disk before linting, so
+  `lint` stays pure and reports this only where its caller says which hrefs
+  name no file (#209).
+
+- Read the shadow where an XSLT element writes an attribute in both spellings.
+  XSLT 3.0 ignores the plain attribute beside a shadow one, and Saxon writes
+  `shadow` for `<xsl:value-of select="'plain'" _select="'shadow'"/>`, while
+  xslint read the plain one: an invalid `select` beside a sound `_select` drew
+  `invalid-xpath-expression`, a `use-when`, a version, an href or a type was
+  taken from the ignored spelling, and the escaping fix deleted the plain
+  attribute. The shadow outranks it everywhere now, below 3.0 too, where
+  Saxon reads it as surely, and so does a text value template (#1114).
 
 ## 0.3.0 - 2026-09-27
 

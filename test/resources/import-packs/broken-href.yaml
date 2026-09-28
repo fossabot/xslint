@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: broken-href
+absent: [ missing-r3.xsl, lost-q8.xsl, gone/deep-z1.xsl ]
+found:
+  amount: 3
+  positions: [ [ 0, 3, 3 ], [ 0, 5, 3 ], [ 0, 6, 3 ] ]
+  fixes: [ null, null, null ]
+inputs:
+  - |-
+    <?xml version="1.0"?>
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0">
+      <xsl:import href="missing-r3.xsl"/>
+      <xsl:import href="present-m5.xsl"/>
+      <xsl:include href="lost-q8.xsl"/>
+      <xsl:include _href="gone/deep-z1.xsl"/>
+      <xsl:template match="/">
+        <xsl:value-of select="."/>
+      </xsl:template>
+    </xsl:stylesheet>
