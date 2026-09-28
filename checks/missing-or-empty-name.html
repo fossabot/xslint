@@ -97,7 +97,7 @@
   <a class="back" href="../index.html">← all checks</a>
   <div class="meta">
     <span class="severity-error">error</span>
-    <code class="xpath">//(xsl:variable | xsl:param | xsl:call-template | xsl:function | xsl:key | xsl:attribute-set | xsl:character-map | xsl:accumulator)[not(@name) and not(@_name)] | //(xsl:variable | xsl:param | xsl:with-param | xsl:call-template | xsl:template | xsl:function | xsl:key | xsl:attribute-set | xsl:decimal-format | xsl:character-map | xsl:mode | xsl:accumulator)[@name = '']</code>
+    <code class="xpath">//(xsl:variable | xsl:param | xsl:call-template | xsl:function | xsl:key | xsl:attribute-set | xsl:character-map | xsl:accumulator)[not(@name) and not(@_name)] | //(xsl:variable | xsl:param | xsl:with-param | xsl:call-template | xsl:template | xsl:function | xsl:key | xsl:attribute-set | xsl:decimal-format | xsl:character-map | xsl:mode | xsl:accumulator)[xslint:attribute(., 'name') = '']</code>
   </div>
   <div class="check-content">
 <h1>A name that is missing or empty</h1>
@@ -119,6 +119,11 @@ and never written back, or an attribute value template that resolved to
 nothing. Nothing about the element says which name was meant, so the fix is
 always to write it rather than to remove the attribute: an <code>xsl:key</code> without a
 key name has no reason to exist.</p>
+<p>XSLT 3.0 hides it once more, writing the name <code>_name</code> as readily as <code>name</code>, the
+underscore form an attribute value template evaluated before the stylesheet
+compiles. So <code>_name=&quot;&quot;</code> and <code>_name=&quot;{&#39;&#39;}&quot;</code> name nothing exactly as <code>name=&quot;&quot;</code>
+does, while <code>_name=&quot;{$prefix}&quot;</code> names whatever that static parameter holds and
+is left alone.</p>
 <p>Incorrect:</p>
 <pre><code class="language-xsl">&lt;xsl:variable name=&quot;&quot; select=&quot;count(item)&quot;/&gt;
 &lt;xsl:key name=&quot;&quot; match=&quot;section&quot; use=&quot;@id&quot;/&gt;

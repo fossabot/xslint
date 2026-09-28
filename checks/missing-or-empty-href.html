@@ -97,7 +97,7 @@
   <a class="back" href="../index.html">← all checks</a>
   <div class="meta">
     <span class="severity-error">error</span>
-    <code class="xpath">//(xsl:import | xsl:include)[(not(@href) and not(@_href)) or @href = '']</code>
+    <code class="xpath">//(xsl:import | xsl:include)[(not(@href) and not(@_href)) or xslint:attribute(., 'href') = '']</code>
   </div>
   <div class="check-content">
 <h1>An href that names no module</h1>
@@ -115,6 +115,11 @@ what it is — a module moved, a path deleted mid-edit, or an attribute value
 template that resolved to nothing. Nothing about the element says which module
 was meant, so the repair is always to write the path rather than to drop the
 attribute: an <code>xsl:include</code> that includes nothing has no reason to stand.</p>
+<p>XSLT 3.0 writes the reference <code>_href</code> as readily as <code>href</code>, the underscore form
+an attribute value template evaluated before the stylesheet compiles. So
+<code>_href=&quot;&quot;</code> and <code>_href=&quot;{&#39;&#39;}&quot;</code> name the module itself exactly as <code>href=&quot;&quot;</code> does,
+while <code>_href=&quot;{$base}&quot;</code> names whatever that static parameter holds and is left
+alone.</p>
 <p>Incorrect:</p>
 <pre><code class="language-xsl">&lt;xsl:import/&gt;
 &lt;xsl:include href=&quot;&quot;/&gt;

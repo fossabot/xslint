@@ -97,7 +97,7 @@
   <a class="back" href="../index.html">← all checks</a>
   <div class="meta">
     <span class="severity-warning">warning</span>
-    <code class="xpath">//(xsl:variable | xsl:param | xsl:template | xsl:function)[string-length(substring-after(@name, ":")) = 1 or (string-length(@name) = 1 and not(contains(@name, ":")))]</code>
+    <code class="xpath">//(xsl:variable | xsl:param | xsl:template | xsl:function)[string-length(substring-after(xslint:attribute(., 'name'), ':')) = 1 or (string-length(xslint:attribute(., 'name')) = 1 and not(contains(xslint:attribute(., 'name'), ':')))]</code>
   </div>
   <div class="check-content">
 <h1>Short names</h1>
@@ -132,6 +132,10 @@ place. The same holds whichever element declares it — an <code>xsl:variable</c
 <p>Correct:</p>
 <pre><code class="language-xsl">&lt;xsl:variable name=&quot;eo:raw-marker&quot; select=&quot;&#39;r&#39;&quot;/&gt;
 </code></pre>
+<p>XSLT 3.0 writes a name <code>_name</code> as readily as <code>name</code>, the underscore form an
+attribute value template, and the name is what the template yields rather than
+its text: <code>_name=&quot;{&#39;q&#39;}&quot;</code> is six characters declaring the one-character
+variable <code>q</code>.</p>
 <p>An <code>xsl:with-param</code> is left alone. It passes a name the declaration already
 fixed, so renaming has to happen where the parameter is declared, and reporting
 both would report one author&#39;s choice twice.</p>
