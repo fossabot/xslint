@@ -67,13 +67,11 @@ the stack carries and scaling the stack down is what puts that within half a
 second of fixture-building instead of the 125,000 files it takes at full size.
 How wide the directory is, it does not decide: the same run measures the
 largest spread that stack carries and the tree is a fifth wider
-than that, some eleven thousand files. A fixed 30,000 was the first spelling and
-it read as cheap on the platform it was written on — a second there, over ten on
-Windows, where the deep target's own timeout took it down. Writing those files is
-the whole of what the test costs, and it costs differently: half a second on
-macOS and thirty on Windows, which walks 380 files a second where macOS walks
-25,000. So the slowest deep file is `xslint.deep.test.js` everywhere but there,
-and this one asks for a timeout of its own rather than the target's ten seconds.
+than that, some eleven thousand files. Writing those files is the whole of what
+the test costs, and it costs differently: half a second on macOS and thirty on
+Windows, which walks 380 files a second where macOS walks 25,000. So the
+slowest deep file is `xslint.deep.test.js` everywhere but there, and this one
+asks for a timeout of its own rather than the target's ten seconds.
 `npm run coverage` runs parallel too: c8 merges what each
 worker writes to `NODE_V8_COVERAGE`, so the 100% gate is unaffected while the
 run went from 48 seconds to 13. `grunt mochacli` runs both targets, so
@@ -304,11 +302,7 @@ names a usage value holds depend on that value and the kind of reference the
 check names, not on the declaration being judged, so reading them per pair
 reads them across the product of the two — 1207 names against 72,077 attributes
 over DocBook-XSL, which is 98% of what that stage spent. Build the index once
-with `indexed` and ask it for the declaration's name. The selector named
-`needle` until #783, the reference string a scan built per pair and then
-`replaceAll`ed, which was the hottest frame in the whole process ahead of every
-fontoxpath one; the index took both the function and the scan, so what it bans
-is the shape rather than the spelling (#755, #783).
+with `indexed` and ask it for the declaration's name (#755, #783).
 
 **Every style or consistency convention must be machine-enforced.** When you fix
 one, do not just fix the instances — in the same change add a check that fails on
@@ -471,14 +465,13 @@ expression but is a whole pattern rather than a step inside one, so `y|.` does
 not parse and a bare `match="."` outranks the `self::node()` it replaced. A
 fixer touching a step withholds inside a pattern; where the shorter form does
 not exist there at all, the check does not report it either, the way it stays
-quiet on a `parent::n` (#583). It also reads a **text value template** — the
-braces of a text node whose nearest `expand-text`/`xsl:expand-text` is on — and
-a **shadow attribute** (`_select` for `select`), which overrules the plain one
-beside it at any version (#606, #1114). The namespace decides and never the
-name: an attribute a
-literal result element happens to call `test` or
-`select` holds text destined for the result tree, so it is left alone — reading it
-as XPath let `--fix` rewrite the output — while the `xsl:use-when` beside it is
+quiet on a `parent::n` (#583). At any version it also reads a **text value
+template** — the braces of a text node whose nearest
+`expand-text`/`xsl:expand-text` is on — and a **shadow attribute** (`_select` for `select`),
+which overrules the plain one beside it (#606, #1114). The namespace decides
+and never the name: an attribute a literal result element happens to call
+`test` or `select` holds text destined for the result tree, so it is left
+alone — reading it as XPath let `--fix` rewrite the output — while the `xsl:use-when` beside it is
 XSLT's own attribute, holding a static expression a processor evaluates before it
 transforms anything, and that spelling reached neither the validator nor any
 check until #654: the derivation asked for an unprefixed name on an XSLT element,
