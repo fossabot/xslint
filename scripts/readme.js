@@ -109,6 +109,15 @@ const FIGURES = [
     reads: DRAWN.filter((one) => one.check === named[0]).length,
   })),
   [{
+    what: 'findings the recommended preset draws',
+    pattern: wrapped(/by default draws ([0-9,]+) of them/),
+    reads: DRAWN.filter(
+      (one) => Object.values(kinds).some(
+        (kind) => kind[one.check]?.preset === 'recommended',
+      ),
+    ).length,
+  },
+  {
     what: 'checks written in code',
     pattern: wrapped(/The kind holds ([0-9,]+) checks/),
     reads: Object.keys(kinds.format).length,

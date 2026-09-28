@@ -3,4 +3,5 @@
 ---
 xpath: (/xsl:stylesheet | /xsl:transform | /xsl:package)[not(xsl:*)]
 severity: warning
+preset: all
 message: The stylesheet declares nothing at all, so it contributes nothing to a transformation. Add a declaration to it.

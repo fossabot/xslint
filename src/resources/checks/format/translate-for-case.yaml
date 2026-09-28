@@ -2,5 +2,6 @@
 # SPDX-License-Identifier: MIT
 ---
 severity: warning
+preset: all
 message: "translate() folds case over the ASCII alphabet alone. Use lower-case() or upper-case(), which are shorter and Unicode-aware."
 fix: suggestion

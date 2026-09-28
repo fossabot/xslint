@@ -3,4 +3,5 @@
 ---
 xpath: //(xsl:variable | xsl:param | xsl:template | xsl:function)[string-length(substring-after(@name, ":")) = 1 or (string-length(@name) = 1 and not(contains(@name, ":")))]
 severity: warning
+preset: all
 message: A variable, parameter, function, or template has a single-character name. Use a descriptive name that reveals intent.

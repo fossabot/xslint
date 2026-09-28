@@ -6,7 +6,7 @@
 const {
   runXslint, xslintStatus, xslintStreams, xslintUnread, repository,
 } = require('./helpers')
-const {SUFFIXES, excluded, pruned} = require('../src/xslint')
+const {PRESETS, SUFFIXES, excluded, pruned} = require('../src/xslint')
 const assert = require('assert')
 const version = require('../src/version')
 const path = require('path')
@@ -183,6 +183,26 @@ const CHOICES = [
     [], 'a flag choosing a check the config turns off'],
 ]
 
+/**
+ * What a run over one stylesheet reports under each way the command line and
+ * the configuration file name a preset: the flags, the file, the checks left
+ * in the report, and the way. A run names none and reports `recommended`; a
+ * flag outranks the file, and a check the file re-grades joins the run
+ * (#1094).
+ * @type {Array.<Array>}
+ */
+const PRESETED = [
+  [[], '', ['unused-variable'], 'nothing named'],
+  [['--preset=all'], '', ['short-names', 'unused-variable'], 'the flag'],
+  [[], 'preset: all\n', ['short-names', 'unused-variable'], 'the config'],
+  [['--preset=recommended'], 'preset: all\n', ['unused-variable'],
+    'a flag outranking the config'],
+  [[], 'rules:\n  short-names: warning\n', ['short-names', 'unused-variable'],
+    'a check the config re-grades'],
+  [[], 'rules:\n  unused-variable: off\n', [],
+    'a check of the preset the config turns off'],
+]
+
 describe('xslint', function() {
   it('should print its own version', function() {
     const stdout = runXslint(['--version'])
@@ -195,11 +215,11 @@ describe('xslint', function() {
     assert.ok(stdout.includes(version.when))
   })
   it('should set log level', function() {
-    const stdout = runXslint(['src', '--log-level=debug'])
+    const stdout = runXslint(['--preset', 'all', 'src', '--log-level=debug'])
     assert.ok(stdout.includes('Log level set to \'debug\''))
   })
   it('should print some violations in xsl file', function() {
-    const stdout = runXslint(['test/resources/stylesheets/xsl-with-some-violations.xsl'])
+    const stdout = runXslint(['--preset', 'all', 'test/resources/stylesheets/xsl-with-some-violations.xsl'])
     const expected = [
       'Processed files: 1',
       '(16:3) A variable or parameter is assigned via a nested xsl:value-of instead of the select attribute. Use select syntax instead. (setting-value-of-variable-incorrectly)',
@@ -211,6 +231,7 @@ describe('xslint', function() {
   })
   it('should print less violations in xsl file', function() {
     const stdout = runXslint([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       '--suppress=empty-content-in-instructions',
       '--suppress=starts-with-double-slash',
@@ -223,11 +244,12 @@ describe('xslint', function() {
     absented.forEach((str) => assert.ok(!stdout.includes(str)))
   })
   it('should print no violations in xsl file', function() {
-    const stdout = runXslint(['test/resources/stylesheets/xsl-with-no-violations.xsl']);
+    const stdout = runXslint(['--preset', 'all', 'test/resources/stylesheets/xsl-with-no-violations.xsl']);
     ['Processed files: 1', 'No defects found'].forEach((expected) => assert.ok(stdout.includes(expected)))
   })
   it('should test all files', function() {
     const stdout = runXslint([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       'test/resources/stylesheets/xsl-with-no-violations.xsl',
     ])
@@ -240,6 +262,7 @@ describe('xslint', function() {
   })
   it('should test all directories', function() {
     const stdout = runXslint([
+      '--preset', 'all',
       'test/resources/stylesheets',
       'test/resources/templates',
     ])
@@ -252,6 +275,7 @@ describe('xslint', function() {
   })
   it('should test all files and directories', function() {
     const stdout = runXslint([
+      '--preset', 'all',
       'test/resources/stylesheets',
       'test/resources/templates/xsl-with-no-violations.xsl',
       'test/resources/reports',
@@ -267,12 +291,13 @@ describe('xslint', function() {
     assert.ok(stdout.includes('Processed files: 6'))
   })
   it('should test default directory', function() {
-    const stdout = runXslint([])
+    const stdout = runXslint(['--preset', 'all'])
     assert.ok(stdout.includes('Directories and files to process: .'))
     assert.ok(/Processed files: [1-9]\d*/.test(stdout))
   })
   it('should test empty suppress', function() {
     const stdout = runXslint([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       '--suppress=',
     ])
@@ -289,6 +314,7 @@ describe('xslint', function() {
   it('should test incorrect suppress', function() {
     const suppress = 'qwerty'
     const stdout = runXslint([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       `--suppress=${suppress}`,
     ])
@@ -296,6 +322,7 @@ describe('xslint', function() {
   })
   it('should silence the bad-suppress warning under a raised log level', function() {
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       '--suppress=qwerty',
       '--log-level=error',
@@ -304,18 +331,18 @@ describe('xslint', function() {
   })
   it('should test non-existing directory', function() {
     const dir = 'non-existing-directory'
-    const stdout = runXslint([dir])
+    const stdout = runXslint(['--preset', 'all', dir])
     assert.ok(stdout.includes(`File or directory ${path.resolve(process.cwd(), dir)} does not exist`))
   })
   it('should test non-existing file', function() {
     const file = 'non-existing-file.xsl'
-    const stdout = runXslint([file])
+    const stdout = runXslint(['--preset', 'all', file])
     assert.ok(stdout.includes(`File or directory ${path.resolve(process.cwd(), file)} does not exist`))
   })
   it('should test non-existing file and directory', function() {
     const file = 'non-existing-file.xsl'
     const dir = 'non-existing-directory'
-    const stdout = runXslint([file, dir])
+    const stdout = runXslint(['--preset', 'all', file, dir])
     assert.ok(stdout.includes(`File or directory ${path.resolve(process.cwd(), file)} does not exist`))
     assert.ok(stdout.includes(`File or directory ${path.resolve(process.cwd(), dir)} does not exist`))
   })
@@ -324,7 +351,7 @@ describe('xslint', function() {
       const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xslint-'))
       const file = path.join(dir, `named${suffix}`)
       fs.copyFileSync(SPELLED.file, file)
-      const printed = runXslint([file])
+      const printed = runXslint(['--preset', 'all', file])
       fs.rmSync(dir, {recursive: true, force: true})
       assert.deepEqual(
         drawn(printed),
@@ -352,7 +379,7 @@ describe('xslint', function() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xslint-'))
     const file = path.join(dir, 'named.txt')
     fs.copyFileSync(SPELLED.file, file)
-    const printed = runXslint([file])
+    const printed = runXslint(['--preset', 'all', file])
     fs.rmSync(dir, {recursive: true, force: true})
     assert.ok(
       printed.includes(`File ${file} was not read`),
@@ -366,7 +393,7 @@ describe('xslint', function() {
   it('should stay quiet about a file a walk stepped over', function() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xslint-'))
     fs.copyFileSync(SPELLED.file, path.join(dir, 'named.txt'))
-    const printed = runXslint([dir])
+    const printed = runXslint(['--preset', 'all', dir])
     fs.rmSync(dir, {recursive: true, force: true})
     assert.ok(
       !printed.includes('was not read'),
@@ -378,7 +405,7 @@ describe('xslint', function() {
     )
   })
   it('should lint the parseable stylesheets and report the malformed ones', function() {
-    const stdout = runXslint(['test/resources/malformed']);
+    const stdout = runXslint(['--preset', 'all', 'test/resources/malformed']);
     [
       'Processed files: 2',
       'bad.xsl(1:1)',
@@ -389,12 +416,14 @@ describe('xslint', function() {
   })
   it('should exit zero when only warnings are found', function() {
     const status = xslintStatus([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
     ])
     assert.equal(status, 0)
   })
   it('should exit one when warnings exceed the budget', function() {
     const status = xslintStatus([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       '--max-warnings=0',
     ])
@@ -402,6 +431,7 @@ describe('xslint', function() {
   })
   it('should exit zero when warnings stay within the budget', function() {
     const status = xslintStatus([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       '--max-warnings=10',
     ])
@@ -409,6 +439,7 @@ describe('xslint', function() {
   })
   it('should exit one when an error is found', function() {
     const status = xslintStatus([
+      '--preset', 'all',
       'test/resources/malformed/bad.xsl',
       '--max-warnings=100',
     ])
@@ -416,24 +447,28 @@ describe('xslint', function() {
   })
   it('should print defects to stdout', function() {
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
     ])
     assert.ok(streams.stdout.includes('short-names'))
   })
   it('should print progress logs to stderr', function() {
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
     ])
     assert.ok(streams.stderr.includes('Processed files: 1'))
   })
   it('should keep progress logs out of stdout', function() {
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
     ])
     assert.ok(!streams.stdout.includes('Processed files'))
   })
   it('should suppress informational logs when quiet', function() {
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       '--quiet',
     ])
@@ -445,6 +480,7 @@ describe('xslint', function() {
       const cfg = path.join(dir, '.xslint.yml')
       fs.writeFileSync(cfg, content)
       const {stdout} = xslintStreams([
+        '--preset', 'all',
         'test/resources/stylesheets/xsl-with-some-violations.xsl',
         '--format=json', `--config=${cfg}`, ...flags,
       ])
@@ -459,11 +495,61 @@ describe('xslint', function() {
       )
     })
   })
+  PRESETED.forEach(([flags, content, expected, what]) => {
+    it(`should report the checks of the preset for ${what}`, function() {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xslint-'))
+      const cfg = path.join(dir, '.xslint.yml')
+      fs.writeFileSync(cfg, content)
+      const {stdout} = xslintStreams([
+        'test/resources/presets/a-short-name-beside-a-dead-variable.xsl',
+        '--format=json', `--config=${cfg}`, ...flags,
+      ])
+      fs.rmSync(dir, {recursive: true, force: true})
+      assert.deepEqual(
+        JSON.parse(stdout).map((defect) => defect.rule),
+        expected,
+        [
+          `cannot report anything but ${expected.join(', ') || 'nothing'}`,
+          `for ${what}, the preset a run starts from being the one the flag`,
+          'names, else the one the file names, else recommended',
+        ].join(' '),
+      )
+    })
+  })
+  it('should fail on a preset that does not exist', function() {
+    assert.equal(
+      xslintStatus([
+        'test/resources/presets/a-short-name-beside-a-dead-variable.xsl',
+        '--preset=everything',
+      ]),
+      1,
+      'ran over a preset naming no check list and left with a zero',
+    )
+  })
+  it('should name the preset it cannot find', function() {
+    assert.match(
+      xslintStreams([
+        'test/resources/presets/a-short-name-beside-a-dead-variable.xsl',
+        '--preset=everything',
+      ]).stderr,
+      /Preset 'everything' does not exist, use one of recommended, all/,
+      'failed on a preset it cannot find without naming it',
+    )
+  })
+  it('should name every preset in its help screen', function() {
+    const stdout = runXslint(['--help'])
+    assert.deepEqual(
+      Object.keys(PRESETS).filter((name) => !stdout.includes(name)),
+      [],
+      'the help screen leaves out a preset a run may start from',
+    )
+  })
   it('should disable a rule named off in the config file', function() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xslint-'))
     const cfg = path.join(dir, '.xslint.yml')
     fs.writeFileSync(cfg, 'rules:\n  short-names: off\n')
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       `--config=${cfg}`,
     ])
@@ -475,6 +561,7 @@ describe('xslint', function() {
     const cfg = path.join(dir, '.xslint.yml')
     fs.writeFileSync(cfg, 'rules:\n  short-names: error\n')
     const status = xslintStatus([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       `--config=${cfg}`,
     ])
@@ -483,6 +570,7 @@ describe('xslint', function() {
   })
   it('should skip files matched by a config exclude glob', function() {
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/excluded',
       '--config=test/resources/excluded/.xslint.yml',
     ])
@@ -543,7 +631,7 @@ describe('xslint', function() {
       fs.rmSync(dir, {recursive: true, force: true})
       this.skip()
     }
-    const streams = xslintStreams([dir, `--config=${cfg}`])
+    const streams = xslintStreams(['--preset', 'all', dir, `--config=${cfg}`])
     fs.chmodSync(shut, 0o755)
     fs.rmSync(dir, {recursive: true, force: true})
     assert.ok(
@@ -569,7 +657,7 @@ describe('xslint', function() {
       if (subject === 'file') {
         read = path.join(dir, 'kept.xsl')
       }
-      const streams = xslintStreams([read, `--config=${cfg}`])
+      const streams = xslintStreams(['--preset', 'all', read, `--config=${cfg}`])
       fs.rmSync(dir, {recursive: true, force: true})
       assert.equal(
         streams.stderr.includes(
@@ -603,7 +691,7 @@ describe('xslint', function() {
       fs.rmSync(dir, {recursive: true, force: true})
       this.skip()
     }
-    const streams = xslintStreams([dir])
+    const streams = xslintStreams(['--preset', 'all', dir])
     fs.chmodSync(shut, 0o755)
     fs.rmSync(dir, {recursive: true, force: true})
     assert.ok(
@@ -620,7 +708,7 @@ describe('xslint', function() {
     fs.copyFileSync(CLEAN, path.join(dir, 'kept.xsl'))
     fs.copyFileSync(CLEAN, path.join(dir, 'sheet.gen.xsl'))
     fs.writeFileSync(path.join(dir, '.gitignore'), '*.gen.xsl\n')
-    const streams = xslintStreams([dir])
+    const streams = xslintStreams(['--preset', 'all', dir])
     fs.rmSync(dir, {recursive: true, force: true})
     assert.ok(
       streams.stderr.includes('Processed files: 1'),
@@ -641,7 +729,7 @@ describe('xslint', function() {
       const made = repository(dir, ['.gitignore'])
       let streams = {stderr: ''}
       if (made) {
-        streams = xslintStreams([shut])
+        streams = xslintStreams(['--preset', 'all', shut])
       }
       fs.rmSync(dir, {recursive: true, force: true})
       if (!made) {
@@ -667,7 +755,7 @@ describe('xslint', function() {
       const made = repository(dir, ['reports/tracked.xsl'])
       let streams = {stderr: ''}
       if (made) {
-        streams = xslintStreams([dir])
+        streams = xslintStreams(['--preset', 'all', dir])
       }
       fs.rmSync(dir, {recursive: true, force: true})
       if (!made) {
@@ -693,7 +781,7 @@ describe('xslint', function() {
       const made = repository(proj, ['reports/tracked.xsl'])
       let streams = {stderr: ''}
       if (made) {
-        streams = xslintStreams([dir])
+        streams = xslintStreams(['--preset', 'all', dir])
       }
       fs.rmSync(dir, {recursive: true, force: true})
       if (!made) {
@@ -713,6 +801,7 @@ describe('xslint', function() {
     const cfg = path.join(dir, '.xslint.yml')
     fs.writeFileSync(cfg, 'max-warnings: 0\n')
     const status = xslintStatus([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       `--config=${cfg}`,
     ])
@@ -724,6 +813,7 @@ describe('xslint', function() {
     const cfg = path.join(dir, '.xslint.yml')
     fs.writeFileSync(cfg, 'max-warnings: 0\n')
     const status = xslintStatus([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       `--config=${cfg}`,
       '--max-warnings=100',
@@ -736,6 +826,7 @@ describe('xslint', function() {
     const cfg = path.join(dir, '.xslint.yml')
     fs.writeFileSync(cfg, 'rules:\n  "unused-*": off\n')
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       `--config=${cfg}`,
     ])
@@ -747,6 +838,7 @@ describe('xslint', function() {
     const cfg = path.join(dir, '.xslint.yml')
     fs.writeFileSync(cfg, 'excludes:\n  - "x"\n')
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       `--config=${cfg}`,
     ])
@@ -758,6 +850,7 @@ describe('xslint', function() {
     const cfg = path.join(dir, '.xslint.yml')
     fs.writeFileSync(cfg, 'rules:\n  no-such-rule: error\n')
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       `--config=${cfg}`,
     ])
@@ -769,6 +862,7 @@ describe('xslint', function() {
   it('should keep stdout clean when it fails to read the config', function() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xslint-'))
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-no-violations.xsl',
       `--config=${dir}`,
     ])
@@ -780,6 +874,7 @@ describe('xslint', function() {
     const cfg = path.join(dir, '.xslint.yml')
     fs.writeFileSync(cfg, 'log-level: debug\n')
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       `--config=${cfg}`,
     ])
@@ -791,6 +886,7 @@ describe('xslint', function() {
     const cfg = path.join(dir, '.xslint.yml')
     fs.writeFileSync(cfg, 'quiet: true\n')
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       `--config=${cfg}`,
     ])
@@ -800,6 +896,7 @@ describe('xslint', function() {
   it('should reject the retired --stable', function() {
     assert.ok(
       xslintStreams([
+        '--preset', 'all',
         'test/resources/stylesheets/xsl-with-some-violations.xsl',
         '--stable',
       ]).stderr.includes('unknown option \'--stable\''),
@@ -811,6 +908,7 @@ describe('xslint', function() {
     const cfg = path.join(dir, '.xslint.yml')
     fs.writeFileSync(cfg, 'stable: true\n')
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       `--config=${cfg}`,
     ])
@@ -821,49 +919,50 @@ describe('xslint', function() {
     )
   })
   it('should suppress a defect with an inline disable-next-line', function() {
-    const streams = xslintStreams(['test/resources/directives/used.xsl'])
+    const streams = xslintStreams(['--preset', 'all', 'test/resources/directives/used.xsl'])
     assert.ok(!streams.stdout.includes('short-names'))
   })
   it('should leave other defects when a disable-next-line is targeted', function() {
-    const streams = xslintStreams(['test/resources/directives/targeted.xsl'])
+    const streams = xslintStreams(['--preset', 'all', 'test/resources/directives/targeted.xsl'])
     assert.ok(streams.stdout.includes('not-using-output'))
   })
   it('should suppress a defect standing in a wrapped attribute value', function() {
-    const streams = xslintStreams(['test/resources/directives/wrapped.xsl'])
+    const streams = xslintStreams(['--preset', 'all', 'test/resources/directives/wrapped.xsl'])
     assert.ok(!streams.stdout.includes('using-namespace-axis'))
   })
   it('should not call the directive over a wrapped value unused', function() {
-    const streams = xslintStreams(['test/resources/directives/wrapped.xsl'])
+    const streams = xslintStreams(['--preset', 'all', 'test/resources/directives/wrapped.xsl'])
     assert.ok(!streams.stderr.includes('Unused xslint-disable'))
   })
   it('should suppress a defect in a value whose start tag wraps too', function() {
-    const streams = xslintStreams(['test/resources/directives/wrapped-tag.xsl'])
+    const streams = xslintStreams(['--preset', 'all', 'test/resources/directives/wrapped-tag.xsl'])
     assert.ok(!streams.stdout.includes('using-namespace-axis'))
   })
   it('should not call the directive over a wrapped tag unused', function() {
-    const streams = xslintStreams(['test/resources/directives/wrapped-tag.xsl'])
+    const streams = xslintStreams(['--preset', 'all', 'test/resources/directives/wrapped-tag.xsl'])
     assert.ok(!streams.stderr.includes('Unused xslint-disable'))
   })
   it('should suppress across the file with an inline disable-file', function() {
-    const streams = xslintStreams(['test/resources/directives/disable-file.xsl'])
+    const streams = xslintStreams(['--preset', 'all', 'test/resources/directives/disable-file.xsl'])
     assert.ok(!streams.stdout.includes('short-names'))
   })
   it('should warn about an unknown rule in a disable directive', function() {
     const streams = xslintStreams(
-      ['test/resources/directives/unknown-rule.xsl'],
+      ['--preset', 'all', 'test/resources/directives/unknown-rule.xsl'],
     )
     assert.ok(streams.stderr.includes('Rule \'bogus-rule\' in an xslint-disable'))
   })
   it('should warn about an unused inline directive', function() {
-    const streams = xslintStreams(['test/resources/directives/unused.xsl'])
+    const streams = xslintStreams(['--preset', 'all', 'test/resources/directives/unused.xsl'])
     assert.ok(streams.stderr.includes('Unused xslint-disable directive'))
   })
   it('should not warn when an inline directive is used', function() {
-    const streams = xslintStreams(['test/resources/directives/used.xsl'])
+    const streams = xslintStreams(['--preset', 'all', 'test/resources/directives/used.xsl'])
     assert.ok(!streams.stderr.includes('Unused xslint-disable directive'))
   })
   it('should print defects as a JSON array with --format json', function() {
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       '--format=json',
     ])
@@ -873,6 +972,7 @@ describe('xslint', function() {
   })
   it('should print a SARIF 2.1.0 log with --format sarif', function() {
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       '--format=sarif',
     ])
@@ -880,6 +980,7 @@ describe('xslint', function() {
   })
   it('should print GitHub workflow commands with --format github', function() {
     const streams = xslintStreams([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       '--format=github',
     ])
@@ -899,7 +1000,7 @@ describe('xslint', function() {
             .replaceAll('SEED', String(at)),
         )
       }
-      const said = await xslintUnread([dir, '--max-warnings=0'], 250)
+      const said = await xslintUnread(['--preset', 'all', dir, '--max-warnings=0'], 250)
       fs.rmSync(dir, {recursive: true, force: true})
       assert.equal(
         said.report.split('\n').filter((line) => line !== '').length,
@@ -910,6 +1011,7 @@ describe('xslint', function() {
   })
   it('should reject an unknown --format value', function() {
     const status = xslintStatus([
+      '--preset', 'all',
       'test/resources/stylesheets/xsl-with-some-violations.xsl',
       '--format=bogus',
     ])

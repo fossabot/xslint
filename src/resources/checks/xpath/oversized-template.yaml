@@ -3,4 +3,5 @@
 ---
 xpath: //xsl:template[count(.//xsl:*) > 100]
 severity: warning
+preset: all
 message: The template contains more than 100 XSLT elements. Decompose it with apply-templates into focused templates.

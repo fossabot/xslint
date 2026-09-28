@@ -364,6 +364,46 @@ const TIERED = new Map(
 )
 
 /**
+ * The check lists a run may start from, by name: every check there is, and
+ * the ones whose own `preset:` puts them in `recommended`, which a run reports
+ * when it names no preset — what a processor refuses, and the dead code whose
+ * report is almost never wrong over the three corpora (#1094).
+ * @type {{[name: string]: Array.<string>}}
+ */
+const PRESETS = {
+  recommended: CHECKS.filter(
+    (check) => Object.values(kinds).some(
+      (kind) => kind[check]?.preset === 'recommended',
+    ),
+  ),
+  all: CHECKS,
+}
+
+/**
+ * The preset a run starts from when neither a flag nor a file names one.
+ * @type {string}
+ */
+const PRESET = 'recommended'
+
+/**
+ * The checks a preset holds, refused outright where no preset has the name,
+ * since a run over a list of nothing would read as a clean report (#1094).
+ * @param {string} name - Name of the preset
+ * @return {Array.<string>} - Names of the checks it holds
+ */
+const presetted = function(name) {
+  if (!Object.hasOwn(PRESETS, name)) {
+    throw new Error(
+      [
+        `Preset '${name}' does not exist,`,
+        `use one of ${Object.keys(PRESETS).join(', ')}`,
+      ].join(' '),
+    )
+  }
+  return PRESETS[name]
+}
+
+/**
  * Whether only `--fix-suggestions` may apply the fix a defect carries, as its
  * check declares — falling back on what the linter said where the check
  * declares nothing, since a run is no place to refuse a fix over it (#899).
@@ -409,13 +449,16 @@ const validatedSuppressions = function(suppressions) {
 }
 
 /**
- * The checks a run narrowed to some substrings reports, every check where it
- * names none. A choice naming no check is warned about, since a typo would
- * otherwise narrow the run to nothing and read as a clean report (#1030).
+ * The checks a run narrowed to some substrings reports, or where it names none
+ * the preset's and every check it re-grades (#1094). A choice naming no check
+ * is warned about, since a typo would otherwise narrow the run to nothing and
+ * read as a clean report (#1030).
  * @param {Array.<string>} only - Substrings of the names chosen
+ * @param {Array.<string>} listed - Names of the checks the preset holds
+ * @param {Array.<string>} graded - Names of the checks the run re-grades
  * @return {Array.<string>} - Names of the checks chosen
  */
-const chosenOf = function(only) {
+const chosenOf = function(only, listed, graded) {
   for (const choice of only) {
     if (!CHECKS.some((check) => check.includes(choice))) {
       logger.warn(
@@ -426,7 +469,9 @@ const chosenOf = function(only) {
       )
     }
   }
-  let chosen = CHECKS
+  let chosen = CHECKS.filter(
+    (check) => listed.includes(check) || graded.includes(check),
+  )
   if (only.length > 0) {
     chosen = CHECKS.filter(
       (check) => only.some((choice) => check.includes(choice)),
@@ -662,13 +707,14 @@ const ranked = function(one, two) {
  *  Raw stylesheets as read, a byte order mark held aside by `parted`, and
  *  the files their parameter entities name, read by the caller (#1010)
  * @param {{suppress: Array.<string>, overrides: {[check: string]: string},
- *  only: Array}} options - Skips, re-grades and choices
+ *  only: Array, preset: string}} options - Skips, re-grades, choices and the
+ *  preset a run starts from, `recommended` unless named (#1094)
  * @return {Array.<object>} - The defects that survive suppression
  */
 const lint = function(
-  sources, {suppress = [], overrides = {}, only = []} = {},
+  sources, {suppress = [], overrides = {}, only = [], preset = PRESET} = {},
 ) {
-  const chosen = chosenOf(only)
+  const chosen = chosenOf(only, presetted(preset), Object.keys(overrides))
   const suppressions = [
     ...validatedSuppressions(suppress), ...unchosenOf(chosen),
   ]
@@ -722,7 +768,7 @@ const lint = function(
  * Entry point for the command line.
  * @param {Array.<string>} pths - Files or directories with .xsl to lint
  * @param {object} options - CLI options: `logLevel`, `quiet`, `suppress`,
- *  `maxWarnings`, `config`, `format`, `only`, `fix`, `fixDryRun`,
+ *  `maxWarnings`, `config`, `format`, `only`, `preset`, `fix`, `fixDryRun`,
  *  `fixSuggestions`
  */
 const xslint = function(pths, options) {
@@ -785,6 +831,7 @@ const xslint = function(pths, options) {
     suppress: [...options.suppress, ...disabled],
     overrides: overrides,
     only: only,
+    preset: options.preset ?? config.preset ?? PRESET,
   })
   if (options.fix || options.fixDryRun || options.fixSuggestions) {
     /**
@@ -837,6 +884,7 @@ module.exports = xslint
 module.exports.lint = lint
 module.exports.fixed = fixed
 module.exports.STAGES = STAGES
+module.exports.PRESETS = PRESETS
 module.exports.SUFFIXES = SUFFIXES
 module.exports.suffixed = suffixed
 module.exports.excluded = excluded

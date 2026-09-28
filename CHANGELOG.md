@@ -7,6 +7,16 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Entries for releases before this file was introduced record their npm
 publication date only; detailed notes begin with the Unreleased section.
 
+## Unreleased
+
+- Report only the `recommended` preset by default. A run used to report every
+  check in the catalog, so the first run over a real project buried the few
+  defects a processor refuses under thousands of style findings. The default
+  now holds every check graded an error and the dead-code checks that proved
+  almost never wrong over DocBook-XSL, TEI and DITA-OT; `--preset all`, or
+  `preset: all` in `.xslint.yml`, restores the whole catalog. `--only` still
+  reaches any check, and a check `rules` re-grades joins the run (#1094).
+
 ## 0.3.0 - 2026-09-27
 
 - Read the extension namespaces a simplified stylesheet declares.

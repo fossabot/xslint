@@ -3,4 +3,5 @@
 ---
 xpath: "//xsl:param[parent::xsl:template or parent::xsl:function][preceding-sibling::*[not(self::xsl:param) and not(self::xsl:context-item)]]"
 severity: error
+preset: recommended
 message: "An xsl:param must be declared before any other content in its xsl:template or xsl:function. Move it above the content."

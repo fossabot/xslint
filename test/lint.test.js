@@ -147,14 +147,67 @@ const SKIPPED = [
   ['directives/bare.xsl', {suppress: ['short-names']}, 'a bare suppression'],
 ]
 
+/**
+ * What a run over one stylesheet reports under each way of saying which
+ * checks it runs: the options, the checks left in the report, and the way.
+ * The preset is where a run starts, `recommended` when it names none; a
+ * choice replaces it, a re-grade adds the check it names to it, and a
+ * suppression outranks all three (#1094).
+ * @type {Array.<Array>}
+ */
+const PRESETED = [
+  [{}, ['unused-variable'], 'no preset named'],
+  [{preset: 'recommended'}, ['unused-variable'], 'the recommended preset'],
+  [{preset: 'all'}, ['short-names', 'unused-variable'], 'the whole catalog'],
+  [{only: ['short']}, ['short-names'], 'a choice outside the preset'],
+  [
+    {overrides: {'short-names': 'error'}}, ['short-names', 'unused-variable'],
+    'a re-grade outside the preset',
+  ],
+  [
+    {overrides: {'short-names': 'error'}, suppress: ['short']},
+    ['unused-variable'], 'a re-graded check suppressed',
+  ],
+  [{suppress: ['unused']}, [], 'a suppression inside the preset'],
+  [
+    {preset: 'all', suppress: ['unused']}, ['short-names'],
+    'a suppression over the whole catalog',
+  ],
+]
+
 describe('lint (programmatic API)', function() {
+  PRESETED.forEach(([options, expected, what]) => {
+    it(`reports what ${what} runs`, function() {
+      assert.deepEqual(
+        lint(
+          [source('presets/a-short-name-beside-a-dead-variable.xsl')], options,
+        ).map((defect) => defect.name),
+        expected,
+        [
+          `cannot report anything but ${expected.join(', ') || 'nothing'}`,
+          `under ${what}, the preset being where a run starts and the other`,
+          'options narrowing or widening it',
+        ].join(' '),
+      )
+    })
+  })
+  it('refuses a preset that does not exist', function() {
+    assert.throws(
+      () => lint(
+        [source('presets/a-short-name-beside-a-dead-variable.xsl')],
+        {preset: 'fastidious'},
+      ),
+      /Preset 'fastidious' does not exist/,
+      'ran over a preset naming no check list, which reads as a clean report',
+    )
+  })
   it('returns defects for in-memory sources', function() {
-    const defects = lint([source('stylesheets/xsl-with-some-violations.xsl')])
+    const defects = lint([source('stylesheets/xsl-with-some-violations.xsl')], {preset: 'all'})
     assert.ok(defects.some((defect) => defect.name === 'short-names'))
   })
   it('finds nothing wrong with a clean stylesheet', function() {
     assert.deepEqual(
-      lint([source('stylesheets/xsl-with-no-violations.xsl')]),
+      lint([source('stylesheets/xsl-with-no-violations.xsl')], {preset: 'all'}),
       [],
     )
   })
@@ -162,14 +215,14 @@ describe('lint (programmatic API)', function() {
     assert.ok(
       !lint(
         [source('stylesheets/xsl-with-some-violations.xsl')],
-        {suppress: ['short-names']},
+        {suppress: ['short-names'], preset: 'all'},
       ).some((defect) => defect.name === 'short-names'),
     )
   })
   NARROWED.forEach(([sheet, only, suppress, expected, what]) => {
     it(`reports only what is chosen for ${what}`, function() {
       assert.deepEqual(
-        lint([source(sheet)], {only: only, suppress: suppress})
+        lint([source(sheet)], {only: only, suppress: suppress, preset: 'all'})
           .map((defect) => defect.name),
         expected,
         [
@@ -183,7 +236,7 @@ describe('lint (programmatic API)', function() {
     assert.match(
       noted(() => lint(
         [source('stylesheets/xsl-with-some-violations.xsl')],
-        {only: ['qwerty']},
+        {only: ['qwerty'], preset: 'all'},
       )).join(' '),
       /qwerty/,
       [
@@ -196,7 +249,7 @@ describe('lint (programmatic API)', function() {
     assert.equal(
       lint(
         [source('stylesheets/xsl-with-some-violations.xsl')],
-        {overrides: {'short-names': 'error'}},
+        {overrides: {'short-names': 'error'}, preset: 'all'},
       ).find((defect) => defect.name === 'short-names').severity,
       'error',
     )
@@ -204,7 +257,7 @@ describe('lint (programmatic API)', function() {
   SKIPPED.forEach(([sheet, options, what]) => {
     it(`leaves a directive called used under ${what}`, function() {
       assert.deepEqual(
-        noted(() => lint([source(sheet)], options))
+        noted(() => lint([source(sheet)], {...options, preset: 'all'}))
           .filter((line) => line.includes('Unused xslint-disable')),
         [],
         [
@@ -217,7 +270,7 @@ describe('lint (programmatic API)', function() {
   it('calls a directive unused where the run ran what it names', function() {
     assert.match(
       noted(() => lint(
-        [source('directives/unused.xsl')], {only: ['short-names']},
+        [source('directives/unused.xsl')], {only: ['short-names'], preset: 'all'},
       )).join(' '),
       /Unused xslint-disable directive at directives\/unused\.xsl:8/,
       [
@@ -228,12 +281,12 @@ describe('lint (programmatic API)', function() {
   })
   it('exposes the fix engine for callers to apply', function() {
     const sources = [source('stylesheets/xsl-with-no-violations.xsl')]
-    assert.equal(fixed(sources, lint(sources)).contents.size, 0)
+    assert.equal(fixed(sources, lint(sources, {preset: 'all'})).contents.size, 0)
   })
   it('draws one defect on the refused axis and the refused comparison',
     function() {
       assert.deepEqual(
-        lint([source('refused/refused-expressions.xsl')])
+        lint([source('refused/refused-expressions.xsl')], {preset: 'all'})
           .filter((defect) => [9, 10].includes(defect.line))
           .map((defect) => `${defect.name} at ${defect.line}:${defect.pos}`),
         [
@@ -244,7 +297,7 @@ describe('lint (programmatic API)', function() {
     })
   it('keeps the fix on the two valid axes beside the refused ones', function() {
     assert.deepEqual(
-      lint([source('refused/refused-expressions.xsl')])
+      lint([source('refused/refused-expressions.xsl')], {preset: 'all'})
         .filter((defect) => [13, 14].includes(defect.line))
         .map((defect) => Boolean(defect.fix)),
       [true, true],
@@ -252,7 +305,7 @@ describe('lint (programmatic API)', function() {
   })
   it('offers no declarative fix on a refused pattern or expression', function() {
     assert.deepEqual(
-      lint([source('refused/refused-by-a-declarative-fix.xsl')])
+      lint([source('refused/refused-by-a-declarative-fix.xsl')], {preset: 'all'})
         .filter((defect) => [8, 9].includes(defect.line) && defect.fix)
         .map((defect) => `${defect.name} at ${defect.line}:${defect.pos}`),
       [],
@@ -261,7 +314,7 @@ describe('lint (programmatic API)', function() {
   UNREADABLE.forEach((sheet) => {
     it(`says nothing but the refusal about the pattern of ${sheet}`, function() {
       assert.deepEqual(
-        lint([source(sheet)])
+        lint([source(sheet)], {preset: 'all'})
           .filter((defect) => defect.line === 8)
           .map((defect) => defect.name),
         ['invalid-xpath-expression'],
@@ -271,7 +324,7 @@ describe('lint (programmatic API)', function() {
   REFUSALS.forEach(([line, check, what]) => {
     it(`names the refusal of ${what} for what it is`, function() {
       assert.deepEqual(
-        lint([source('refused/newer-than-the-declared-version.xsl')])
+        lint([source('refused/newer-than-the-declared-version.xsl')], {preset: 'all'})
           .filter((defect) => defect.line === line)
           .map((defect) => defect.name),
         [check],
@@ -285,7 +338,7 @@ describe('lint (programmatic API)', function() {
   })
   it('withholds the declarative fix beside a refused text value template', function() {
     assert.deepEqual(
-      lint([source('refused/refused-by-a-declarative-fix.xsl')])
+      lint([source('refused/refused-by-a-declarative-fix.xsl')], {preset: 'all'})
         .filter((defect) => defect.name === 'text-outside-xsl-text')
         .map((defect) => Boolean(defect.fix)),
       [false],
@@ -293,7 +346,7 @@ describe('lint (programmatic API)', function() {
   })
   it('keeps the code-based fix beside a refused text value template', function() {
     assert.deepEqual(
-      lint([source('refused/refused-by-a-declarative-fix.xsl')])
+      lint([source('refused/refused-by-a-declarative-fix.xsl')], {preset: 'all'})
         .filter((defect) => defect.line === 14 && defect.fix)
         .map((defect) => defect.name),
       ['starts-with-double-slash'],
@@ -301,7 +354,7 @@ describe('lint (programmatic API)', function() {
   })
   it('reports a malformed expression in every attribute that holds one', function() {
     assert.deepEqual(
-      lint([source('refused/unvalidated-expression-attributes.xsl')])
+      lint([source('refused/unvalidated-expression-attributes.xsl')], {preset: 'all'})
         .filter((defect) => defect.name === 'invalid-xpath-expression')
         .map((defect) => `${defect.line}:${defect.pos}`),
       ['9:45', '11:43', '14:45'],
@@ -312,7 +365,7 @@ describe('lint (programmatic API)', function() {
       [
         'fix/starts-with-double-slash.xsl',
         'fix/starts-with-double-slash-outside-a-template.xsl',
-      ].flatMap((sheet) => lint([source(sheet)])
+      ].flatMap((sheet) => lint([source(sheet)], {preset: 'all'})
         .filter((defect) => defect.name === 'starts-with-double-slash')
         .map((defect) => Boolean(defect.fix.suggestion))),
       [true, true, false, true, true, true, true, true],
@@ -320,7 +373,7 @@ describe('lint (programmatic API)', function() {
   })
   it('safely fixes every pattern but a match in an XSLT 1.0 sheet', function() {
     assert.deepEqual(
-      lint([source('fix/starts-with-double-slash-in-xslt-1.xsl')])
+      lint([source('fix/starts-with-double-slash-in-xslt-1.xsl')], {preset: 'all'})
         .filter((defect) => defect.name === 'starts-with-double-slash')
         .map((defect) => Boolean(defect.fix.suggestion)),
       [false, true, false, false],
@@ -328,7 +381,7 @@ describe('lint (programmatic API)', function() {
   })
   it('offers no fix on a pattern that is only a valid expression', function() {
     assert.deepEqual(
-      lint([source('refused/refused-pattern-that-parses-as-an-expression.xsl')])
+      lint([source('refused/refused-pattern-that-parses-as-an-expression.xsl')], {preset: 'all'})
         .filter((defect) => defect.line === 8 && defect.fix)
         .map((defect) => `${defect.name} at ${defect.line}:${defect.pos}`),
       [],
@@ -336,7 +389,7 @@ describe('lint (programmatic API)', function() {
   })
   it('keeps the fix on the pattern beside one no XSLT grammar reads', function() {
     assert.deepEqual(
-      lint([source('refused/refused-pattern-that-parses-as-an-expression.xsl')])
+      lint([source('refused/refused-pattern-that-parses-as-an-expression.xsl')], {preset: 'all'})
         .filter((defect) => defect.line === 11)
         .map((defect) => Boolean(defect.fix)),
       [true],
@@ -347,7 +400,7 @@ describe('lint (programmatic API)', function() {
       const reported = lint([
         source('refused/refused-expressions.xsl'),
         source('fix/starts-with-double-slash.xsl'),
-      ]).map((defect) => defect.file)
+      ], {preset: 'all'}).map((defect) => defect.file)
       assert.ok(
         reported.lastIndexOf('fix/starts-with-double-slash.xsl') <
           reported.indexOf('refused/refused-expressions.xsl'),
@@ -356,14 +409,14 @@ describe('lint (programmatic API)', function() {
     })
   it('orders the defects of one file by the line each stands on', function() {
     assert.deepEqual(
-      lint([source('stylesheets/xsl-with-some-violations.xsl')])
+      lint([source('stylesheets/xsl-with-some-violations.xsl')], {preset: 'all'})
         .map((defect) => defect.line),
       [16, 16, 31, 45],
     )
   })
   it('orders two defects on one line by the column each stands at', function() {
     assert.deepEqual(
-      lint([source('fix/starts-with-double-slash-outside-a-template.xsl')])
+      lint([source('fix/starts-with-double-slash-outside-a-template.xsl')], {preset: 'all'})
         .filter((defect) => defect.line === 10)
         .map((defect) => defect.pos),
       [58, 88],
@@ -371,7 +424,7 @@ describe('lint (programmatic API)', function() {
   })
   it('orders two defects at one place by the check that found them', function() {
     assert.deepEqual(
-      lint([source('fix/variable-or-param-with-select-spelled-oddly.xsl')])
+      lint([source('fix/variable-or-param-with-select-spelled-oddly.xsl')], {preset: 'all'})
         .filter((defect) => defect.line === 8)
         .map((defect) => defect.name),
       [
@@ -382,7 +435,7 @@ describe('lint (programmatic API)', function() {
   })
   it('keeps both fixes on the valid template', function() {
     assert.deepEqual(
-      lint([source('refused/refused-by-a-declarative-fix.xsl')])
+      lint([source('refused/refused-by-a-declarative-fix.xsl')], {preset: 'all'})
         .filter((defect) => [11, 12].includes(defect.line))
         .map((defect) => Boolean(defect.fix)),
       [true, true],
@@ -390,7 +443,7 @@ describe('lint (programmatic API)', function() {
   })
   it('counts no column of the first line in a byte order mark', function() {
     assert.deepEqual(
-      lint([source('fix/a-mark-no-column-counts-in.xsl')])
+      lint([source('fix/a-mark-no-column-counts-in.xsl')], {preset: 'all'})
         .filter((defect) => defect.line === 1)
         .map((defect) => defect.fix.col),
       [103],
@@ -407,7 +460,7 @@ describe('lint (programmatic API)', function() {
             'utf-8',
           ),
         ]]),
-      }])
+      }], {preset: 'all'})
         .filter((defect) => defect.name === 'scans-whole-document')
         .map((defect) => defect.line),
       [15],
@@ -419,7 +472,7 @@ describe('lint (programmatic API)', function() {
   })
   it('says which file holds the expressions it cannot read', function() {
     assert.match(
-      noted(() => lint([source('entities/behind-a-parameter-entity.xsl')]))
+      noted(() => lint([source('entities/behind-a-parameter-entity.xsl')], {preset: 'all'}))
         .join(' '),
       /1 expression.*entities\/behind-a-parameter-entity\.xsl/,
       [
@@ -431,7 +484,7 @@ describe('lint (programmatic API)', function() {
   BROUGHT.forEach(([sheet, subsets, line, kind]) => {
     it(`places a run behind ${kind} entity where the file spells it`, function() {
       assert.deepEqual(
-        lint([{...source(sheet), subsets: subsets}])
+        lint([{...source(sheet), subsets: subsets}], {preset: 'all'})
           .filter((defect) => defect.name === 'redundant-whitespace')
           .map((defect) => [defect.line, defect.pos, defect.fix]),
         [[line, 33, undefined]],
@@ -444,7 +497,7 @@ describe('lint (programmatic API)', function() {
   })
   it('offers no fix on an element whose attribute an entity wrote', function() {
     assert.deepEqual(
-      lint([source('entities/a-constant-behind-an-entity.xsl')])
+      lint([source('entities/a-constant-behind-an-entity.xsl')], {preset: 'all'})
         .filter((defect) => defect.name === 'incorrect-use-of-boolean-constants')
         .map((defect) => [defect.line, defect.fix]),
       [[12, undefined]],

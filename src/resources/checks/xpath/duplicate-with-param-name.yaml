@@ -3,4 +3,5 @@
 ---
 xpath: //xsl:with-param[@name = preceding-sibling::xsl:with-param/@name]
 severity: error
+preset: recommended
 message: A single call passes two xsl:with-param with the same @name. Each parameter can be supplied only once.

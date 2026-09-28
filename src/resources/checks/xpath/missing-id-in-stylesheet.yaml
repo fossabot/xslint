@@ -3,4 +3,5 @@
 ---
 xpath: (/xsl:stylesheet | /xsl:transform | /xsl:package)[not(@id) and not(@_id)]
 severity: warning
+preset: all
 message: "The stylesheet element has no @id attribute. Declare it to specify the unique identifier explicitly."

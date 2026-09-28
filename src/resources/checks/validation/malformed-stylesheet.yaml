@@ -2,4 +2,5 @@
 # SPDX-License-Identifier: MIT
 ---
 severity: error
+preset: recommended
 message: The stylesheet is not well-formed XML and cannot be parsed. Fix its syntax.

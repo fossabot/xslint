@@ -3,4 +3,5 @@
 ---
 xpath: "//xsl:choose[not(xsl:when)]"
 severity: error
+preset: recommended
 message: "An xsl:choose has no xsl:when branch. Add one, or drop the xsl:choose and keep its content directly."

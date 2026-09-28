@@ -660,6 +660,11 @@ standing within `NEARBY` characters of the file's own name, so the drift above i
 reading and not as so many lines: the gate cannot tell what a ticket once measured from what the
 file stands at today, and a history spelled the other way is a stale claim it rightly fails.
 
+`QUIET` is the ratchet on the `recommended` preset, counted off the committed corpus reports: 152,
+113 and 26 reports over DocBook-XSL, TEI and DITA-OT when #1094 drew it. The defect it catches is a
+noisy check joining the preset, so each bar stands at the geometric middle of those readings and the
+ones `use-choose-without-otherwise` gives when added, 415, 386 and 129, the nearest candidate left out.
+
 ## `test/guides.test.js`
 
 Its derivation stands at the top of `test/guides.test.js` itself, for the reason it gives there:

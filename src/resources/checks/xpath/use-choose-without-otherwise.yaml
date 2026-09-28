@@ -3,4 +3,5 @@
 ---
 xpath: "//xsl:choose[not(xsl:otherwise) and count(xsl:when) >= 2]"
 severity: warning
+preset: all
 message: xsl:choose has no xsl:otherwise branch. Add xsl:otherwise to handle unmatched cases explicitly.

@@ -8,6 +8,7 @@
         "reference": "call",
         "reachable": true,
         "severity": "warning",
+        "preset": "recommended",
         "message": "A stylesheet function is called only from functions that are themselves never reached, so it can never run. Remove it, or call it from a template."
       },
       "unused-function": {
@@ -15,12 +16,14 @@
         "usage": "//@*",
         "reference": "call",
         "severity": "warning",
+        "preset": "recommended",
         "message": "A stylesheet function is never called in any expression across the corpus. Remove it or call it."
       },
       "unused-named-template": {
         "declaration": "//xsl:template[not(@match) and not(@_match)][@name][not(ends-with(@name, ':initial-template'))]",
         "usage": "//xsl:call-template/@name | //xsl:call-template/@_name",
         "severity": "warning",
+        "preset": "all",
         "message": "A named template is never invoked via xsl:call-template from anything that runs. Remove it or call it."
       },
       "unused-variable": {
@@ -29,83 +32,100 @@
         "reference": "variable",
         "scoped": true,
         "severity": "warning",
+        "preset": "recommended",
         "message": "A variable is declared but never referenced by $name across the corpus. Remove it or use it."
       }
     },
     "format": {
       "circular-import": {
         "severity": "error",
+        "preset": "recommended",
         "message": "The stylesheet pulls in itself, or a module that pulls it back, through xsl:import or xsl:include, which is a static error. Break the cycle."
       },
       "confusing-variable-and-node": {
         "severity": "warning",
+        "preset": "all",
         "message": "A variable name is used bare as a node selector. Use $name syntax to reference the variable.",
         "fix": "suggestion"
       },
       "count-compared-to-zero": {
         "severity": "warning",
+        "preset": "all",
         "message": "count(...) is compared with 0 to test existence, which walks the whole sequence. Test existence directly instead (exists()/empty() on XSLT 2.0+, boolean()/not() on 1.0).",
         "fix": "safe"
       },
       "leaking-result-namespace": {
         "severity": "warning",
+        "preset": "all",
         "message": "The xsl:stylesheet declares a namespace prefix used only in stylesheet logic, which a literal result element copies into the output. Add the prefix to exclude-result-prefixes.",
         "fix": "suggestion"
       },
       "name-compared-to-string": {
         "severity": "warning",
+        "preset": "all",
         "message": "name() or local-name() is compared with a string, which is prefix-fragile and slower than a node test. Use self::name instead.",
         "fix": "suggestion"
       },
       "not-creating-element-correctly": {
         "severity": "warning",
+        "preset": "all",
         "message": "xsl:element is used with a static name. Use a literal result element instead."
       },
       "not-using-output": {
         "severity": "warning",
+        "preset": "all",
         "message": "The xsl:output instruction is missing. Declare it to specify the serialization format explicitly."
       },
       "output-method-xml": {
         "severity": "warning",
+        "preset": "all",
         "message": "xsl:output declares method='xml' while the root template builds an HTML document. Change the method to 'html'.",
         "fix": "suggestion"
       },
       "predicate-position-literal": {
         "severity": "warning",
+        "preset": "all",
         "message": "A positional predicate is written the long way; [position() = N] is just [N] and [position() = last()] is just [last()]. Shorten it.",
         "fix": "safe"
       },
       "redundant-boolean-call": {
         "severity": "warning",
+        "preset": "all",
         "message": "A boolean() call stands where nothing but a truth is taken, so the wrapper is redundant. Drop it.",
         "fix": "safe"
       },
       "redundant-double-negation": {
         "severity": "warning",
+        "preset": "all",
         "message": "A double negation not(not(x)) is redundant; it is just boolean(x), and where nothing but a truth is taken simply x. Replace it.",
         "fix": "safe"
       },
       "redundant-import": {
         "severity": "warning",
+        "preset": "recommended",
         "message": "The stylesheet imports or includes the same module more than once. Keep a single xsl:import/xsl:include of it and remove the other.",
         "fix": "suggestion"
       },
       "redundant-namespace-declarations": {
         "severity": "warning",
+        "preset": "all",
         "message": "The xsl:stylesheet declares a namespace prefix that is never used. Remove the redundant xmlns declaration.",
         "fix": "safe"
       },
       "redundant-whitespace": {
         "severity": "warning",
+        "preset": "all",
         "message": "An XPath expression has redundant whitespace. Remove the extra spaces.",
         "fix": "safe"
       },
       "scans-whole-document": {
         "severity": "warning",
+        "preset": "all",
         "message": "An expression opens a path with //, which scans the whole document each time it runs. Name the path, use xsl:key, or bind the scan once in a top-level variable."
       },
       "starts-with-double-slash": {
         "severity": "warning",
+        "preset": "all",
         "message": "A pattern alternative opens with //, which at most demands a document-node root. Drop it, and set an explicit priority if the template must rank as before.",
         "fix": [
           "safe",
@@ -114,52 +134,63 @@
       },
       "string-length-compared-to-zero": {
         "severity": "warning",
+        "preset": "all",
         "message": "string-length(...) is compared with 0 to test emptiness, which measures the whole string. Compare the value with '' instead.",
         "fix": "suggestion"
       },
       "template-writes-nothing": {
         "severity": "warning",
+        "preset": "recommended",
         "message": "This template declares variables and writes nothing to the result tree, so applying it produces nothing. Write the output it was meant to build, or empty it."
       },
       "translate-for-case": {
         "severity": "warning",
+        "preset": "all",
         "message": "translate() folds case over the ASCII alphabet alone. Use lower-case() or upper-case(), which are shorter and Unicode-aware.",
         "fix": "suggestion"
       },
       "unabbreviated-axis": {
         "severity": "warning",
+        "preset": "all",
         "message": "Verbose axis specifiers child::, attribute::, parent::node(), or self::node() are used. Replace them with the node name alone, @, .., or . respectively.",
         "fix": "safe"
       },
       "unused-function-template-parameter": {
         "severity": "warning",
+        "preset": "all",
         "message": "A parameter is declared but never referenced in the function or template body. Remove it or use it."
       },
       "use-double-slash": {
         "severity": "warning",
+        "preset": "all",
         "message": "A pattern contains //, which matches at any depth and is broader than intended. Use a specific path."
       },
       "use-node-set-extension": {
         "severity": "warning",
+        "preset": "all",
         "message": "The node-set() extension function is unnecessary in XSLT 2.0 and later. Query the variable directly without it.",
         "fix": "safe"
       },
       "using-namespace-axis": {
         "severity": "warning",
+        "preset": "all",
         "message": "The namespace:: axis is deprecated in XSLT 2.0 and later. Use in-scope-prefixes() and namespace-uri-for-prefix() instead."
       }
     },
     "validation": {
       "invalid-xpath-expression": {
         "severity": "error",
+        "preset": "recommended",
         "message": "An XPath expression is malformed and cannot be parsed. Fix its syntax."
       },
       "malformed-stylesheet": {
         "severity": "error",
+        "preset": "recommended",
         "message": "The stylesheet is not well-formed XML and cannot be parsed. Fix its syntax."
       },
       "syntax-newer-than-xslt-version": {
         "severity": "error",
+        "preset": "recommended",
         "message": "This XPath syntax belongs to a later XSLT version than the one in force, so a conformant processor rejects it. Raise the version, or respell the construct."
       }
     },
@@ -167,197 +198,235 @@
       "blank-nested-if": {
         "xpath": "//xsl:if[(count(*) = 1) and (count(xsl:if) = 1) and not(text()[xslint:normalize-space(.) or ancestor::*[@xml:space][1]/@xml:space = 'preserve'])]",
         "severity": "warning",
+        "preset": "all",
         "message": "An xsl:if holds nothing but another xsl:if, stating one condition in two places. Combine the tests with 'and' in one xsl:if, unless the outer test guards the inner one."
       },
       "duplicate-param-name": {
         "xpath": "//xsl:param[some $sibling in preceding-sibling::xsl:param satisfies xslint:name($sibling, 'name') = xslint:name(., 'name') and not(xslint:conditional($sibling) or xslint:conditional(.))]",
         "severity": "error",
+        "preset": "recommended",
         "message": "Two xsl:param siblings share a @name. Each parameter of a template, function, or stylesheet must have a distinct name."
       },
       "duplicate-with-param-name": {
         "xpath": "//xsl:with-param[@name = preceding-sibling::xsl:with-param/@name]",
         "severity": "error",
+        "preset": "recommended",
         "message": "A single call passes two xsl:with-param with the same @name. Each parameter can be supplied only once."
       },
       "empty-choose": {
         "xpath": "//xsl:choose[not(xsl:when)]",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:choose has no xsl:when branch. Add one, or drop the xsl:choose and keep its content directly."
       },
       "empty-content-in-instructions": {
         "xpath": "//(xsl:for-each | xsl:if)[not(* | processing-instruction()) and xslint:normalize-space(.) = \"\" and not(text()[ancestor::*[@xml:space][1]/@xml:space = 'preserve'])]",
         "severity": "warning",
+        "preset": "recommended",
         "message": "An instruction element such as xsl:for-each or xsl:if has no content. Add content or remove the empty element."
       },
       "empty-variable": {
         "xpath": "//xsl:variable[not(@select) and not(@_select) and not(node()) and (not(@as or @_as) or xslint:version(.) < 2.0)]",
         "severity": "warning",
+        "preset": "all",
         "message": "An empty xsl:variable binds the empty string without saying so. State the value with select=\"''\" or give it some content."
       },
       "function-complexity": {
         "xpath": "//xsl:function[count(.//xsl:*) > 50]",
         "severity": "warning",
+        "preset": "all",
         "message": "The function contains more than 50 XSLT elements. Split it into smaller functions."
       },
       "function-template-is-not-child-of-stylesheet": {
         "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)/*//(xsl:function | xsl:template)[not(ancestor::xsl:override)]",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:function or xsl:template is nested inside another element. Move it up to the top level, as a child of the stylesheet element."
       },
       "function-use-in-xslt-1": {
         "xpath": "//xsl:function[xslint:version(.) < 2.0]",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:function requires XSLT 2.0 or later, and the version in force here is below that. Use a named template, or raise that version to 2.0."
       },
       "incorrect-use-of-boolean-constants": {
         "xpath": "//(xsl:if | xsl:when)[xslint:normalize-space(@test) = (\"'true'\", \"'false'\", '\"true\"', '\"false\"')]",
         "severity": "warning",
+        "preset": "recommended",
         "message": "The test is the string 'true' or 'false', a non-empty string that is always true, not a boolean. Use true() or false() instead.",
         "fix": "suggestion"
       },
       "malformed-version-in-stylesheet": {
         "xpath": "(//@version[parent::xsl:*][not(parent::xsl:output)] | //@xsl:version[not(parent::xsl:*)])[not(matches(xslint:normalize-space(.), '^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$'))]",
         "severity": "error",
+        "preset": "recommended",
         "message": "A declared version is not a decimal number, so it names no XSLT version and every check gated on one stays quiet. Declare it as a decimal, such as 2.0."
       },
       "missing-id-in-stylesheet": {
         "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)[not(@id) and not(@_id)]",
         "severity": "warning",
+        "preset": "all",
         "message": "The stylesheet element has no @id attribute. Declare it to specify the unique identifier explicitly."
       },
       "missing-or-empty-href": {
         "xpath": "//(xsl:import | xsl:include)[(not(@href) and not(@_href)) or @href = '']",
         "severity": "error",
+        "preset": "recommended",
         "message": "The @href is missing or empty, so this pulls in no module and no processor will load the stylesheet. Name the module to pull in."
       },
       "missing-or-empty-name": {
         "xpath": "//(xsl:variable | xsl:param | xsl:call-template | xsl:function | xsl:key | xsl:attribute-set | xsl:character-map | xsl:accumulator)[not(@name) and not(@_name)] | //(xsl:variable | xsl:param | xsl:with-param | xsl:call-template | xsl:template | xsl:function | xsl:key | xsl:attribute-set | xsl:decimal-format | xsl:character-map | xsl:mode | xsl:accumulator)[@name = '']",
         "severity": "error",
+        "preset": "recommended",
         "message": "The @name is missing or empty, so it holds no QName and no processor will load this stylesheet. Give it a name."
       },
       "missing-version-in-stylesheet": {
         "xpath": "/*[if (self::xsl:*) then (not(@version) and not(@_version)) else (not(@xsl:version) and .//xsl:* and not(.//(xsl:stylesheet | xsl:transform | xsl:package)))] | /*[not(self::xsl:*)]//(xsl:stylesheet | xsl:transform | xsl:package)[not(@version) and not(@_version)]",
         "severity": "warning",
+        "preset": "all",
         "message": "The version attribute is missing on the stylesheet's root element. Declare it to specify the stylesheet version explicitly.",
         "fix": "suggestion"
       },
       "mode-or-priority-without-match": {
         "xpath": "//xsl:template[(@name or @_name) and not(@match) and not(@_match) and (@mode or @_mode or @priority or @_priority)]",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:template that has no match attribute must have no mode attribute and no priority attribute. Add match attribute or remove mode or priority.",
         "fix": "suggestion"
       },
       "modern-construct-in-xslt-1": {
         "xpath": "//(xsl:for-each-group | xsl:sequence | xsl:analyze-string | xsl:next-match | xsl:perform-sort | xsl:namespace | xsl:character-map | xsl:result-document | xsl:import-schema | xsl:*[(@as or @_as) and not(self::xsl:function)])[xslint:version(.) < 2.0]",
         "severity": "error",
+        "preset": "recommended",
         "message": "This XSLT 2.0 construct stands where the version in force is below 2.0, which a conformant 1.0 processor rejects. Use a 1.0 equivalent, or raise that version to 2.0."
       },
       "name-starts-with-numeric": {
         "xpath": "//(xsl:variable | xsl:param | xsl:template | xsl:function)[matches(@name, '^([^:]*:)?[0-9]')]",
         "severity": "error",
+        "preset": "recommended",
         "message": "A variable, parameter, function, or template name starts with a digit, so no processor loads this stylesheet. Rename it to start with a letter."
       },
       "not-creating-attribute-correctly": {
         "xpath": "//xsl:attribute[not(contains(@name, '{')) and not(@_name)][not(@namespace) and not(@_namespace)][parent::*[not(self::xsl:*)]][not(*) or (count(*) = 1 and (xsl:value-of[not(@separator) and not(@_separator)] or xsl:text[not(@disable-output-escaping) and not(@_disable-output-escaping)]))][not(preceding-sibling::*[not(self::xsl:variable) and not(self::xsl:attribute)])][not(preceding-sibling::xsl:attribute[@_name or not(@name) or contains(@name, '{')])][not(preceding-sibling::xsl:attribute/@name = @name)][not(some $held in ../@*[not(namespace-uri() = 'http://www.w3.org/1999/XSL/Transform')] satisfies local-name($held) = replace(xslint:attribute(., 'name'), '^.*:', ''))][not(@separator) and not(@_separator) and not(@type) and not(@_type) and not(@validation) and not(@_validation)][not(some $value in (. | .//@select | .//@_select) satisfies preceding-sibling::xsl:variable[contains($value, concat('$', xslint:attribute(., 'name')))])]",
         "severity": "warning",
+        "preset": "all",
         "message": "xsl:attribute with a static name on a literal element can be a literal attribute (an AVT for a computed value). Write it inline."
       },
       "not-using-attribute-test-in-if-when-node": {
         "xpath": "//( xsl:if | xsl:when)[not(@test) and not(@_test)]",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:if or xsl:when has no @test attribute. Add one, or remove the element."
       },
       "otherwise-not-last": {
         "xpath": "//xsl:otherwise[following-sibling::*]",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:otherwise must be the last child of its xsl:choose. Move it after every xsl:when."
       },
       "oversized-template": {
         "xpath": "//xsl:template[count(.//xsl:*) > 100]",
         "severity": "warning",
+        "preset": "all",
         "message": "The template contains more than 100 XSLT elements. Decompose it with apply-templates into focused templates."
       },
       "param-after-content": {
         "xpath": "//xsl:param[parent::xsl:template or parent::xsl:function][preceding-sibling::*[not(self::xsl:param) and not(self::xsl:context-item)]]",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:param must be declared before any other content in its xsl:template or xsl:function. Move it above the content."
       },
       "setting-value-of-variable-incorrectly": {
         "xpath": "//(xsl:variable | xsl:param | xsl:with-param)[not(@select) and not(@_select) and (count(*) = 1) and (count(xsl:value-of[@select or @_select][not(@separator) and not(@_separator)]) = 1) and not(text()[xslint:normalize-space(.) or ancestor::*[@xml:space][1]/@xml:space = 'preserve'])]",
         "severity": "warning",
+        "preset": "all",
         "message": "A variable or parameter is assigned via a nested xsl:value-of instead of the select attribute. Use select syntax instead."
       },
       "short-names": {
         "xpath": "//(xsl:variable | xsl:param | xsl:template | xsl:function)[string-length(substring-after(@name, \":\")) = 1 or (string-length(@name) = 1 and not(contains(@name, \":\")))]",
         "severity": "warning",
+        "preset": "all",
         "message": "A variable, parameter, function, or template has a single-character name. Use a descriptive name that reveals intent."
       },
       "sort-not-first": {
         "xpath": "//xsl:sort[preceding-sibling::*[not(self::xsl:sort) and not(self::xsl:with-param)]]",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:sort must come before any other content in its xsl:for-each or xsl:apply-templates. Move it to the front."
       },
       "stylesheet-has-no-templates": {
         "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)[not(xsl:*)]",
         "severity": "warning",
+        "preset": "all",
         "message": "The stylesheet declares nothing at all, so it contributes nothing to a transformation. Add a declaration to it."
       },
       "template-has-no-name-or-match": {
         "xpath": "//xsl:template[not(@name) and not(@_name) and not(@match) and not(@_match)]",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:template must have a @match or @name attribute, or both. Add one of them."
       },
       "text-outside-xsl-text": {
         "xpath": "//xsl:*[text()[xslint:normalize-space(.)] and not(local-name() = ('text','attribute','comment','processing-instruction','message','variable','param','with-param'))]",
         "severity": "warning",
+        "preset": "all",
         "message": "Literal text appears directly inside an XSLT instruction element. Wrap it in xsl:text.",
         "fix": "suggestion"
       },
       "too-many-templates": {
         "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)[count(//xsl:template) >= 10]",
         "severity": "warning",
+        "preset": "all",
         "message": "The stylesheet declares 10 or more templates, too many to read in one file. Split it into imported modules."
       },
       "use-choose-without-otherwise": {
         "xpath": "//xsl:choose[not(xsl:otherwise) and count(xsl:when) >= 2]",
         "severity": "warning",
+        "preset": "all",
         "message": "xsl:choose has no xsl:otherwise branch. Add xsl:otherwise to handle unmatched cases explicitly."
       },
       "use-single-option-for-choose": {
         "xpath": "//xsl:choose[count(xsl:when) = 1 and not(xsl:otherwise)]",
         "severity": "warning",
+        "preset": "all",
         "message": "xsl:choose contains only one xsl:when branch. Replace it with xsl:if."
       },
       "using-disable-output-escaping": {
         "xpath": "//(xsl:value-of | xsl:text)[xslint:attribute(., 'disable-output-escaping') = 'yes']",
         "severity": "warning",
+        "preset": "all",
         "message": "disable-output-escaping='yes' is set, which produces implementation-defined output. Use xsl:copy-of or literal elements instead.",
         "fix": "suggestion"
       },
       "using-not-outermost-stylesheet": {
         "xpath": "(/xsl:stylesheet | /xsl:transform | /xsl:package)//(xsl:stylesheet | xsl:transform | xsl:package)",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:stylesheet, xsl:transform or xsl:package is nested inside another element. It must be the outermost element of the document."
       },
       "variable-or-param-with-select-and-content": {
         "xpath": "//(xsl:variable | xsl:param | xsl:with-param)[(@select or @_select) and (* or text()[xslint:normalize-space(.) or ancestor::*[@xml:space][1]/@xml:space = 'preserve'])]",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:variable, xsl:param or xsl:with-param has both a select attribute and a non-empty body. Use only one way to set the value.",
         "fix": "suggestion"
       },
       "when-or-otherwise-outside-choose": {
         "xpath": "//xsl:when[not(parent::xsl:choose)] | //xsl:otherwise[not(parent::xsl:choose)]",
         "severity": "error",
+        "preset": "recommended",
         "message": "An xsl:when or xsl:otherwise is valid only as a child of xsl:choose. Move it into an xsl:choose, or use xsl:if."
       },
       "with-param-use-in-invalid-parent-node": {
         "xpath": "//xsl:with-param[not(parent::xsl:call-template or parent::xsl:apply-templates or parent::xsl:apply-imports or parent::xsl:next-match or parent::xsl:next-iteration)] | //xsl:with-param[parent::xsl:apply-imports][xslint:version(.) < 2.0]",
         "severity": "error",
+        "preset": "recommended",
         "message": "xsl:with-param is allowed only within xsl:call-template, xsl:apply-templates, xsl:next-match, xsl:next-iteration, or an xsl:apply-imports whose version in force is 2.0 or later. Move it into a call, or raise that version."
       },
       "with-param-without-name": {
         "xpath": "//xsl:with-param[not(@name) and not(@_name)]",
         "severity": "error",
+        "preset": "recommended",
         "message": "xsl:with-param requires a @name attribute to bind the parameter it passes. Add one."
       }
     }

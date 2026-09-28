@@ -49,6 +49,10 @@ program
     '--only <check>', 'Report only the checks whose names hold this substring',
     (check, choices) => [...choices, check], [],
   )
+  .option(
+    '--preset <name>',
+    'Run the checks of a preset: recommended (the default) or all',
+  )
   .argument('[paths...]', 'paths to file or directory to process', ['.'])
   .action(async (path) => {
     const {default: xslint} = await import('./xslint.js')
