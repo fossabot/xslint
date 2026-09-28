@@ -4,6 +4,7 @@
  */
 
 const {validate} = require('../src/validators/xsl-validator')
+const {kinds} = require('../src/resources/checks.json')
 const {XMLSerializer} = require('@xmldom/xmldom')
 const assert = require('assert')
 
@@ -230,6 +231,89 @@ const REPORTED = [
 ]
 
 /**
+ * Sources reported as malformed, each beside the line and column its defect
+ * must stand at: where the parser met the fault, or where the forbidden
+ * sequence it let stand begins, never the opening of the file (#1019).
+ * @type {Array.<{name: string, content: string, place: Array.<number>}>}
+ */
+const PLACED = [
+  {
+    name: 'should place a tag mismatch at the element left open',
+    content: '<a>\n\n  <b></a>',
+    place: [3, 3],
+  },
+  {
+    name: 'should place an undeclared prefix at the element spelling it',
+    content: '<a>\n  <b/>\n    <q:c/>\n</a>',
+    place: [3, 5],
+  },
+  {
+    name: 'should place an undeclared prefix on an attribute at its element',
+    content: '<a>\n <b q:c="d"/>\n</a>',
+    place: [2, 2],
+  },
+  {
+    name: 'should place an unquoted attribute value on its own line',
+    content: '<a>\n<b c=d/></a>',
+    place: [2, 1],
+  },
+  {
+    name: 'should place a bare ampersand at the ampersand itself',
+    content: '<a>\nTom & Jerry</a>',
+    place: [2, 5],
+  },
+  {
+    name: 'should place a section close at its first bracket',
+    content: '<a>x\n  y ]]> z</a>',
+    place: [2, 5],
+  },
+  {
+    name: 'should place an undeclared entity at its ampersand',
+    content: '<a>\n <b c="&nope;"/></a>',
+    place: [2, 8],
+  },
+  {
+    name: 'should place a fault behind a byte order mark on its line',
+    content: '\uFEFF<a>\n  <b></a>',
+    place: [2, 3],
+  },
+  {
+    name: 'should place a document holding no element at its opening',
+    content: 'plain text',
+    place: [1, 1],
+  },
+]
+
+/**
+ * Sources reported as malformed, each beside the message key its defect must
+ * carry: a prefix nothing binds is a namespace fault, remedied by declaring
+ * it, and not a syntax fault to hunt for (#1019).
+ * @type {Array.<{name: string, content: string, key: string}>}
+ */
+const WORDED = [
+  {
+    name: 'should call an undeclared element prefix a namespace fault',
+    content: '<a>\n  <q:b/>\n</a>',
+    key: 'namespace',
+  },
+  {
+    name: 'should call an undeclared attribute prefix a namespace fault',
+    content: '<a q:b="c"/>',
+    key: 'namespace',
+  },
+  {
+    name: 'should call a tag mismatch a syntax fault',
+    content: '<a><b></a>',
+    key: 'message',
+  },
+  {
+    name: 'should call a bare ampersand a syntax fault',
+    content: '<a>Tom & Jerry</a>',
+    key: 'message',
+  },
+]
+
+/**
  * Sources whose declared entities expand into a `t` attribute value.
  * @type {Array.<{name: string, content: string, expected: string}>}
  */
@@ -341,6 +425,24 @@ describe('xsl-validator', function() {
     it(name, function() {
       assert.equal(
         validate([{file, content}]).defects[0].name, 'malformed-stylesheet',
+      )
+    })
+  })
+  PLACED.forEach(({name, content, place}) => {
+    it(name, function() {
+      const [found] = validate([{file: 'p.xsl', content}]).defects
+      assert.deepStrictEqual(
+        [found.line, found.pos], place,
+        'a malformed stylesheet is not reported where the parser met its fault',
+      )
+    })
+  })
+  WORDED.forEach(({name, content, key}) => {
+    it(name, function() {
+      assert.equal(
+        validate([{file: 'w.xsl', content}]).defects[0].message,
+        kinds.validation['malformed-stylesheet'][key],
+        'a malformed stylesheet does not say which kind of fault it holds',
       )
     })
   })

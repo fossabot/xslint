@@ -156,7 +156,8 @@
       },
       "malformed-stylesheet": {
         "severity": "error",
-        "message": "The stylesheet is not well-formed XML and cannot be parsed. Fix its syntax."
+        "message": "The stylesheet is not well-formed XML and cannot be parsed. Fix its syntax.",
+        "namespace": "The stylesheet uses a namespace prefix it never declares, so it cannot be parsed. Declare the prefix with its namespace URI."
       },
       "syntax-newer-than-xslt-version": {
         "severity": "error",
