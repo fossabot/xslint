@@ -60,7 +60,7 @@ get inline annotations on your pull requests:
 
 ```yaml
 - uses: actions/checkout@v6
-- uses: xslint/xslint-action@0.0.11
+- uses: xslint/xslint-action@0.0.12
 ```
 
 Or run it on commit with [pre-commit](https://pre-commit.com) — add to your
@@ -83,7 +83,7 @@ Pointed at core stylesheets from the three most widely-used XSLT projects —
 [TEI](https://github.com/TEIC/Stylesheets) (2.0), and
 [DITA-OT](https://github.com/dita-ot/dita-ot) (1.0/2.0) — and run with
 `--preset all`, xslint surfaced
-**10,942 findings across 43 different checks in 867 stylesheets, with no false
+**10,958 findings across 43 different checks in 867 stylesheets, with no false
 positives from its validators**: 3,279 pieces of literal text outside
 `xsl:text`, 639 `xsl:choose` blocks with no `xsl:otherwise`, and 583 template
 and function parameters nothing reads. Real stylistic and logical findings in

@@ -16,6 +16,13 @@ publication date only; detailed notes begin with the Unreleased section.
   almost never wrong over DocBook-XSL, TEI and DITA-OT; `--preset all`, or
   `preset: all` in `.xslint.yml`, restores the whole catalog. `--only` still
   reaches any check, and a check `rules` re-grades joins the run (#1094).
+- Report an unprefixed `name()` compared with a string in XSLT 1.0 again.
+  `name-compared-to-string` withheld the whole report where the `*:name`
+  wildcard it rewrites to cannot be spelled, so `name() = 'para'` went silent
+  in every 1.0 stylesheet, sixteen DocBook-XSL rows among them. The report
+  stands now with no fix, and a `local-name()` in 1.0 is still left alone.
+  Its message no longer spells the `self::name` rewrite, which 1.0 gets
+  right only where the source elements are in no namespace (#1042).
 
 ## 0.3.0 - 2026-09-27
 
