@@ -125,8 +125,10 @@ matches a prefixed <code>d:pubdate</code> the string never did. An
 <code>xpath-default-namespace</code> puts the bare step in the namespace it names:</p>
 <pre><code class="language-xsl">&lt;xsl:if test=&quot;name() = &#39;pubdate&#39;&quot;&gt;                →  &lt;xsl:if test=&quot;self::*:pubdate&quot;&gt;
 </code></pre>
-<p>XSLT 1.0 has no wildcard for it, so there an unprefixed comparison stands as
-written.</p>
+<p>XSLT 1.0 has no wildcard for it, yet the comparison is as fragile there, so
+the node test is chosen by hand from what the source holds: <code>self::pubdate</code>
+where its elements are in no namespace, and a prefix the stylesheet binds to
+their namespace where they are in one, <code>self::d:pubdate</code> for DocBook 5.</p>
 <p>Either quote spells the same string and both classes of equality comparison ask
 the same question, so <code>name() = &#39;div&#39;</code>, <code>name() = &quot;div&quot;</code> and the value comparison
 <code>name() eq &quot;div&quot;</code> are one construct, and <code>name() != &#39;div&#39;</code> is <code>not(self::*:div)</code>.
