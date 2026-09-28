@@ -17,11 +17,14 @@ zero or an empty string literal (#1057) — in any of the four spellings an XSLT
 result element gives it, is removed with everything under it. A selector judging the text as written
 reported an `empty-choose` on a `choose` Saxon-HE 12.5 never compiles, and stayed quiet on one whose
 only `when` it excludes, which Saxon refuses as XTSE0010. The attribute is XSLT's from 2.0 on, at
-the version in force, and a shadow at every version, only a 3.0 processor reading one (#1114): xsltproc compiles an `xsl:if` carrying `use-when="false()"`
-in a 1.0 sheet and refuses the `xsl:sequence` inside it, so pruning there hid the defect it hits.
+the version in force, and a shadow at every version, only a 3.0 processor reading one (#1114):
+xsltproc compiles an `xsl:if` carrying `use-when="false()"` in a 1.0 sheet and refuses the
+`xsl:sequence` inside it, so pruning there hid the defect it hits.
 Any other condition, `not(true())` among them, is left standing, its answer being a processor's,
 and so is the root, a document with no element being one nothing reads.
 The pack harness builds its corpus here too, so a pack reads what a run reads (#1048).
+A refusal stands where the parser stopped rather than at 1:1, and one naming a prefix nothing binds
+carries the check's `namespace` message rather than its syntax one (#1019).
 
 ## `src/validators/xpath-validator.js`
 

@@ -538,8 +538,10 @@ or `scoped: true` (counts usage only within the declaration's subtree, or an
 importing file). Because usage is followed across files, a symbol defined in a
 `_funcs.xsl` library and used elsewhere is never flagged.
 
-A validator or format YAML is `severity` and `message` alone. A message is
-two sentences, fault then remedy, in thirty words, names bare, no dash (#1072).
+A validator or format YAML is `severity` and `message` alone, bar the
+`namespace` message `malformed-stylesheet` gives a prefix nothing binds (#1019).
+A message is two sentences, fault then remedy, in thirty words, names bare, no
+dash (#1072).
 
 A check of any kind may carry one more key. `fix:` names the tier every fix it
 offers lands in — `safe`, `suggestion`, or both where the tier is the standing
@@ -710,8 +712,10 @@ Then run `npx grunt checks`, `npm test`, `npm run coverage`, and
   one spelling: a shadow value is an attribute value template rather than the
   value, so `@x = 'y'` reads past `_x="{'y'}"` and a second clause beside it
   would compare the wrong text. Ask `xslint:attribute(., 'x')`, whose answer
-  is what either spelling says; `test/shadows.test.js` holds the six selectors
-  still asking one (#992, #997).
+  is what either spelling says and nothing where a value is the run's, so
+  `= ''` never reads a computed name as an empty one; `test/shadows.test.js`
+  refuses a comparison of one spelling, with no table to exempt one on, and
+  `src/predicates.js` answers the function off the walk (#992, #997).
   And a selector that opens `//name` or `//(name | name)` is served from the
   shared walk rather than by a descendant step of its own, so how a selector
   opens decides what it costs: the axis comes off `named` in `src/tree.js` and
@@ -1043,7 +1047,7 @@ one of them.
 | `src/comparisons.js` | `comparedToZero` — the shared scan for a call compared with `0`/`1` (count, string-length) |
 | `src/booleans.js` | `coerced` and `unwrapped` — where nothing but an effective boolean value is taken, and what may stand there instead |
 | `src/roots.js` | `roots` and `entered` — the templates matching the root of the document, and whether a transformation can start at a module |
-| `src/expressions.js` | `enclosed`, what an attribute value template's braces hold; `staticOf`, what one names statically; `attributeOf` and `nameOf`, an attribute's value in either spelling and its expanded name |
+| `src/expressions.js` | `enclosed`, what an attribute value template's braces hold; `staticOf`, what one names statically; `saidOf`, `attributeOf` and `nameOf`, an attribute's value in either spelling, nothing where the run supplies it, and its expanded name |
 | `src/tokens.js` | Positioned XPath lexer (`tokenized`, `TOKENS`), preserving whitespace; owns `GAP`, `TRIVIA`, `OPAQUE`, `NAMED`, `unquoted`, and `normalized`, the gap-collapsing XPath defines and the engine widens |
 | `src/grammar.js` | `parsed` and `matched` — the XPath 3.1 expression grammar and the pattern grammar, as recursive descent, at the version in force |
 | `src/syntax.js` | The one door between a record and its parse: `parseOf`, `isValid`, `gathered`, `textOf`, `calls`, `filters` |

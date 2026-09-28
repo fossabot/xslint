@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: not-creating-attribute-correctly
+# The second xsl:attribute repeats the name the first gives in its shadow
+# spelling, so Saxon writes rev="two" and the inline form would lose to the
+# one in front of it; only the one repeating nothing is reported (#997).
+found:
+  amount: 1
+  positions: [ [ 11, 7 ] ]
+input: |-
+  <?xml version="1.0"?>
+  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0" id="style1">
+    <xsl:output encoding="UTF-8" method="xml"/>
+    <xsl:template match="/objects/o">
+      <iota>
+        <xsl:attribute _name="{'rev'}">one</xsl:attribute>
+        <xsl:attribute name="rev">two</xsl:attribute>
+      </iota>
+      <kappa>
+        <xsl:variable name="hop" select="1"/>
+        <xsl:attribute name="rel">two</xsl:attribute>
+      </kappa>
+    </xsl:template>
+  </xsl:stylesheet>

@@ -107,14 +107,18 @@ const modeOrPriority = function(node, content) {
 /**
  * Fix for `incorrect-use-of-boolean-constants`: replace the string literal
  * test `'true'`/`'false'` with the boolean `true()`/`false()`. The check
- * declares it a suggestion, `'false'` being a non-empty string that is always
- * true, so the rewrite changes the test's truth value — which is the point.
+ * declares it a suggestion, the rewrite changing the test's truth value —
+ * which is the point. It rewrites the spelling the check read, the shadow
+ * where one stands and the plain one otherwise (#997, #1114).
  * @param {Element} node - The `xsl:if`/`xsl:when` element
  * @param {string} content - Raw source text of the file it stands in
  * @return {object} - The fix
  */
 const booleanConstant = function(node, content) {
-  const test = node.getAttributeNode('test')
+  let test = node.getAttributeNode('test')
+  if (node.hasAttribute('_test')) {
+    test = node.getAttributeNode('_test')
+  }
   let constant = 'false()'
   if (test.value.includes('true')) {
     constant = 'true()'
