@@ -7,13 +7,17 @@ serialization intent explicitly and uniformly. A reader should not have to
 infer the output method from the shape of the first element, and the choice
 should be visible in one place. The only coherent policies are "every
 stylesheet that serializes declares its output" or "none does", so xslint asks
-for the first. What is asked to declare it is the stylesheet a transformation starts at:
-one holding a template that matches the document root, or the template named
-`xsl:initial-template`, that nothing else imports. A library of templates for
-particular elements is imported into such a stylesheet and serializes as part
-of it, so it is left alone. A stylesheet that is neither cannot be told apart
-from such a library, so it is left alone as well — an identity transform run
-on its own, or one started from a named template, goes unreported.
+for the first. What is asked to declare it is the stylesheet a transformation
+starts at, that nothing else imports: one holding a template that matches the
+document root, the template named `xsl:initial-template`, or a template in the
+default mode, naming no mode or `#default`, `#unnamed` or `#all` among its
+modes, that takes whatever element stands at the top of the document —
+any element at all, as the `node()` of an identity transform does, or the one a
+pattern such as `/book` spells. A library of templates for particular elements
+is imported into such a stylesheet and serializes as part of it, so it is left
+alone. A stylesheet whose default mode names only particular elements, or one
+started from a template with some other name, cannot be told apart from such a
+library, so it is left alone as well and goes unreported.
 
 Which stylesheet declares it is a question about the whole import tree and not
 about one file. An `xsl:output` merges into every stylesheet that imports the

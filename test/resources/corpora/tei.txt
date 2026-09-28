@@ -3151,6 +3151,7 @@ html/html_verse.xsl:10:17 redundant-namespace-declarations fix ""
 html/microdata.xsl:2:1 missing-id-in-stylesheet
 html/post-process-ids.xsl:2:1 missing-id-in-stylesheet
 icml/tei2icml.xsl:33:1 missing-id-in-stylesheet
+icml/tei2icml.xsl:33:1 not-using-output
 icml/tei2icml.xsl:33:1 too-many-templates
 icml/tei2icml.xsl:65:38 scans-whole-document
 icml/tei2icml.xsl:82:38 scans-whole-document
@@ -4066,6 +4067,7 @@ odds/translate-odd.xsl:10:4 missing-id-in-stylesheet
 odds/translate-odd.xsl:10:20 redundant-namespace-declarations fix ""
 odds/translate-odd.xsl:12:17 redundant-namespace-declarations fix ""
 odt/expandxsl.xsl:2:1 missing-id-in-stylesheet
+odt/expandxsl.xsl:2:1 not-using-output
 odt/fixgraphics.xsl:2:1 missing-id-in-stylesheet
 odt/fixgraphics.xsl:2:57 redundant-namespace-declarations fix ""
 odt/fixgraphics.xsl:4:17 redundant-namespace-declarations fix ""
@@ -4506,6 +4508,7 @@ profiles/iso/check-docx.xsl:147:9 setting-value-of-variable-incorrectly
 profiles/iso/check-docx.xsl:166:17 text-outside-xsl-text suggestion "<xsl:text>-->\n                </xsl:text>"
 profiles/iso/check-docx.xsl:178:9 setting-value-of-variable-incorrectly
 profiles/iso/docx/addisometa.xsl:2:1 missing-id-in-stylesheet
+profiles/iso/docx/addisometa.xsl:2:1 not-using-output
 profiles/iso/docx/addisometa.xsl:2:1 too-many-templates
 profiles/iso/docx/fixdotrels.xsl:2:1 missing-id-in-stylesheet
 profiles/iso/docx/fixstyle.xsl:2:1 missing-id-in-stylesheet
@@ -4769,6 +4772,7 @@ profiles/iso/docx/makecoverpages.xsl:136:6 unused-function-template-parameter
 profiles/iso/docx/makecoverpages.xsl:137:6 unused-function-template-parameter
 profiles/iso/docx/makecoverpages.xsl:138:6 unused-function-template-parameter
 profiles/iso/docx/makecoverpages2.xsl:2:1 missing-id-in-stylesheet
+profiles/iso/docx/makecoverpages2.xsl:2:1 not-using-output
 profiles/iso/docx/makecoverpages2.xsl:108:9 use-single-option-for-choose
 profiles/iso/docx/makecoverpages2.xsl:172:18 not-creating-element-correctly
 profiles/iso/docx/makecoverpages2.xsl:208:32 unabbreviated-axis fix ""
@@ -4779,6 +4783,7 @@ profiles/iso/docx/makecoverpages2.xsl:242:32 name-compared-to-string suggestion 
 profiles/iso/docx/makecoverpages2.xsl:248:32 name-compared-to-string suggestion "self::w:p"
 profiles/iso/docx/makecoverpages2.xsl:254:32 name-compared-to-string suggestion "self::w:p"
 profiles/iso/docx/metadatamerge.xsl:2:1 missing-id-in-stylesheet
+profiles/iso/docx/metadatamerge.xsl:2:1 not-using-output
 profiles/iso/docx/metadatamerge.xsl:126:34 name-compared-to-string suggestion "self::*:q"
 profiles/iso/docx/tbx.xsl:2:1 missing-id-in-stylesheet
 profiles/iso/docx/tbx.xsl:71:7 text-outside-xsl-text suggestion "<xsl:text>abbreviatedForm</xsl:text>"
@@ -5373,6 +5378,7 @@ profiles/jtei/odt/odt.common.xsl:749:33 confusing-variable-and-node suggestion "
 profiles/jtei/odt/to.xsl:2:1 missing-id-in-stylesheet
 profiles/jtei/odt/to.xsl:4:3 redundant-namespace-declarations fix ""
 profiles/jtei/openedition/to.xsl:2:1 missing-id-in-stylesheet
+profiles/jtei/openedition/to.xsl:2:1 not-using-output
 profiles/jtei/openedition/to.xsl:2:1 too-many-templates
 profiles/jtei/openedition/to.xsl:8:3 redundant-namespace-declarations fix ""
 profiles/jtei/openedition/to.xsl:73:37 redundant-whitespace fix " "
@@ -5899,19 +5905,51 @@ simple/teitosimple.xsl:2:1 too-many-templates
 simple/teitosimple.xsl:145:9 not-creating-element-correctly
 simple/teitosimple.xsl:163:5 text-outside-xsl-text suggestion "<xsl:text>simple:</xsl:text>"
 slides/slides.xsl:2:1 missing-id-in-stylesheet
+slides/slides.xsl:2:1 not-using-output
 slides/slides.xsl:2:1 too-many-templates
 slides/slides.xsl:3:3 leaking-result-namespace
 slides/slides.xsl:4:17 leaking-result-namespace
 slides/slides.xsl:5:17 leaking-result-namespace
 slides/slides.xsl:78:5 use-choose-without-otherwise
+slides/slides.xsl:89:27 undefined-variable
+slides/slides.xsl:107:32 undefined-variable
 slides/slides.xsl:111:4 setting-value-of-variable-incorrectly
+slides/slides.xsl:117:21 undefined-variable
+slides/slides.xsl:121:42 undefined-variable
+slides/slides.xsl:122:49 undefined-variable
+slides/slides.xsl:123:39 undefined-variable
+slides/slides.xsl:125:51 undefined-variable
+slides/slides.xsl:126:37 undefined-variable
+slides/slides.xsl:129:21 undefined-variable
 slides/slides.xsl:140:7 unused-function-template-parameter
 slides/slides.xsl:141:7 unused-function-template-parameter
+slides/slides.xsl:143:32 undefined-variable
 slides/slides.xsl:145:10 use-choose-without-otherwise
+slides/slides.xsl:158:64 undefined-variable
+slides/slides.xsl:163:62 undefined-variable
 slides/slides.xsl:167:10 use-choose-without-otherwise
+slides/slides.xsl:183:64 undefined-variable
 slides/slides.xsl:212:25 short-names
+slides/slides.xsl:231:27 undefined-variable
+slides/slides.xsl:234:40 undefined-variable
+slides/slides.xsl:254:38 undefined-variable
+slides/slides.xsl:275:38 undefined-variable
+slides/slides.xsl:338:32 undefined-variable
 slides/slides.xsl:343:13 setting-value-of-variable-incorrectly
+slides/slides.xsl:349:21 undefined-variable
+slides/slides.xsl:353:42 undefined-variable
+slides/slides.xsl:354:49 undefined-variable
+slides/slides.xsl:356:51 undefined-variable
+slides/slides.xsl:357:37 undefined-variable
+slides/slides.xsl:376:21 undefined-variable
 slides/slides.xsl:394:19 setting-value-of-variable-incorrectly
+slides/slides.xsl:400:27 undefined-variable
+slides/slides.xsl:404:49 undefined-variable
+slides/slides.xsl:405:55 undefined-variable
+slides/slides.xsl:406:45 undefined-variable
+slides/slides.xsl:408:57 undefined-variable
+slides/slides.xsl:409:43 undefined-variable
+slides/slides.xsl:412:27 undefined-variable
 slides/slides.xsl:473:7 short-names
 slides/slides.xsl:495:7 unused-function-template-parameter
 slides/slides.xsl:500:13 setting-value-of-variable-incorrectly

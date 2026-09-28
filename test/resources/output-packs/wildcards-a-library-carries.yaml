@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: not-using-output
+found:
+  amount: 0
+  positions: [ ]
+  fixes: [ ]
+input: |-
+  <?xml version="1.0"?>
+  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:p="urn:riemann" version="3.0" id="style1">
+    <xsl:template match="node() | @*" mode="copycontent">
+      <xsl:copy/>
+    </xsl:template>
+    <xsl:template match="*[@zeta]">
+      <hypothesis/>
+    </xsl:template>
+    <xsl:template match="p:surface/*">
+      <sheet/>
+    </xsl:template>
+    <xsl:template match="/p:manifold/p:chart">
+      <atlas/>
+    </xsl:template>
+    <xsl:template match="(p:plane | *)/p:curve">
+      <genus/>
+    </xsl:template>
+    <xsl:template match="/()">
+      <void/>
+    </xsl:template>
+    <xsl:template match="/comment()">
+      <xsl:copy/>
+    </xsl:template>
+    <xsl:template match="@*">
+      <xsl:copy/>
+    </xsl:template>
+    <xsl:template name="riemann" match="text()">
+      <xsl:value-of select="."/>
+    </xsl:template>
+  </xsl:stylesheet>

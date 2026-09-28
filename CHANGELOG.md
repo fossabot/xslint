@@ -9,14 +9,23 @@ publication date only; detailed notes begin with the Unreleased section.
 
 ## Unreleased
 
+- Judge an identity transform in `not-using-output`. Since #1031 the check
+  judged a stylesheet nothing imports only when a template of it matched the
+  document root or was `xsl:initial-template`, so a standalone identity
+  transform, which the built-in rule enters through its `node()` template, went
+  unjudged. A template in the default mode, in any of its spellings, taking any
+  element, or the document element a `/name` pattern spells, now marks an entry
+  point too. A stylesheet started with `-it` from another name stays unjudged,
+  being indistinguishable from a library of named templates (#1046).
+
 - Report only the `recommended` preset by default. A run used to report every
   check in the catalog, so the first run over a real project buried the few
   defects a processor refuses under thousands of style findings. The default
   now holds every check graded an error and the dead-code checks that proved
-  almost never wrong over DocBook-XSL, TEI and DITA-OT, 214 reports where the
-  whole catalog draws 11,121. `unused-variable` is not among them: its reports
+  almost never wrong over DocBook-XSL, TEI and DITA-OT, 245 reports where the
+  whole catalog draws 11,161. `unused-variable` is not among them: its reports
   hold, but they ask for cleanup rather than name a bug, and they would be 234
-  of the 448 the preset drew with them. `--preset all`, or `preset: all` in `.xslint.yml`,
+  of the 479 the preset drew with them. `--preset all`, or `preset: all` in `.xslint.yml`,
   restores the whole catalog. `--only` still reaches any check, and a check
   `rules` names exactly joins the run, while a glob such as `"unused-*"`
   re-grades only the checks already in it. The `lint()` API defaults to
