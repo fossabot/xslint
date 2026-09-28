@@ -32,6 +32,14 @@ publication date only; detailed notes begin with the Unreleased section.
   stands now with no fix, and a `local-name()` in 1.0 is still left alone.
   Its message no longer spells the `self::name` rewrite, which 1.0 gets
   right only where the source elements are in no namespace (#1042).
+- Report an `xsl:import` or `xsl:include` whose `href` names no file. A
+  processor refuses such a stylesheet with XTSE0165, and nothing said so until
+  the transformation ran. The new `broken-href` error judges only a relative
+  `href`, read against the file holding it; a URL, an absolute path, a
+  `plugin:` URI, an `xml:base` in scope and a `use-when` that may drop the
+  import are left alone. The command line reads the disk before linting, so
+  `lint` stays pure and reports this only where its caller says which hrefs
+  name no file (#209).
 
 - Read the shadow where an XSLT element writes an attribute in both spellings.
   XSLT 3.0 ignores the plain attribute beside a shadow one, and Saxon writes

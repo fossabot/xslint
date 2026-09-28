@@ -398,7 +398,8 @@ from `src/xpath.js`, the fontoxpath environment.
 and hands the defects back in one total order rather than in the order the
 walk or the wiring happened to give (#638). The command-line `xslint(paths,
 options)` in the same module wraps it — resolves config, reads the `.xsl`
-files and what their parameter entities name (#1010), calls `lint`, applies
+files, what their parameter entities name and the hrefs missing
+(#1010, #209), calls `lint`, applies
 `--fix`, reports, and sets the exit code as
 `process.exitCode`, a `no-restricted-syntax` selector banning the
 `process.exit` that ends the process where it stands and abandons every write
@@ -824,7 +825,8 @@ reports under `test/resources/corpora/` and `REFUSED` in
 Each linter owns a `test/resources/<name>-packs/` directory, auto-discovered by
 its harness — no registration. A pack is `pack` (the check name), `found`, and
 `input` (or `inputs` for corpus/import packs, which reference each other as
-`file<index>.xsl`). `found` carries `amount` and `positions` — `[line, col]`, or
+`file<index>.xsl`; an import pack's `absent` lists missing hrefs).
+`found` carries `amount` and `positions` — `[line, col]`, or
 `[fileIndex, line, col]` for cross-file packs, or `[line, col, other-check]` for
 a co-firing check. A code-based linter's pack also carries `found.fixes` aligned
 with `positions` (the expected `fix.replacement`, `null` for report-only). A
@@ -1056,7 +1058,7 @@ one of them.
 | `src/fixes.js` | Shared fix builders reading the raw source: `deletion`, `substitution`, `excision`, `standsAt` |
 | `src/fixer.js` | Applies a defect's `fix` to source (decode-walk, verify-before-apply, end-to-start) |
 | `src/xpath.js` | The fontoxpath environment, and what we add to it: `PREFIXES`, the evaluator, `satisfies`, `compiles`, and the five `xslint:` functions |
-| `src/helpers.js` | XML parsing (expands every entity it reads a declaration of), YAML parsing, `slashed`, and file recursion that opens no `.git` and no `node_modules` |
+| `src/helpers.js` | XML parsing (expands every entity it reads a declaration of), YAML parsing, `slashed`, `absentOf`, and file recursion that opens no `.git` and no `node_modules` |
 | `src/resources/checks.json` | Every check as a run reads it, built from the YAML; never edited by hand |
 | `src/logger.js` | 4-level logger |
 | `src/output.js` | `colorful(stream)`, the one gate on coloring, and the leveled prefixed `writer` both streams are written through |

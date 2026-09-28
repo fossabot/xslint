@@ -63,23 +63,25 @@ const compiled = function(xsl) {
  * the parser met its fault, and left out of the corpus, so the validators and
  * linters that follow run only over the stylesheets that parse, each as a
  * processor compiles it.
- * @param {Array.<{file: string, content: string, subsets: Map}>} sources -
- *  Raw stylesheets, each with the external subsets its entities name
+ * @param {Array.<{file: string, content: string, subsets: Map,
+ *  absent: Set}>} sources - Raw stylesheets, each with the external subsets
+ *  its entities name and the hrefs no file stands behind
  * @param {Array.<string>} suppressions - Array of suppressed checks
- * @return {{corpus: Array.<{file: string, content: string, xsl: Document}>,
- *  defects:
- *  Array.<object>}} - Parsed corpus and defects for the unparsable sources
+ * @return {{corpus: Array.<{file: string, content: string, xsl: Document,
+ *  absent: Set}>, defects: Array.<object>}} - Parsed corpus and defects for
+ *  the unparsable sources
  */
 const validate = function(sources, suppressions = []) {
   logger.debug(`Xml validation started`)
   const corpus = []
   const defects = []
   const suppressed = suppressions.some((sup) => CHECK.includes(sup))
-  for (const {file, content, subsets} of sources) {
+  for (const {file, content, subsets, absent} of sources) {
     try {
       corpus.push({
         file: file, content: content,
         xsl: compiled(xml.parsedFromString(content, subsets)),
+        absent: absent,
       })
     } catch (err) {
       if (!suppressed) {

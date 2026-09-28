@@ -28,6 +28,12 @@ Documentation/verbatim.xsl:55:1 text-outside-xsl-text suggestion "<xsl:text>xsl:
 Documentation/verbatim.xsl:64:1 text-outside-xsl-text suggestion "<xsl:text>/</xsl:text>"
 Documentation/verbatim.xsl:69:1 text-outside-xsl-text suggestion "<xsl:text>xsl:</xsl:text>"
 Documentation/xsltdoc.xsl:2:1 missing-id-in-stylesheet
+Documentation/xsltdoc.xsl:3:3 broken-href
+Documentation/xsltdoc.xsl:4:3 broken-href
+Documentation/xsltdoc.xsl:5:3 broken-href
+Documentation/xsltdoc.xsl:6:3 broken-href
+Documentation/xsltdoc.xsl:7:3 broken-href
+Documentation/xsltdoc.xsl:8:3 broken-href
 Documentation/xsltdoc.xsl:76:5 text-outside-xsl-text suggestion "<xsl:text>/</xsl:text>"
 Test/checklinks.xsl:2:1 missing-id-in-stylesheet
 Test/formatexamples.xsl:2:1 missing-id-in-stylesheet
@@ -4348,8 +4354,11 @@ profiles/agora/docx/from.xsl:284:4 not-creating-element-correctly
 profiles/agora/docx/from.xsl:300:3 setting-value-of-variable-incorrectly
 profiles/agora/docx/from.xsl:315:3 not-creating-element-correctly
 profiles/agora/docx/old-to.xsl:2:1 missing-id-in-stylesheet
+profiles/agora/docx/old-to.xsl:5:2 broken-href
 profiles/agora/docx/to.xsl:2:1 missing-id-in-stylesheet
+profiles/agora/docx/to.xsl:5:2 broken-href
 profiles/agora/html/from.xsl:2:1 missing-id-in-stylesheet
+profiles/agora/html/from.xsl:11:5 broken-href
 profiles/agora/html/to.xsl:2:1 missing-id-in-stylesheet
 profiles/agora/html/to.xsl:2:1 too-many-templates
 profiles/agora/html/to.xsl:60:23 scans-whole-document
@@ -4405,6 +4414,7 @@ profiles/default/html/oddhtml.xsl:2:1 missing-id-in-stylesheet
 profiles/default/html/to.xsl:2:1 missing-id-in-stylesheet
 profiles/default/html5/to.xsl:2:1 missing-id-in-stylesheet
 profiles/default/ibooks/to.xsl:2:1 missing-id-in-stylesheet
+profiles/default/ibooks/to.xsl:6:5 broken-href
 profiles/default/json/to.xsl:2:1 missing-id-in-stylesheet
 profiles/default/latex/to.xsl:2:1 missing-id-in-stylesheet
 profiles/default/lite/to.xsl:2:1 missing-id-in-stylesheet
@@ -4490,6 +4500,7 @@ profiles/enrich/latex/to.xsl:69:4 text-outside-xsl-text suggestion "<xsl:text>\n
 profiles/enrich/latex/to.xsl:214:7 text-outside-xsl-text suggestion "<xsl:text>\\mbox{}\\\\[-10pt] </xsl:text>"
 profiles/iso/check-docx.xsl:2:1 missing-id-in-stylesheet
 profiles/iso/check-docx.xsl:20:17 redundant-namespace-declarations fix ""
+profiles/iso/check-docx.xsl:24:5 broken-href
 profiles/iso/check-docx.xsl:68:5 setting-value-of-variable-incorrectly
 profiles/iso/check-docx.xsl:147:9 setting-value-of-variable-incorrectly
 profiles/iso/check-docx.xsl:166:17 text-outside-xsl-text suggestion "<xsl:text>-->\n                </xsl:text>"
@@ -5436,6 +5447,7 @@ profiles/oepack/epub/to.xsl:174:4 text-outside-xsl-text suggestion "<xsl:text>st
 profiles/oepack/epub/to.xsl:176:4 text-outside-xsl-text suggestion "<xsl:text>stage it</xsl:text>"
 profiles/oepack/html/from.xsl:2:1 missing-id-in-stylesheet
 profiles/oepack/html/from.xsl:2:1 too-many-templates
+profiles/oepack/html/from.xsl:11:5 broken-href
 profiles/oepack/html/from.xsl:14:3 short-names
 profiles/oepack/html/from.xsl:58:5 short-names
 profiles/oepack/html/from.xsl:58:5 unused-variable
@@ -5466,6 +5478,7 @@ profiles/ota/epub3/to.xsl:14:3 redundant-namespace-declarations fix ""
 profiles/ota/epub3/to.xsl:180:5 unused-function-template-parameter
 profiles/ota/html/from.xsl:2:1 missing-id-in-stylesheet
 profiles/ota/html/from.xsl:2:1 too-many-templates
+profiles/ota/html/from.xsl:11:5 broken-href
 profiles/ota/html/from.xsl:14:3 short-names
 profiles/ota/html/from.xsl:58:5 short-names
 profiles/ota/html/from.xsl:58:5 unused-variable

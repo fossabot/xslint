@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: broken-href
+absent: [ rebased-h2.xsl, stranded-j6.xsl ]
+found:
+  amount: 1
+  positions: [ [ 0, 4, 3 ] ]
+  fixes: [ null ]
+inputs:
+  - |-
+    <?xml version="1.0"?>
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
+      <xsl:import href="rebased-h2.xsl" xml:base="https://example.org/lib/"/>
+      <xsl:import href="stranded-j6.xsl"/>
+      <xsl:template match="/">
+        <xsl:value-of select="."/>
+      </xsl:template>
+    </xsl:stylesheet>

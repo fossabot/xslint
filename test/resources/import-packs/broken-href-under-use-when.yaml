@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: broken-href
+absent: [ optional-c4.xsl, dropped-n1.xsl, kept-v8.xsl ]
+found:
+  amount: 1
+  positions: [ [ 0, 5, 3 ] ]
+  fixes: [ null ]
+inputs:
+  - |-
+    <?xml version="1.0"?>
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0">
+      <xsl:import href="optional-c4.xsl" use-when="system-property('xsl:product-name') = 'SAXON'"/>
+      <xsl:import href="dropped-n1.xsl" use-when="false()"/>
+      <xsl:import href="kept-v8.xsl"/>
+      <xsl:template match="/">
+        <xsl:value-of select="."/>
+      </xsl:template>
+    </xsl:stylesheet>
