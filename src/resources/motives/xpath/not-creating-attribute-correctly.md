@@ -87,6 +87,6 @@ emits `hop="new"` over a source `<o hop="old"/>`, and
 ```
 
 emits `hop="old"`. The same holds for an earlier `xsl:attribute` repeating the
-name, or naming it through an attribute value template that might evaluate to
-it. Where a predecessor can reach the name, the two forms say different things
+name, written `name="hop"` or `_name="{'hop'}"` alike, or naming it through an
+attribute value template that might evaluate to it. Where a predecessor can reach the name, the two forms say different things
 and only reordering the stylesheet makes them agree.

@@ -33,26 +33,31 @@ const assert = require('assert')
 const SELECTORS = {xpath: ['xpath'], corpus: ['declaration', 'usage']}
 
 /**
- * An attribute a selector reads the *value* of: `@x` standing on the left of a
- * comparison, with any call wrapping it closed first. A step tail is not one —
- * `../@x` reads what the document supplies where a clause spells the attribute
- * it wants, the same difference `SUPPLIED` turns on (#992).
- * @type {RegExp}
+ * An attribute a selector reads the *value* of, on the left of a comparison
+ * with any call wrapping it closed first, or on the right with a path in
+ * front of it: `preceding-sibling::x/@name = @name` reads it twice, and the
+ * first spelling of this gate saw neither, a slash standing before the one and
+ * the sign before the other (#997).
+ * @type {Array.<RegExp>}
  */
-const COMPARED = new RegExp(`(^|[^/])@([\\w:.-]+)${GAP}*\\)*${GAP}*!?=`, 'g')
+const COMPARED = [
+  new RegExp(`@([\\w:.-]+)${GAP}*\\)*${GAP}*!?=`, 'g'),
+  new RegExp(`=${GAP}*[\\w:./*()-]*?@([\\w:.-]+)`, 'g'),
+]
 
 /**
  * Every attribute a selector compares the value of. Comparing the shadow
  * spelling beside it is no remedy here, that value being an attribute value
  * template rather than the value, so what this finds is refused outright
- * rather than asked for a second clause (#992).
+ * rather than asked for a second clause (#992). An attribute in a namespace
+ * has no shadow to read, the mechanism reaching none, so `xml:space` is left.
  * @param {string} selector - The XPath a declarative check is written in
  * @return {Array.<string>} - The attributes whose value it compares
  */
 const compared = function(selector) {
-  return Array.from(selector.matchAll(COMPARED))
-    .map((found) => found[2])
-    .filter((named) => !named.split(':').pop().startsWith('_'))
+  return COMPARED.flatMap((pattern) => Array.from(selector.matchAll(pattern)))
+    .map((found) => found[1])
+    .filter((named) => !named.includes(':') && !named.startsWith('_'))
 }
 
 /**
