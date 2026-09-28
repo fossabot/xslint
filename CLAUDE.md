@@ -586,7 +586,7 @@ on any difference, because a check that has drifted is not the check that fires.
   `src/checks.js`
   (`metaOf`, `suppressed`, `defect`) and reads its expressions from
   `src/attributes.js`'s `expressionsOf` (every XPath/pattern attribute of an XSLT
-  element, plus every expression an attribute value template, a 3.0 text value
+  element, plus every expression an attribute value template, a text value
   template, or a shadow attribute carries, each flagged `pattern` or not) unless
   it has a documented reason to
   narrow — then it narrows through `whole(found, name)`, never a hand-written
