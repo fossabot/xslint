@@ -194,6 +194,8 @@ const REFUSED = {
       'an xsl:function in a sheet whose declared version has none, which a',
       'conformant processor of that version rejects',
     ].join(' '),
+  'undefined-variable':
+    'XPST0008, a variable reference no binding in scope declares',
 }
 
 /**

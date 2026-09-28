@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: undefined-variable
+found:
+  amount: 0
+  positions: [ ]
+  fixes: [ ]
+input: |-
+  <?xml version="1.0"?>
+  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
+    <xsl:param name="global" select="1"/>
+    <xsl:template match="/" name="entry">
+      <xsl:param name="given" select="$global"/>
+      <xsl:variable name="outer" select="$given"/>
+      <xsl:for-each select="item">
+        <xsl:variable name="inner" select="$outer"/>
+        <xsl:choose>
+          <xsl:when test="$inner">
+            <xsl:call-template name="entry">
+              <xsl:with-param name="given" select="$inner"/>
+            </xsl:call-template>
+          </xsl:when>
+        </xsl:choose>
+      </xsl:for-each>
+      <xsl:variable name="outer" select="$outer"/>
+      <xsl:value-of select="$outer, $later"/>
+    </xsl:template>
+    <xsl:variable name="later" select="$global"/>
+  </xsl:stylesheet>
