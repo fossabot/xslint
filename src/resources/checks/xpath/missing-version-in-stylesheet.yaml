@@ -3,5 +3,6 @@
 ---
 xpath: "/*[if (self::xsl:*) then (not(@version) and not(@_version)) else (not(@xsl:version) and .//xsl:* and not(.//(xsl:stylesheet | xsl:transform | xsl:package)))] | /*[not(self::xsl:*)]//(xsl:stylesheet | xsl:transform | xsl:package)[not(@version) and not(@_version)]"
 severity: warning
+preset: all
 message: The version attribute is missing on the stylesheet's root element. Declare it to specify the stylesheet version explicitly.
 fix: suggestion

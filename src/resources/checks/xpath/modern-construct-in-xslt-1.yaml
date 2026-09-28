@@ -3,4 +3,5 @@
 ---
 xpath: "//(xsl:for-each-group | xsl:sequence | xsl:analyze-string | xsl:next-match | xsl:perform-sort | xsl:namespace | xsl:character-map | xsl:result-document | xsl:import-schema | xsl:*[(@as or @_as) and not(self::xsl:function)])[xslint:version(.) < 2.0]"
 severity: error
+preset: recommended
 message: "This XSLT 2.0 construct stands where the version in force is below 2.0, which a conformant 1.0 processor rejects. Use a 1.0 equivalent, or raise that version to 2.0."

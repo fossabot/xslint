@@ -3,4 +3,5 @@
 ---
 xpath: //( xsl:if | xsl:when)[not(@test) and not(@_test)]
 severity: error
+preset: recommended
 message: "An xsl:if or xsl:when has no @test attribute. Add one, or remove the element."

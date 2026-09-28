@@ -78,6 +78,15 @@ const CSS = `
     font-weight: 600;
     white-space: nowrap;
   }
+  .preset-recommended {
+    background: #ddf4ff;
+    color: #0969da;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
   .fix-note {
     background: #f6f8fa;
     border-left: 4px solid #57606a;
@@ -163,6 +172,14 @@ const fixNote = (lint) => {
   return note
 }
 
+const presetBadge = (lint) => {
+  let badge = ''
+  if (lint.preset === 'recommended') {
+    badge = ' <span class="preset-recommended">recommended</span>'
+  }
+  return badge
+}
+
 const escaped = (xpath) => xpath.replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
 const expressions = (kind, lint) => {
@@ -204,7 +221,7 @@ const generate = function() {
     return `  <tr>
     <td><a href="checks/${name}.html">${name}</a></td>
     <td>${kind}</td>
-    <td>${severityBadge(lint.severity)}${fixBadge(lint)}</td>
+    <td>${severityBadge(lint.severity)}${fixBadge(lint)}${presetBadge(lint)}</td>
     <td>${lint.message}</td>
   </tr>`
   }).join('\n')
@@ -242,7 +259,11 @@ const generate = function() {
   that has shipped for decades.</p>
 
   <h2>Checks</h2>
-  <p>${checks.length} checks, each with its rationale:</p>
+  <p>${checks.length} checks, each with its rationale. A run reports the
+  ${checks.filter(({lint}) => lint.preset === 'recommended').length} marked
+  <span class="preset-recommended">recommended</span> unless asked for
+  <code>--preset all</code>: what a processor refuses, and the dead code whose
+  report is almost never wrong.</p>
   <table>
     <thead>
       <tr>
@@ -269,7 +290,7 @@ ${indexRows}
     }
     const checkBody = `  <a class="back" href="../index.html">← all checks</a>
   <div class="meta">
-    ${severityBadge(lint.severity)}${fixBadge(lint)}
+    ${severityBadge(lint.severity)}${fixBadge(lint)}${presetBadge(lint)}
     ${expressions(kind, lint)}
   </div>${fixNote(lint)}
   <div class="check-content">

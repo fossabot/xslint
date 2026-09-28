@@ -107,7 +107,7 @@ const offered = function() {
       const file = path.join(FIXTURES, named)
       const defects = lint([
         {file: file, content: fs.readFileSync(file, 'utf-8')},
-      ])
+      ], {preset: 'all'})
       for (const defect of defects.filter((one) => one.fix)) {
         if (!found.has(defect.name)) {
           found.set(defect.name, new Set())

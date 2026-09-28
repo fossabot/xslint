@@ -64,7 +64,7 @@ jobs:
           stylesheets=$(find corpus -name '*.xsl' | wc -l)
           started=$(date +%s%3N)
           set +e
-          node src/index.mjs --format json corpus > report.json 2> log.txt
+          node src/index.mjs --preset all --format json corpus > report.json 2> log.txt
           code=$?
           set -e
           spent=$(( $(date +%s%3N) - started ))

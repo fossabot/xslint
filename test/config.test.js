@@ -52,6 +52,18 @@ const CASES = [
     expected: ['short', 'unused-variable'],
   },
   {
+    name: 'reads the preset a run starts from',
+    content: 'preset: all\n',
+    field: 'preset',
+    expected: 'all',
+  },
+  {
+    name: 'ignores a preset that is not a string',
+    content: 'preset:\n  - all\n',
+    field: 'preset',
+    expected: null,
+  },
+  {
     name: 'ignores an only that is not a list',
     content: 'only: short-names\n',
     field: 'only',
@@ -86,6 +98,7 @@ describe('config', function() {
       rules: {},
       exclude: [],
       only: [],
+      preset: null,
       maxWarnings: null,
       logLevel: null,
       quiet: null,

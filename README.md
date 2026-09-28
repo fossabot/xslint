@@ -29,7 +29,11 @@ Given a stylesheet like this:
 
 ```xml
 <?xml version="1.0"?>
-<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:my="urn:my">
+  <xsl:function name="my:upper">
+    <xsl:param name="text"/>
+    <xsl:sequence select="upper-case($text)"/>
+  </xsl:function>
   <xsl:template match="//book">
     <xsl:variable name="x" select="title"/>
     <xsl:value-of select="$x"/>
@@ -40,10 +44,18 @@ Given a stylesheet like this:
 xslint points at each problem with its exact position and how to fix it:
 
 ```text
+[WARNING] sheet.xsl(3:3) A stylesheet function is never called in any expression across the corpus. Remove it or call it. (unused-function)
+```
+
+A run reports the `recommended` preset unless told otherwise: what a processor
+refuses, and the dead code whose report is almost never wrong. Ask for the whole
+catalog, style checks and unused variables included, with `--preset all`:
+
+```text
 [WARNING] sheet.xsl(2:1) The stylesheet element has no @id attribute. Declare it to specify the unique identifier explicitly. (missing-id-in-stylesheet)
-[WARNING] sheet.xsl(2:1) The xsl:output instruction is missing. Declare it to specify the serialization format explicitly. (not-using-output)
-[WARNING] sheet.xsl(3:24) A pattern alternative opens with //, which at most demands a document-node root. Drop it, and set an explicit priority if the template must rank as before. (starts-with-double-slash)
-[WARNING] sheet.xsl(4:5) A variable, parameter, function, or template has a single-character name. Use a descriptive name that reveals intent. (short-names)
+[WARNING] sheet.xsl(3:3) A stylesheet function is never called in any expression across the corpus. Remove it or call it. (unused-function)
+[WARNING] sheet.xsl(7:24) A pattern alternative opens with //, which at most demands a document-node root. Drop it, and set an explicit priority if the template must rank as before. (starts-with-double-slash)
+[WARNING] sheet.xsl(8:5) A variable, parameter, function, or template has a single-character name. Use a descriptive name that reveals intent. (short-names)
 ```
 
 In CI, use the [GitHub Action](https://github.com/xslint/xslint-action) to
@@ -72,12 +84,14 @@ Browse the full [check catalog](https://xslint.github.io/xslint/).
 Pointed at core stylesheets from the three most widely-used XSLT projects —
 [DocBook-XSL](https://github.com/docbook/xslt10-stylesheets) (1.0),
 [TEI](https://github.com/TEIC/Stylesheets) (2.0), and
-[DITA-OT](https://github.com/dita-ot/dita-ot) (1.0/2.0) — xslint surfaced
+[DITA-OT](https://github.com/dita-ot/dita-ot) (1.0/2.0) — and run with
+`--preset all`, xslint surfaced
 **11,161 findings across 45 different checks in 867 stylesheets, with no false
 positives from its validators**: 3,279 pieces of literal text outside
 `xsl:text`, 639 `xsl:choose` blocks with no `xsl:otherwise`, and 583 template
 and function parameters nothing reads. Real stylistic and logical findings in
-code that has shipped for decades.
+code that has shipped for decades. The `recommended` preset a run reports by
+default draws 245 of them.
 
 Every figure above is read off the reports committed under
 `test/resources/corpora/`, which a nightly job re-lints at the pinned commits
@@ -144,6 +158,15 @@ a tree the project does not track is not its source. A file git tracks is read
 whatever a line says of it, the way git itself reads one, and a path given on the
 command line is read whatever those files say about it.
 
+A run reports the checks of one preset. `recommended`, the default, holds what
+a processor refuses and the dead code whose report is almost never wrong;
+`all` holds every check in the catalog, style checks and unused variables
+included. The [check catalog][checks] marks the preset each check belongs to:
+
+```bash
+xslint --preset all
+```
+
 You can suppress some [checks][checks] by using `--suppress` option:
 
 ```bash
@@ -163,8 +186,9 @@ xslint --suppress=oversized-template --suppress=short-names
 ```
 
 To ask one question of a whole tree, run only the checks you name with
-`--only`. It matches by substring the way `--suppress` does, and it may be
-given as many times as you need:
+`--only`. It matches by substring the way `--suppress` does, it may be given
+as many times as you need, and it reaches any check in the catalog whatever
+the preset:
 
 ```bash
 xslint --only=short-names --only=unused
@@ -185,6 +209,7 @@ flags override the file, and the file overrides the built-in defaults.
 
 ```yaml
 # .xslint.yml
+preset: all              # default for --preset: recommended or all
 rules:
   short-names: off       # turn one check off
   "unused-*": error      # or a family, by glob
@@ -197,9 +222,14 @@ log-level: info                         # default for --log-level
 quiet: false                            # default for --quiet
 ```
 
+- **`preset`** names the preset a run starts from, `recommended` unless it
+  says `all`. Passing `--preset` replaces it.
 - **`rules`** maps a check name — or a glob such as `unused-*` — to
   `off`, `warning`, or `error`. `off` disables the check (like `--suppress`);
-  `warning` and `error` re-grade its severity.
+  `warning` and `error` re-grade its severity. A check named exactly also runs
+  where the preset leaves it out, which is how one style check joins a
+  `recommended` run; a glob re-grades only the checks already in the run, so
+  `"*": warning` or `"unused-*": error` adds none.
 - **`exclude`** lists globs, relative to the config file's own directory, whose
   matching files are not linted. A pattern covering everything under a
   directory — `dir/**` — also stops the walk descending it, so an exclusion
@@ -214,9 +244,12 @@ quiet: false                            # default for --quiet
 
 Unknown top-level keys, rule names that match no check, and values of the wrong
 type (a non-numeric `max-warnings`, a non-list `exclude` or `only`, a
-non-boolean `quiet`, a non-string `log-level`) are reported and ignored, so
-typos do not pass silently. An `exclude` glob is named the same way when a run walks a
-directory and the glob excludes nothing anywhere under it.
+non-boolean `quiet`, a non-string `log-level` or `preset`) are reported and
+ignored, so typos do not pass silently. A preset that does not exist fails the
+run instead, before a file is read, since a run over no checks would read as a
+clean report. An
+`exclude` glob is named the same way when a run walks a directory and the glob
+excludes nothing anywhere under it.
 
 ## Inline suppression
 
@@ -236,8 +269,8 @@ suppressed.
 - **`xslint-disable-file [rules]`** — the whole file (put it near the top).
 
 A directive that suppresses nothing is reported as unused, so stale ones can be
-found and removed. A run narrowed by `--only` or `--suppress` judges only the
-directives whose rules it ran, since a rule it skipped reports nothing for a
+found and removed. A run narrowed by its preset, `--only` or `--suppress` judges
+only the directives whose rules it ran, since a rule it skipped reports nothing for a
 directive to cover.
 
 An expression written across several lines is one value, and a directive that
@@ -430,8 +463,10 @@ const defects = lint(sources, {suppress: ['short-names']})
 const {contents} = fixed(sources, defects)
 ```
 
-`lint(sources, {suppress, overrides})` runs every validator and linter over the
-`{file, content}` sources, honors inline `xslint-disable` directives, and hands
+`lint(sources, {suppress, overrides, only, preset})` runs the validators and
+linters of a preset, `recommended` unless named, over the `{file, content}`
+sources, honors inline `xslint-disable` directives, runs every check
+`overrides` names beside the preset, and hands
 the defects back in the order the reports print them — file, line, column, rule;
 `fixed(sources, defects, suggestions)` returns the rewritten content per file.
 
