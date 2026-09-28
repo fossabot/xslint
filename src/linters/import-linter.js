@@ -257,18 +257,20 @@ const settled = function(node) {
 /**
  * Defects for `broken-href` — every `xsl:import`/`xsl:include` whose href the
  * caller found no file behind. The disk is read before `lint`, by whoever
- * hands it the sources, so a run reading none reports none (#209).
+ * hands it the sources, so a run reading none reports none (#209). A defect
+ * names the file as the caller spelled it, never as `importsOf` normalized it.
  * @param {Array.<{file: string, xsl: Document, absent: Set}>} corpus -
  *  Parsed stylesheets, each with the hrefs no file stands behind
  * @return {Array.<object>} - Defects found
  */
 const byAbsence = function(corpus) {
-  const absent = new Map(corpus.map(
-    ({file, absent = new Set()}) => [path.normalize(file), absent],
+  const sources = new Map(corpus.map(
+    ({file, absent = new Set()}) => [path.normalize(file), {file, absent}],
   ))
   return importsOf(corpus)
-    .filter(({file, href, node}) => absent.get(file).has(href) && settled(node))
-    .map(({file, node}) => defect(BROKEN, file, node))
+    .filter(({file, href, node}) => sources.get(file).absent.has(href) &&
+      settled(node))
+    .map(({file, node}) => defect(BROKEN, sources.get(file).file, node))
 }
 
 /**
