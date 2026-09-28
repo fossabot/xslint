@@ -10,7 +10,8 @@ stylesheet that serializes declares its output" or "none does", so xslint asks
 for the first. What is asked to declare it is the stylesheet a transformation
 starts at, that nothing else imports: one holding a template that matches the
 document root, the template named `xsl:initial-template`, or a template in the
-default mode that takes whatever element stands at the top of the document —
+default mode, naming no mode or `#default`, `#unnamed` or `#all` among its
+modes, that takes whatever element stands at the top of the document —
 any element at all, as the `node()` of an identity transform does, or the one a
 pattern such as `/book` spells. A library of templates for particular elements
 is imported into such a stylesheet and serializes as part of it, so it is left

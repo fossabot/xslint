@@ -36,10 +36,11 @@ const INITIAL = 'initial-template'
 
 /**
  * The modes a template is in when the initial mode is the default one: none
- * named at all, or one of these among the modes it names.
+ * named at all, or one of these among the modes it names, `#unnamed` being
+ * the mode XSLT 3.0 starts in where no `default-mode` says otherwise.
  * @type {Array.<string>}
  */
-const DEFAULTS = ['#default', '#all']
+const DEFAULTS = ['#default', '#unnamed', '#all']
 
 /**
  * The node tests, spelled as their solid tokens, that every element answers.

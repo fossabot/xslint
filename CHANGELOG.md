@@ -13,8 +13,9 @@ publication date only; detailed notes begin with the Unreleased section.
   judged a stylesheet nothing imports only when a template of it matched the
   document root or was `xsl:initial-template`, so a standalone identity
   transform, which the built-in rule enters through its `node()` template, went
-  unjudged. A template in the default mode taking any element, or the document
-  element a `/name` pattern spells, now marks an entry point too. A stylesheet
+  unjudged. A template in the default mode, in any of its spellings, taking any
+  element, or the document element a `/name` pattern spells, now marks an entry
+  point too. A stylesheet
   started with `-it` from another name stays unjudged, being indistinguishable
   from a library of named templates (#1046).
 
