@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-const {subsetsOf, xml, yaml} = require('../src/helpers')
+const {absentOf, subsetsOf, xml, yaml} = require('../src/helpers')
 const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
@@ -153,6 +153,34 @@ describe('helpers', function() {
       ].join(' '),
     )
   })
+  it('names the relative hrefs that stand for no file beside the stylesheet',
+    function() {
+      const file = path.resolve(
+        __dirname, 'resources', 'hrefs', 'importing.xsl')
+      assert.deepEqual(
+        [...absentOf(file, fs.readFileSync(file, 'utf-8'))].sort(),
+        ['lost-w4.xsl', 'modules', 'modules/vanished-7q.xsl'],
+        [
+          'cannot tell the relative hrefs naming no file from the ones naming',
+          'a file, a URL, an absolute path, a plugin, a fragment or a',
+          'backslashed path, which a catalog or a processor may resolve',
+          'elsewhere (#209)',
+        ].join(' '),
+      )
+    })
+  it('names the href a shadow quotes where no file stands behind it',
+    function() {
+      const file = path.resolve(
+        __dirname, 'resources', 'hrefs', 'shadowed.xsl')
+      assert.deepEqual(
+        [...absentOf(file, fs.readFileSync(file, 'utf-8'))],
+        ['gone-m3.xsl'],
+        [
+          'cannot read a braced literal in a _href as the href it quotes,',
+          'so the module it names goes unreported or its braces are (#209)',
+        ].join(' '),
+      )
+    })
   NESTED.forEach(({name, file, select}) => {
     it(name, function() {
       this.timeout(5000)

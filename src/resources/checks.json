@@ -33,6 +33,10 @@
       }
     },
     "format": {
+      "broken-href": {
+        "severity": "error",
+        "message": "The @href names no file on disk, so no processor will load this stylesheet. Point it at the module, or restore the file."
+      },
       "circular-import": {
         "severity": "error",
         "message": "The stylesheet pulls in itself, or a module that pulls it back, through xsl:import or xsl:include, which is a static error. Break the cycle."

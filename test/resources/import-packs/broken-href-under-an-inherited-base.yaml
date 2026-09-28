@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: broken-href
+absent: [ elsewhere-b7.xsl ]
+found:
+  amount: 0
+  positions: [ ]
+  fixes: [ ]
+inputs:
+  - |-
+    <?xml version="1.0"?>
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0" xml:base="../shared/">
+      <xsl:import href="elsewhere-b7.xsl"/>
+      <xsl:template match="/">
+        <xsl:value-of select="."/>
+      </xsl:template>
+    </xsl:stylesheet>

@@ -611,8 +611,10 @@ releasetools/eval-xpath.xsl:3:3 redundant-namespace-declarations fix ""
 releasetools/eval-xpath.xsl:11:5 use-choose-without-otherwise
 releasetools/gitlog2docbook.xsl:2:1 missing-id-in-stylesheet
 releasetools/gitlog2docbook.xsl:2:1 too-many-templates
+releasetools/gitlog2docbook.xsl:21:3 broken-href
 releasetools/gitlog2docbook.xsl:160:9 not-creating-attribute-correctly
 releasetools/make-catalog.xsl:2:1 missing-id-in-stylesheet
+releasetools/make-catalog.xsl:11:1 broken-href
 releasetools/make-catalog.xsl:12:1 setting-value-of-variable-incorrectly
 releasetools/make-catalog.xsl:15:1 setting-value-of-variable-incorrectly
 releasetools/modified-markup.xsl:36:1 missing-id-in-stylesheet
@@ -625,6 +627,7 @@ releasetools/w2docbook.xsl:10:1 missing-id-in-stylesheet
 releasetools/xslnsfiles/addns.xsl:2:1 missing-id-in-stylesheet
 releasetools/xslnsfiles/addns.xsl:4:17 redundant-namespace-declarations fix ""
 releasetools/xslnsfiles/addns.xsl:5:17 redundant-namespace-declarations fix ""
+releasetools/xslnsfiles/addns.xsl:12:1 broken-href
 releasetools/xslnsfiles/manpages.table.xsl:2:1 missing-id-in-stylesheet
 releasetools/xslnsfiles/manpages.table.xsl:2:1 too-many-templates
 releasetools/xslnsfiles/manpages.table.xsl:3:17 leaking-result-namespace suggestion "exsl d"
@@ -663,7 +666,9 @@ releasetools/xtangle.xsl:117:63 redundant-whitespace fix " "
 releasetools/xtangle.xsl:117:111 redundant-whitespace fix " "
 releasetools/xtangle.xsl:117:158 redundant-whitespace fix ""
 testdocs/fo-debug.xsl:2:1 missing-id-in-stylesheet
+testdocs/fo-debug.xsl:5:1 broken-href
 testdocs/i18n/i18n-fo.xsl:2:1 missing-id-in-stylesheet
+testdocs/i18n/i18n-fo.xsl:7:1 broken-href
 testdocs/i18n/i18n-fo.xsl:22:62 confusing-variable-and-node
 testdocs/i18n/identity.xsl:2:1 missing-id-in-stylesheet
 testdocs/i18n/identity.xsl:3:17 redundant-namespace-declarations fix ""
@@ -734,6 +739,8 @@ xsl/assembly/effectivity.xsl:304:33 string-length-compared-to-zero suggestion "$
 xsl/assembly/effectivity.xsl:313:35 string-length-compared-to-zero suggestion "$effectivity.wordsize != ''"
 xsl/assembly/topic-maker-chunk.xsl:1:1 missing-id-in-stylesheet
 xsl/assembly/topic-maker-chunk.xsl:4:17 redundant-namespace-declarations fix ""
+xsl/assembly/topic-maker-chunk.xsl:12:1 broken-href
+xsl/assembly/topic-maker-chunk.xsl:14:1 broken-href
 xsl/assembly/topic-maker-chunk.xsl:69:9 not-creating-attribute-correctly
 xsl/assembly/topic-maker-chunk.xsl:72:9 not-creating-attribute-correctly
 xsl/assembly/topic-maker-chunk.xsl:85:9 not-creating-attribute-correctly
@@ -742,6 +749,7 @@ xsl/assembly/topic-maker-chunk.xsl:110:7 text-outside-xsl-text suggestion "<xsl:
 xsl/assembly/topic-maker-chunk.xsl:132:19 string-length-compared-to-zero suggestion "$base.dir != ''"
 xsl/assembly/topic-maker-chunk.xsl:175:21 string-length-compared-to-zero suggestion "$title != ''"
 xsl/assembly/topic-maker.xsl:2:1 missing-id-in-stylesheet
+xsl/assembly/topic-maker.xsl:13:1 broken-href
 xsl/common/addns.xsl:2:1 missing-id-in-stylesheet
 xsl/common/addns.xsl:4:17 redundant-namespace-declarations fix ""
 xsl/common/addns.xsl:5:17 redundant-namespace-declarations fix ""
@@ -1074,6 +1082,9 @@ xsl/epub/bin/spec/tools/obfuscate_regression_submission.xsl:2:1 missing-id-in-st
 xsl/epub/bin/xslt/obfuscate.xsl:2:1 missing-id-in-stylesheet
 xsl/epub/docbook.xsl:2:1 missing-id-in-stylesheet
 xsl/epub/docbook.xsl:2:1 too-many-templates
+xsl/epub/docbook.xsl:22:3 broken-href
+xsl/epub/docbook.xsl:23:3 broken-href
+xsl/epub/docbook.xsl:24:3 broken-href
 xsl/epub/docbook.xsl:67:23 string-length-compared-to-zero suggestion "string($base.dir) = ''"
 xsl/epub/docbook.xsl:192:23 count-compared-to-zero fix "not(key('id',$rootid))"
 xsl/epub/docbook.xsl:265:9 use-choose-without-otherwise
@@ -1252,6 +1263,8 @@ xsl/epub/docbook.xsl:1769:7 text-outside-xsl-text suggestion "<xsl:text>2</xsl:t
 xsl/epub/docbook.xsl:1770:7 text-outside-xsl-text suggestion "<xsl:text>1</xsl:text>"
 xsl/epub3/chunk.xsl:2:1 missing-id-in-stylesheet
 xsl/epub3/chunk.xsl:6:3 redundant-namespace-declarations fix ""
+xsl/epub3/chunk.xsl:17:1 broken-href
+xsl/epub3/chunk.xsl:19:1 broken-href
 xsl/epub3/chunkfast.xsl:4:1 missing-id-in-stylesheet
 xsl/epub3/docbook.xsl:7:1 missing-id-in-stylesheet
 xsl/epub3/epub3-chunk-mods.xsl:2:1 missing-id-in-stylesheet
@@ -1259,6 +1272,7 @@ xsl/epub3/epub3-chunk-mods.xsl:6:3 redundant-namespace-declarations fix ""
 xsl/epub3/epub3-chunk-mods.xsl:9:3 redundant-namespace-declarations fix ""
 xsl/epub3/epub3-element-mods.xsl:7:1 missing-id-in-stylesheet
 xsl/epub3/epub3-element-mods.xsl:7:1 too-many-templates
+xsl/epub3/epub3-element-mods.xsl:33:1 broken-href
 xsl/epub3/epub3-element-mods.xsl:58:21 string-length-compared-to-zero suggestion "string($base.dir) = ''"
 xsl/epub3/epub3-element-mods.xsl:306:5 setting-value-of-variable-incorrectly
 xsl/epub3/epub3-element-mods.xsl:345:7 not-creating-attribute-correctly
@@ -1333,8 +1347,49 @@ xsl/epub3/epub3-element-mods.xsl:2463:3 unused-function-template-parameter
 xsl/epub3/epub3-element-mods.xsl:2490:23 string-length-compared-to-zero suggestion "normalize-space($title) != ''"
 xsl/epub3/epub3-element-mods.xsl:2533:5 use-choose-without-otherwise
 xsl/epub3/profile-chunk.xsl:4:1 missing-id-in-stylesheet
+xsl/epub3/profile-chunk.xsl:35:1 broken-href
+xsl/epub3/profile-chunk.xsl:53:1 broken-href
 xsl/epub3/profile-docbook.xsl:6:1 missing-id-in-stylesheet
 xsl/epub3/profile-docbook.xsl:6:1 too-many-templates
+xsl/epub3/profile-docbook.xsl:33:1 broken-href
+xsl/epub3/profile-docbook.xsl:34:1 broken-href
+xsl/epub3/profile-docbook.xsl:45:1 broken-href
+xsl/epub3/profile-docbook.xsl:46:1 broken-href
+xsl/epub3/profile-docbook.xsl:47:1 broken-href
+xsl/epub3/profile-docbook.xsl:48:1 broken-href
+xsl/epub3/profile-docbook.xsl:49:1 broken-href
+xsl/epub3/profile-docbook.xsl:50:1 broken-href
+xsl/epub3/profile-docbook.xsl:51:1 broken-href
+xsl/epub3/profile-docbook.xsl:52:1 broken-href
+xsl/epub3/profile-docbook.xsl:53:1 broken-href
+xsl/epub3/profile-docbook.xsl:54:1 broken-href
+xsl/epub3/profile-docbook.xsl:55:1 broken-href
+xsl/epub3/profile-docbook.xsl:56:1 broken-href
+xsl/epub3/profile-docbook.xsl:57:1 broken-href
+xsl/epub3/profile-docbook.xsl:58:1 broken-href
+xsl/epub3/profile-docbook.xsl:59:1 broken-href
+xsl/epub3/profile-docbook.xsl:60:1 broken-href
+xsl/epub3/profile-docbook.xsl:61:1 broken-href
+xsl/epub3/profile-docbook.xsl:62:1 broken-href
+xsl/epub3/profile-docbook.xsl:63:1 broken-href
+xsl/epub3/profile-docbook.xsl:64:1 broken-href
+xsl/epub3/profile-docbook.xsl:65:1 broken-href
+xsl/epub3/profile-docbook.xsl:66:1 broken-href
+xsl/epub3/profile-docbook.xsl:67:1 broken-href
+xsl/epub3/profile-docbook.xsl:68:1 broken-href
+xsl/epub3/profile-docbook.xsl:69:1 broken-href
+xsl/epub3/profile-docbook.xsl:70:1 broken-href
+xsl/epub3/profile-docbook.xsl:71:1 broken-href
+xsl/epub3/profile-docbook.xsl:72:1 broken-href
+xsl/epub3/profile-docbook.xsl:73:1 broken-href
+xsl/epub3/profile-docbook.xsl:74:1 broken-href
+xsl/epub3/profile-docbook.xsl:75:1 broken-href
+xsl/epub3/profile-docbook.xsl:76:1 broken-href
+xsl/epub3/profile-docbook.xsl:77:1 broken-href
+xsl/epub3/profile-docbook.xsl:78:1 broken-href
+xsl/epub3/profile-docbook.xsl:79:1 broken-href
+xsl/epub3/profile-docbook.xsl:80:1 broken-href
+xsl/epub3/profile-docbook.xsl:81:1 broken-href
 xsl/epub3/profile-docbook.xsl:157:53 redundant-whitespace fix " "
 xsl/epub3/profile-docbook.xsl:157:103 redundant-whitespace fix " "
 xsl/epub3/profile-docbook.xsl:157:156 redundant-whitespace fix " "
@@ -1647,6 +1702,9 @@ xsl/fo/division.xsl:39:27 count-compared-to-zero fix "$node/ancestor::*"
 xsl/fo/division.xsl:42:11 text-outside-xsl-text suggestion "<xsl:text>1</xsl:text>"
 xsl/fo/division.xsl:409:17 count-compared-to-zero fix "$nodes"
 xsl/fo/docbook.xsl:2:1 missing-id-in-stylesheet
+xsl/fo/docbook.xsl:28:1 broken-href
+xsl/fo/docbook.xsl:29:1 broken-href
+xsl/fo/docbook.xsl:72:1 broken-href
 xsl/fo/docbook.xsl:176:29 count-compared-to-zero fix "not($root.element)"
 xsl/fo/docbook.xsl:242:3 unused-variable
 xsl/fo/docbook.xsl:248:7 text-outside-xsl-text suggestion "<xsl:text>[could not find document title]</xsl:text>"
@@ -2594,6 +2652,9 @@ xsl/html/division.xsl:2:1 too-many-templates
 xsl/html/division.xsl:210:5 not-creating-attribute-correctly
 xsl/html/docbook.xsl:2:1 missing-id-in-stylesheet
 xsl/html/docbook.xsl:2:1 too-many-templates
+xsl/html/docbook.xsl:23:1 broken-href
+xsl/html/docbook.xsl:24:1 broken-href
+xsl/html/docbook.xsl:67:1 broken-href
 xsl/html/docbook.xsl:127:3 unused-function-template-parameter
 xsl/html/docbook.xsl:132:3 unused-function-template-parameter
 xsl/html/docbook.xsl:164:3 unused-function-template-parameter
@@ -2838,6 +2899,7 @@ xsl/html/pi.xsl:5:17 leaking-result-namespace suggestion "doc d xlink"
 xsl/html/pi.xsl:971:17 count-compared-to-zero fix "not($cmdsynopses)"
 xsl/html/pi.xsl:1001:17 count-compared-to-zero fix "not($funcsynopses)"
 xsl/html/profile-chunk.xsl:1:1 missing-id-in-stylesheet
+xsl/html/profile-chunk.xsl:49:1 broken-href
 xsl/html/profile-onechunk.xsl:2:1 missing-id-in-stylesheet
 xsl/html/publishers.xsl:2:1 missing-id-in-stylesheet
 xsl/html/publishers.xsl:2:1 too-many-templates
@@ -3015,6 +3077,7 @@ xsl/htmlhelp/htmlhelp-common.xsl:969:11 not-creating-attribute-correctly
 xsl/htmlhelp/htmlhelp-common.xsl:1106:5 short-names
 xsl/htmlhelp/htmlhelp.xsl:2:1 missing-id-in-stylesheet
 xsl/htmlhelp/profile-htmlhelp.xsl:2:1 missing-id-in-stylesheet
+xsl/htmlhelp/profile-htmlhelp.xsl:19:1 broken-href
 xsl/javahelp/javahelp.xsl:2:1 missing-id-in-stylesheet
 xsl/javahelp/javahelp.xsl:2:1 too-many-templates
 xsl/javahelp/javahelp.xsl:75:29 count-compared-to-zero fix "not(key('id',$rootid))"
@@ -3076,6 +3139,8 @@ xsl/manpages/charmap.groff.xsl:2:1 missing-id-in-stylesheet
 xsl/manpages/docbook.xsl:2:1 missing-id-in-stylesheet
 xsl/manpages/docbook.xsl:5:17 redundant-namespace-declarations fix ""
 xsl/manpages/docbook.xsl:6:17 redundant-namespace-declarations fix ""
+xsl/manpages/docbook.xsl:13:3 broken-href
+xsl/manpages/docbook.xsl:29:3 broken-href
 xsl/manpages/endnotes.xsl:2:1 missing-id-in-stylesheet
 xsl/manpages/endnotes.xsl:93:27 scans-whole-document
 xsl/manpages/endnotes.xsl:95:9 not-creating-attribute-correctly
@@ -3177,6 +3242,7 @@ xsl/profiling/profile.xsl:49:5 text-outside-xsl-text suggestion "<xsl:text>0</xs
 xsl/profiling/strip-attributes.xsl:2:1 missing-id-in-stylesheet
 xsl/profiling/xsl2profile.xsl:2:1 missing-id-in-stylesheet
 xsl/profiling/xsl2profile.xsl:2:1 too-many-templates
+xsl/profiling/xsl2profile.xsl:9:1 broken-href
 xsl/profiling/xsl2profile.xsl:110:65 redundant-whitespace fix " "
 xsl/profiling/xsl2profile.xsl:148:29 use-double-slash
 xsl/roundtrip/blocks2dbk.xsl:13:1 missing-id-in-stylesheet
@@ -3233,6 +3299,7 @@ xsl/roundtrip/dbk2pages.xsl:1:1 missing-id-in-stylesheet
 xsl/roundtrip/dbk2pages.xsl:1:1 too-many-templates
 xsl/roundtrip/dbk2pages.xsl:3:3 leaking-result-namespace suggestion "doc rnd xi d"
 xsl/roundtrip/dbk2pages.xsl:6:3 redundant-namespace-declarations fix ""
+xsl/roundtrip/dbk2pages.xsl:26:3 broken-href
 xsl/roundtrip/dbk2pages.xsl:269:5 unused-function-template-parameter
 xsl/roundtrip/dbk2pages.xsl:292:5 unused-function-template-parameter
 xsl/roundtrip/dbk2pages.xsl:293:5 unused-function-template-parameter
@@ -3254,6 +3321,7 @@ xsl/roundtrip/dbk2wordml.xsl:5:3 redundant-namespace-declarations fix ""
 xsl/roundtrip/dbk2wordml.xsl:6:3 redundant-namespace-declarations fix ""
 xsl/roundtrip/dbk2wordml.xsl:10:3 redundant-namespace-declarations fix ""
 xsl/roundtrip/dbk2wordml.xsl:11:3 redundant-namespace-declarations fix ""
+xsl/roundtrip/dbk2wordml.xsl:28:3 broken-href
 xsl/roundtrip/dbk2wordml.xsl:57:7 not-creating-attribute-correctly
 xsl/roundtrip/dbk2wordml.xsl:68:13 text-outside-xsl-text suggestion "<xsl:text>Unknown</xsl:text>"
 xsl/roundtrip/dbk2wordml.xsl:80:15 text-outside-xsl-text suggestion "<xsl:text>Unknown</xsl:text>"
@@ -3342,6 +3410,8 @@ xsl/roundtrip/wordml2normalise.xsl:429:7 text-outside-xsl-text suggestion "<xsl:
 xsl/slides/common/common.xsl:2:1 missing-id-in-stylesheet
 xsl/slides/fo/plain.xsl:2:1 missing-id-in-stylesheet
 xsl/slides/fo/plain.xsl:2:1 too-many-templates
+xsl/slides/fo/plain.xsl:13:1 broken-href
+xsl/slides/fo/plain.xsl:14:1 broken-href
 xsl/slides/fo/plain.xsl:154:1 unused-named-template
 xsl/slides/fo/plain.xsl:281:2 use-choose-without-otherwise
 xsl/slides/fo/plain.xsl:418:45 scans-whole-document
@@ -3352,6 +3422,9 @@ xsl/slides/tools/dbs3-upgrade.xsl:2:1 missing-id-in-stylesheet
 xsl/slides/tools/dbs3-upgrade.xsl:2:1 too-many-templates
 xsl/slides/xhtml/plain.xsl:2:1 missing-id-in-stylesheet
 xsl/slides/xhtml/plain.xsl:2:1 too-many-templates
+xsl/slides/xhtml/plain.xsl:12:1 broken-href
+xsl/slides/xhtml/plain.xsl:14:1 broken-href
+xsl/slides/xhtml/plain.xsl:15:1 broken-href
 xsl/slides/xhtml/plain.xsl:222:5 text-outside-xsl-text suggestion "<xsl:text>1</xsl:text>"
 xsl/slides/xhtml/plain.xsl:226:5 text-outside-xsl-text suggestion "<xsl:text>1</xsl:text>"
 xsl/slides/xhtml/plain.xsl:230:5 text-outside-xsl-text suggestion "<xsl:text>1</xsl:text>"
@@ -3395,6 +3468,7 @@ xsl/tools/xsl/build/db4-upgrade.xsl:1053:48 redundant-whitespace fix " "
 xsl/tools/xsl/build/db4-upgrade.xsl:1071:2 text-outside-xsl-text suggestion "<xsl:text>significance</xsl:text>"
 xsl/tools/xsl/build/dblatex-release-notes.xsl:1:1 missing-id-in-stylesheet
 xsl/tools/xsl/build/doc-link-docbook.xsl:2:1 missing-id-in-stylesheet
+xsl/tools/xsl/build/doc-link-docbook.xsl:5:1 broken-href
 xsl/tools/xsl/build/docparam2txt.xsl:2:1 missing-id-in-stylesheet
 xsl/tools/xsl/build/entify.xsl:1:1 missing-id-in-stylesheet
 xsl/tools/xsl/build/entify.xsl:2:17 redundant-namespace-declarations fix ""
@@ -3423,19 +3497,24 @@ xsl/tools/xsl/build/make-xsl-pi.xsl:84:5 unused-function-template-parameter
 xsl/tools/xsl/build/make-xsl-pi.xsl:115:5 setting-value-of-variable-incorrectly
 xsl/tools/xsl/build/make-xsl-pi.xsl:118:5 setting-value-of-variable-incorrectly
 xsl/tools/xsl/build/pirefentry.xsl:2:1 missing-id-in-stylesheet
+xsl/tools/xsl/build/pirefentry.xsl:5:1 broken-href
 xsl/tools/xsl/build/reference-fo.xsl:2:1 missing-id-in-stylesheet
 xsl/tools/xsl/build/reference-fo.xsl:4:3 leaking-result-namespace suggestion " exclude-result-prefixes=\"xlink\""
 xsl/tools/xsl/build/reference-txt.xsl:2:1 missing-id-in-stylesheet
 xsl/tools/xsl/build/reference.xsl:2:1 missing-id-in-stylesheet
 xsl/tools/xsl/build/reference.xsl:3:3 leaking-result-namespace suggestion " exclude-result-prefixes=\"xlink\""
 xsl/tools/xsl/build/tdg-link.xsl:2:1 missing-id-in-stylesheet
+xsl/tools/xsl/build/tdg-link.xsl:5:3 broken-href
 xsl/tools/xsl/build/xmlid-to-id.xsl:1:1 missing-id-in-stylesheet
 xsl/tools/xsl/build/xsl-param-link.xsl:2:1 missing-id-in-stylesheet
+xsl/tools/xsl/build/xsl-param-link.xsl:5:3 broken-href
 xsl/tools/xsl/build/xsl-pi-link.xsl:2:1 missing-id-in-stylesheet
+xsl/tools/xsl/build/xsl-pi-link.xsl:5:3 broken-href
 xsl/tools/xsl/build/xsl-pi-link.xsl:18:5 setting-value-of-variable-incorrectly
 xsl/tools/xsl/build/xsl2jref.xsl:2:1 missing-id-in-stylesheet
 xsl/tools/xsl/build/xsl2jref.xsl:2:1 too-many-templates
 xsl/tools/xsl/build/xsl2jref.xsl:6:17 redundant-namespace-declarations fix ""
+xsl/tools/xsl/build/xsl2jref.xsl:10:1 broken-href
 xsl/tools/xsl/build/xsl2jref.xsl:20:5 text-outside-xsl-text suggestion "<xsl:text>left</xsl:text>"
 xsl/tools/xsl/build/xsl2jref.xsl:21:5 text-outside-xsl-text suggestion "<xsl:text>right</xsl:text>"
 xsl/tools/xsl/build/xsl2jref.xsl:22:5 text-outside-xsl-text suggestion "<xsl:text>left</xsl:text>"
@@ -3577,6 +3656,7 @@ xsl/webhelp/xsl/webhelp-common.xsl:863:5 unused-named-template
 xsl/webhelp/xsl/webhelp-common.xsl:913:38 scans-whole-document
 xsl/webhelp/xsl/webhelp-common.xsl:925:13 setting-value-of-variable-incorrectly
 xsl/webhelp/xsl/webhelp.xsl:2:1 missing-id-in-stylesheet
+xsl/webhelp/xsl/webhelp.xsl:17:1 broken-href
 xsl/website/autolayout.xsl:2:1 missing-id-in-stylesheet
 xsl/website/autolayout.xsl:2:1 too-many-templates
 xsl/website/autolayout.xsl:38:3 unused-variable
@@ -3635,6 +3715,7 @@ xsl/website/toc.xsl:68:15 not-creating-attribute-correctly
 xsl/website/toc.xsl:260:7 unused-variable
 xsl/website/website-common.xsl:2:1 missing-id-in-stylesheet
 xsl/website/website-common.xsl:2:1 too-many-templates
+xsl/website/website-common.xsl:21:1 broken-href
 xsl/website/website-common.xsl:39:5 text-outside-xsl-text suggestion "<xsl:text>note</xsl:text>"
 xsl/website/website-common.xsl:40:5 text-outside-xsl-text suggestion "<xsl:text>warning</xsl:text>"
 xsl/website/website-common.xsl:41:5 text-outside-xsl-text suggestion "<xsl:text>caution</xsl:text>"
@@ -3659,17 +3740,22 @@ xsl/website/xbel.xsl:2:1 missing-id-in-stylesheet
 xsl/website/xbel.xsl:2:1 too-many-templates
 xsl/xhtml-1_1/html2xhtml.xsl:2:1 missing-id-in-stylesheet
 xsl/xhtml-1_1/html2xhtml.xsl:2:1 too-many-templates
+xsl/xhtml-1_1/html2xhtml.xsl:9:1 broken-href
 xsl/xhtml-1_1/html2xhtml.xsl:25:3 short-names
 xsl/xhtml-1_1/html2xhtml.xsl:157:5 text-outside-xsl-text suggestion "<xsl:text>background-color: </xsl:text>"
 xsl/xhtml-1_1/html2xhtml.xsl:165:5 text-outside-xsl-text suggestion "<xsl:text>text-align: </xsl:text>"
 xsl/xhtml-1_1/html2xhtml.xsl:215:5 not-creating-attribute-correctly
 xsl/xhtml/html2xhtml.xsl:2:1 missing-id-in-stylesheet
 xsl/xhtml/html2xhtml.xsl:2:1 too-many-templates
+xsl/xhtml/html2xhtml.xsl:9:1 broken-href
 xsl/xhtml/html2xhtml.xsl:27:3 short-names
 xsl/xhtml/html2xhtml.xsl:152:5 not-creating-attribute-correctly
 xsl/xhtml5/chunk.xsl:2:1 missing-id-in-stylesheet
+xsl/xhtml5/chunk.xsl:17:1 broken-href
+xsl/xhtml5/chunk.xsl:19:1 broken-href
 xsl/xhtml5/chunkfast.xsl:4:1 missing-id-in-stylesheet
 xsl/xhtml5/docbook.xsl:4:1 missing-id-in-stylesheet
+xsl/xhtml5/docbook.xsl:16:1 broken-href
 xsl/xhtml5/html5-chunk-mods.xsl:2:1 missing-id-in-stylesheet
 xsl/xhtml5/html5-element-mods.xsl:6:1 missing-id-in-stylesheet
 xsl/xhtml5/html5-element-mods.xsl:6:1 too-many-templates
@@ -3685,9 +3771,50 @@ xsl/xhtml5/html5-element-mods.xsl:421:19 string-length-compared-to-zero suggesti
 xsl/xhtml5/html5-element-mods.xsl:455:7 text-outside-xsl-text suggestion "<xsl:text>1</xsl:text>"
 xsl/xhtml5/onechunk.xsl:4:1 missing-id-in-stylesheet
 xsl/xhtml5/profile-chunk.xsl:2:1 missing-id-in-stylesheet
+xsl/xhtml5/profile-chunk.xsl:33:1 broken-href
+xsl/xhtml5/profile-chunk.xsl:51:1 broken-href
 xsl/xhtml5/profile-docbook.xsl:2:1 missing-id-in-stylesheet
 xsl/xhtml5/xhtml-profile-docbook.xsl:6:1 missing-id-in-stylesheet
 xsl/xhtml5/xhtml-profile-docbook.xsl:6:1 too-many-templates
+xsl/xhtml5/xhtml-profile-docbook.xsl:33:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:34:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:45:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:46:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:47:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:48:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:49:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:50:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:51:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:52:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:53:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:54:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:55:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:56:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:57:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:58:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:59:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:60:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:61:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:62:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:63:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:64:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:65:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:66:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:67:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:68:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:69:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:70:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:71:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:72:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:73:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:74:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:75:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:76:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:77:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:78:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:79:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:80:1 broken-href
+xsl/xhtml5/xhtml-profile-docbook.xsl:81:1 broken-href
 xsl/xhtml5/xhtml-profile-docbook.xsl:157:53 redundant-whitespace fix " "
 xsl/xhtml5/xhtml-profile-docbook.xsl:157:103 redundant-whitespace fix " "
 xsl/xhtml5/xhtml-profile-docbook.xsl:157:156 redundant-whitespace fix " "
