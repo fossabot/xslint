@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: incorrect-use-of-boolean-constants
+found:
+  amount: 2
+  positions: [ [ 5, 5 ], [ 11, 5 ] ]
+  fixes: [ "false()", "true()" ]
+input: |-
+  <?xml version="1.0"?>
+  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0" id="style1">
+    <xsl:output encoding="UTF-8" method="xml"/>
+    <xsl:template match="alpha">
+      <xsl:if test="'true'" _test="'false'">
+        <p>bravo</p>
+      </xsl:if>
+      <xsl:if test="'true'" _test="@active">
+        <p>charlie</p>
+      </xsl:if>
+      <xsl:if test="@active" _test="{'&quot;true&quot;'}">
+        <p>delta</p>
+      </xsl:if>
+    </xsl:template>
+  </xsl:stylesheet>

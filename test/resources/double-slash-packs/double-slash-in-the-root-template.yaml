@@ -14,10 +14,13 @@ found:
   # is reached only by an `xsl:apply-templates` naming that mode, which runs as
   # often as whatever holds it and over whatever tree it selects. And a template
   # matching the document element rather than the root is one
-  # `xsl:apply-templates` may reach more than once.
-  amount: 5
-  positions: [ [ 7, 29 ], [ 17, 27 ], [ 20, 27 ], [ 23, 27 ], [ 26, 27 ] ]
-  fixes: [ null, null, null, null, null ]
+  # `xsl:apply-templates` may reach more than once. Where a template writes its
+  # match in both spellings the shadow is the one that matches, so a plain `/`
+  # beside a `_match` of the document element is not the root template, and a
+  # `_match` of the root beside a plain `/objects` is (#1114).
+  amount: 6
+  positions: [ [ 7, 29 ], [ 17, 27 ], [ 20, 27 ], [ 23, 27 ], [ 26, 27 ], [ 29, 27 ] ]
+  fixes: [ null, null, null, null, null, null ]
 input: |-
   <?xml version="1.0"?>
   <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0" id="style1">
@@ -45,5 +48,11 @@ input: |-
     </xsl:template>
     <xsl:template match="/objects">
       <xsl:value-of select="//o[@each]"/>
+    </xsl:template>
+    <xsl:template match="/" _match="/objects" priority="5">
+      <xsl:value-of select="//o[@overruled]"/>
+    </xsl:template>
+    <xsl:template match="/objects" _match="/" priority="6">
+      <xsl:value-of select="//o[@overruling]"/>
     </xsl:template>
   </xsl:stylesheet>

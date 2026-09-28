@@ -547,6 +547,15 @@ const APPLIED = [
     after: 'using-disable-output-escaping-spelled-oddly.fixed.xsl',
   },
   {
+    name: [
+      'should delete the shadow escaping a plain one stands beside',
+      'with --fix-suggestions',
+    ].join(' '),
+    flag: '--fix-suggestions',
+    before: 'using-disable-output-escaping-shadowed.xsl',
+    after: 'using-disable-output-escaping-shadowed.fixed.xsl',
+  },
+  {
     name: 'should fix two expressions a line wrap crosses with --fix',
     flag: '--fix',
     before: 'a-fix-across-a-line-wrap.xsl',
