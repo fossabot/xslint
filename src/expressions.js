@@ -217,16 +217,15 @@ const attributeOf = function(element, name) {
 const EDGES = new RegExp(`^${GAP}+|${GAP}+$`, 'g')
 
 /**
- * The expanded name an attribute of an XSLT element holds, `Q{uri}local`,
- * read through `attributeOf` so either spelling counts. A prefix resolves at
- * the element, a prefix bound nowhere staying itself; an unprefixed name is
- * in no namespace, the default one applying to elements alone (#1060).
- * @param {Element} element - The element carrying the attribute
- * @param {string} name - The attribute's name, in its plain spelling
- * @return {string} - The expanded name, or empty where neither spelling says
+ * The expanded name a lexical QName spells at an element, `Q{uri}local`. A
+ * prefix resolves there, a prefix bound nowhere staying itself; an unprefixed
+ * name is in no namespace, the default one applying to elements alone, and a
+ * name spelling its namespace inline is its own expansion (#1060).
+ * @param {Element} element - The element the name is read at
+ * @param {string} lexical - The name as written, its edges trimmed
+ * @return {string} - The expanded name, or empty where the name is
  */
-const nameOf = function(element, name) {
-  const lexical = attributeOf(element, name).replace(EDGES, '')
+const expandedOf = function(element, lexical) {
   const colon = lexical.indexOf(':')
   let expanded = `Q{}${lexical}`
   if (lexical === '' || lexical.startsWith('Q{')) {
@@ -239,9 +238,21 @@ const nameOf = function(element, name) {
   return expanded
 }
 
+/**
+ * The expanded name an attribute of an XSLT element holds, read through
+ * `attributeOf` so either spelling counts, and expanded at that element.
+ * @param {Element} element - The element carrying the attribute
+ * @param {string} name - The attribute's name, in its plain spelling
+ * @return {string} - The expanded name, or empty where neither spelling says
+ */
+const nameOf = function(element, name) {
+  return expandedOf(element, attributeOf(element, name).replace(EDGES, ''))
+}
+
 module.exports = {
   attributeOf,
   enclosed,
+  expandedOf,
   nameOf,
   saidOf,
   staticOf,

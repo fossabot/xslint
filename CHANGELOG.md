@@ -13,8 +13,8 @@ publication date only; detailed notes begin with the Unreleased section.
   check in the catalog, so the first run over a real project buried the few
   defects a processor refuses under thousands of style findings. The default
   now holds every check graded an error and the dead-code checks that proved
-  almost never wrong over DocBook-XSL, TEI and DITA-OT, 57 reports where the
-  whole catalog draws 10,964. `unused-variable` is not among them: its reports
+  almost never wrong over DocBook-XSL, TEI and DITA-OT, 73 reports where the
+  whole catalog draws 10,980. `unused-variable` is not among them: its reports
   hold, but they ask for cleanup rather than name a bug, and they were 234 of
   the 291 it would add. `--preset all`, or `preset: all` in `.xslint.yml`,
   restores the whole catalog. `--only` still reaches any check, and a check
@@ -23,6 +23,13 @@ publication date only; detailed notes begin with the Unreleased section.
   `recommended` too, so a caller passing no `preset`, an editor integration
   among them, reports far less after upgrading; pass `preset: 'all'` to keep
   the whole catalog (#1094).
+
+- Add the `undefined-variable` check (error): a `$name` no binding in scope
+  declares is a static error every processor raises before it transforms
+  anything. A global counts across the whole import tree, a local only from
+  the sibling after its binding onward, and a text value template starts its
+  scope at its own text node (#208).
+
 - Resolve an entity whose replacement text names another. Each reference was
   replaced once, so DocBook's `&section.id;` reached the validator as
   `generate-id(&section;)` and the expression holding it was dropped unread.

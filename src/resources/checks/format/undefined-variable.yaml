@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+severity: error
+preset: recommended
+message: A variable is referenced where no binding in scope declares it. Declare it, or correct the name to one in scope.

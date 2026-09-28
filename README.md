@@ -86,12 +86,12 @@ Pointed at core stylesheets from the three most widely-used XSLT projects —
 [TEI](https://github.com/TEIC/Stylesheets) (2.0), and
 [DITA-OT](https://github.com/dita-ot/dita-ot) (1.0/2.0) — and run with
 `--preset all`, xslint surfaced
-**10,964 findings across 43 different checks in 867 stylesheets, with no false
+**10,980 findings across 44 different checks in 867 stylesheets, with no false
 positives from its validators**: 3,279 pieces of literal text outside
 `xsl:text`, 639 `xsl:choose` blocks with no `xsl:otherwise`, and 583 template
 and function parameters nothing reads. Real stylistic and logical findings in
 code that has shipped for decades. The `recommended` preset a run reports by
-default draws 57 of them.
+default draws 73 of them.
 
 Every figure above is read off the reports committed under
 `test/resources/corpora/`, which a nightly job re-lints at the pinned commits
@@ -432,7 +432,7 @@ Linters:
 - **Formatting** checks are written in code rather than as a declarative
   selector — their YAML tunes only `severity` and `message`. Most read the
   parse tree of one expression; the rest read the document or the import
-  graph. The kind holds 24 checks today, and the [check catalog][checks]
+  graph. The kind holds 25 checks today, and the [check catalog][checks]
   teaches every one of them.
 
 Every check that reads an expression reads it from an XPath or pattern attribute
