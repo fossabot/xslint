@@ -10,7 +10,9 @@
  * see one — it matches a presence clause closing on a bracket, an `and`, an
  * `or` or a union bar, and `@x = 'y'` closes on none of them — which is how
  * `using-disable-output-escaping` came to report the 1.0 spelling of an
- * attribute and miss the 3.0 one Saxon honours identically (#992).
+ * attribute and miss the 3.0 one Saxon honours identically (#992). Six more
+ * stood on a table here until #997 moved them onto `xslint:attribute`, so the
+ * gate exempts nothing.
  *
  * It stands in a file of its own because `test/conformance.test.js` is at the
  * 1000-line `max-lines` cap, and because the checks are read here the way
@@ -31,42 +33,32 @@ const assert = require('assert')
 const SELECTORS = {xpath: ['xpath'], corpus: ['declaration', 'usage']}
 
 /**
- * An attribute a selector reads the *value* of: `@x` standing on the left of a
- * comparison, with any call wrapping it closed first. A step tail is not one —
- * `../@x` reads what the document supplies where a clause spells the attribute
- * it wants, the same difference `SUPPLIED` turns on (#992).
- * @type {RegExp}
+ * An attribute a selector reads the *value* of, on the left of a comparison
+ * with any call wrapping it closed first, or on the right with a path in
+ * front of it: `preceding-sibling::x/@name = @name` reads it twice, and the
+ * first spelling of this gate saw neither, a slash standing before the one and
+ * the sign before the other (#997).
+ * @type {Array.<RegExp>}
  */
-const COMPARED = new RegExp(`(^|[^/])@([\\w:.-]+)${GAP}*\\)*${GAP}*!?=`, 'g')
+const COMPARED = [
+  new RegExp(`@([\\w:.-]+)${GAP}*\\)*${GAP}*!?=`, 'g'),
+  new RegExp(`=${GAP}*[\\w:./*()-]*?@([\\w:.-]+)`, 'g'),
+]
 
 /**
  * Every attribute a selector compares the value of. Comparing the shadow
  * spelling beside it is no remedy here, that value being an attribute value
  * template rather than the value, so what this finds is refused outright
- * rather than asked for a second clause (#992).
+ * rather than asked for a second clause (#992). Only the `xml:` namespace
+ * has no shadow, so `xml:space` is left and `xsl:expand-text` is not (#997).
  * @param {string} selector - The XPath a declarative check is written in
  * @return {Array.<string>} - The attributes whose value it compares
  */
 const compared = function(selector) {
-  return Array.from(selector.matchAll(COMPARED))
-    .map((found) => found[2])
+  return COMPARED.flatMap((pattern) => Array.from(selector.matchAll(pattern)))
+    .map((found) => found[1])
+    .filter((named) => !named.startsWith('xml:'))
     .filter((named) => !named.split(':').pop().startsWith('_'))
-}
-
-/**
- * The checks still comparing a shadowable attribute's value in one spelling,
- * beside the issue reporting each. `xslint:attribute` is the reading that
- * reaches both, and `using-disable-output-escaping` was the first to ask it
- * (#992, #997). A ratchet both ways, the gate failing an unlisted comparison
- * and this table an entry that has stopped making one.
- * @type {{[name: string]: string}}
- */
-const COMPARING = {
-  'duplicate-with-param-name': '#997, the same over xsl:with-param',
-  'incorrect-use-of-boolean-constants': '#997, a shadow test spelling true',
-  'missing-or-empty-href': '#997, a shadow href naming nothing',
-  'missing-or-empty-name': '#997, a shadow name naming nothing',
-  'short-names': '#997, a shadow name one character long',
 }
 
 /**
@@ -84,16 +76,52 @@ const selectors = function() {
   )
 }
 
+/**
+ * Selectors the gate must refuse, each beside the attribute it names: an
+ * attribute in the XSLT namespace has a shadow as much as one in no namespace
+ * does, `xsl:_expand-text` on a literal result element being how the 3.0 idiom
+ * spells `xsl:expand-text`, so the prefix alone exempts nothing (#997).
+ * @type {Array.<[string, Array.<string>]>}
+ */
+const REFUSED = [
+  [`//*[@xsl:expand-text = 'yes']`, ['xsl:expand-text']],
+  [`//xsl:if[normalize-space(@test) != 'q']`, ['test']],
+  [`//xsl:param[../xsl:param/@name = @name]`, ['name', 'name']],
+]
+
+/**
+ * Selectors the gate must leave, those reading an attribute no shadow spelling
+ * reaches or reading the shadow itself (#997).
+ * @type {Array.<string>}
+ */
+const LEFT = [
+  `//*[ancestor::*[@xml:space][1]/@xml:space = 'preserve']`,
+  `//*[@xsl:_expand-text = '{true()}']`,
+  `//xsl:if[@_test = '{$q}']`,
+]
+
 describe('shadows', function() {
+  for (const [selector, named] of REFUSED) {
+    it(`refuses the one spelling ${selector} compares`, function() {
+      assert.deepStrictEqual(
+        compared(selector), named,
+        `the gate does not refuse ${selector}, which compares one spelling`,
+      )
+    })
+  }
+  for (const selector of LEFT) {
+    it(`leaves ${selector}, which has no other spelling to ask`, function() {
+      assert.deepStrictEqual(
+        compared(selector), [],
+        `the gate refuses ${selector}, whose attribute has no other spelling`,
+      )
+    })
+  }
   it('asks both spellings of an attribute a selector compares the value of',
     function() {
       for (const {name, key, kind, selector} of selectors()) {
-        let asked = compared(selector)
-        if (COMPARING[name]) {
-          asked = []
-        }
         assert.deepStrictEqual(
-          asked, [],
+          compared(selector), [],
           [
             `${kind}/${name} compares the value of an attribute in its ${key}`,
             'and reads one of the two spellings XSLT gives it, so a',
@@ -102,21 +130,5 @@ describe('shadows', function() {
           ].join(' '),
         )
       }
-    })
-  it('exempts a check from that gate only while it compares one spelling',
-    function() {
-      const asked = selectors()
-        .filter((one) => compared(one.selector).length > 0)
-        .map((one) => one.name)
-      assert.deepStrictEqual(
-        Object.keys(COMPARING).filter((name) => !asked.includes(name)),
-        [],
-        [
-          'a check in the COMPARING table of test/shadows.test.js compares no',
-          'attribute value any more, so its entry is asserting nothing and',
-          'reads like a limit still in force: delete the row with the',
-          'selector that earned it',
-        ].join(' '),
-      )
     })
 })

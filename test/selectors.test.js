@@ -525,6 +525,12 @@ const CANDIDATES = [
   '(count(*) = 1) and (count(a) = 1)', '@select and (@as or @mode)',
   '(@select) and //xsl:text', '(2) and @select', '(@name, @as)',
   'xslint:version(.) < 2.0',
+  'xslint:attribute(., "name") = "one"', 'xslint:attribute(., "name") = ""',
+  'xslint:attribute(., "select") = "\'v\'"',
+  'string-length(xslint:attribute(., "name")) = 8',
+  'contains(xslint:attribute(., "name"), "e")',
+  'xslint:attribute(., "name") = preceding-sibling::*/xslint:attribute(., "name")',
+  'xslint:attribute(., "name") = xsl:variable/xslint:attribute(., "name")',
 ]
 
 /**

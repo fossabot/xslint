@@ -73,7 +73,7 @@ Pointed at core stylesheets from the three most widely-used XSLT projects —
 [DocBook-XSL](https://github.com/docbook/xslt10-stylesheets) (1.0),
 [TEI](https://github.com/TEIC/Stylesheets) (2.0), and
 [DITA-OT](https://github.com/dita-ot/dita-ot) (1.0/2.0) — xslint surfaced
-**10,974 findings across 44 different checks in 867 stylesheets, with no false
+**10,980 findings across 44 different checks in 867 stylesheets, with no false
 positives from its validators**: 3,279 pieces of literal text outside
 `xsl:text`, 639 `xsl:choose` blocks with no `xsl:otherwise`, and 583 template
 and function parameters nothing reads. Real stylistic and logical findings in
@@ -374,8 +374,9 @@ rest.
 
 Validators:
 
-- **XML well-formedness** — a stylesheet that is not well-formed XML is
-  reported and excluded from linting.
+- **XML well-formedness** — a stylesheet that is not well-formed XML, or
+  that spells a namespace prefix it never declares, is reported at the line
+  and column the parser stopped on and excluded from linting.
 - **XPath syntax** — every bare XPath expression (in `select`, `test`,
   `use`, `value`, `group-by`, `group-adjacent`, and the XSLT 3.0 `key`,
   `initial-value`, `xpath`, `context-item`, `with-params`,

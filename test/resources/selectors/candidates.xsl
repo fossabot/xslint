@@ -52,4 +52,8 @@
     <!-- epsilon -->
     <?zeta eta?>
   </xsl:variable>
+  <xsl:variable _name="{'nineteen'}" _select="{&quot;'v'&quot;}"/>
+  <xsl:variable _name="{$twenty}"/>
+  <xsl:variable name="" _name="one"/>
+  <xsl:variable _name=""/>
 </xsl:stylesheet>

@@ -160,7 +160,8 @@
       },
       "malformed-stylesheet": {
         "severity": "error",
-        "message": "The stylesheet is not well-formed XML and cannot be parsed. Fix its syntax."
+        "message": "The stylesheet is not well-formed XML and cannot be parsed. Fix its syntax.",
+        "namespace": "The stylesheet uses a namespace prefix it never declares, so it cannot be parsed. Declare the prefix with its namespace URI, or rename it if it is reserved."
       },
       "syntax-newer-than-xslt-version": {
         "severity": "error",
@@ -179,7 +180,7 @@
         "message": "Two xsl:param siblings share a @name. Each parameter of a template, function, or stylesheet must have a distinct name."
       },
       "duplicate-with-param-name": {
-        "xpath": "//xsl:with-param[@name = preceding-sibling::xsl:with-param/@name]",
+        "xpath": "//xsl:with-param[xslint:attribute(., 'name') = preceding-sibling::xsl:with-param/xslint:attribute(., 'name')]",
         "severity": "error",
         "message": "A single call passes two xsl:with-param with the same @name. Each parameter can be supplied only once."
       },
@@ -214,7 +215,7 @@
         "message": "An xsl:function requires XSLT 2.0 or later, and the version in force here is below that. Use a named template, or raise that version to 2.0."
       },
       "incorrect-use-of-boolean-constants": {
-        "xpath": "//(xsl:if | xsl:when)[xslint:normalize-space(@test) = (\"'true'\", \"'false'\", '\"true\"', '\"false\"')]",
+        "xpath": "//(xsl:if | xsl:when)[xslint:normalize-space(xslint:attribute(., 'test')) = (\"'true'\", \"'false'\", '\"true\"', '\"false\"')]",
         "severity": "warning",
         "message": "The test is the string 'true' or 'false', a non-empty string that is always true, not a boolean. Use true() or false() instead.",
         "fix": "suggestion"
@@ -230,12 +231,12 @@
         "message": "The stylesheet element has no @id attribute. Declare it to specify the unique identifier explicitly."
       },
       "missing-or-empty-href": {
-        "xpath": "//(xsl:import | xsl:include)[(not(@href) and not(@_href)) or @href = '']",
+        "xpath": "//(xsl:import | xsl:include)[(not(@href) and not(@_href)) or xslint:attribute(., 'href') = '']",
         "severity": "error",
         "message": "The @href is missing or empty, so this pulls in no module and no processor will load the stylesheet. Name the module to pull in."
       },
       "missing-or-empty-name": {
-        "xpath": "//(xsl:variable | xsl:param | xsl:call-template | xsl:function | xsl:key | xsl:attribute-set | xsl:character-map | xsl:accumulator)[not(@name) and not(@_name)] | //(xsl:variable | xsl:param | xsl:with-param | xsl:call-template | xsl:template | xsl:function | xsl:key | xsl:attribute-set | xsl:decimal-format | xsl:character-map | xsl:mode | xsl:accumulator)[@name = '']",
+        "xpath": "//(xsl:variable | xsl:param | xsl:call-template | xsl:function | xsl:key | xsl:attribute-set | xsl:character-map | xsl:accumulator)[not(@name) and not(@_name)] | //(xsl:variable | xsl:param | xsl:with-param | xsl:call-template | xsl:template | xsl:function | xsl:key | xsl:attribute-set | xsl:decimal-format | xsl:character-map | xsl:mode | xsl:accumulator)[xslint:attribute(., 'name') = '']",
         "severity": "error",
         "message": "The @name is missing or empty, so it holds no QName and no processor will load this stylesheet. Give it a name."
       },
@@ -262,7 +263,7 @@
         "message": "A variable, parameter, function, or template name starts with a digit, so no processor loads this stylesheet. Rename it to start with a letter."
       },
       "not-creating-attribute-correctly": {
-        "xpath": "//xsl:attribute[not(contains(@name, '{')) and not(@_name)][not(@namespace) and not(@_namespace)][parent::*[not(self::xsl:*)]][not(*) or (count(*) = 1 and (xsl:value-of[not(@separator) and not(@_separator)] or xsl:text[not(@disable-output-escaping) and not(@_disable-output-escaping)]))][not(preceding-sibling::*[not(self::xsl:variable) and not(self::xsl:attribute)])][not(preceding-sibling::xsl:attribute[@_name or not(@name) or contains(@name, '{')])][not(preceding-sibling::xsl:attribute/@name = @name)][not(some $held in ../@*[not(namespace-uri() = 'http://www.w3.org/1999/XSL/Transform')] satisfies local-name($held) = replace(xslint:attribute(., 'name'), '^.*:', ''))][not(@separator) and not(@_separator) and not(@type) and not(@_type) and not(@validation) and not(@_validation)][not(some $value in (. | .//@select | .//@_select) satisfies preceding-sibling::xsl:variable[contains($value, concat('$', xslint:attribute(., 'name')))])]",
+        "xpath": "//xsl:attribute[not(contains(@name, '{')) and not(@_name)][not(@namespace) and not(@_namespace)][parent::*[not(self::xsl:*)]][not(*) or (count(*) = 1 and (xsl:value-of[not(@separator) and not(@_separator)] or xsl:text[not(@disable-output-escaping) and not(@_disable-output-escaping)]))][not(preceding-sibling::*[not(self::xsl:variable) and not(self::xsl:attribute)])][not(preceding-sibling::xsl:attribute[@_name or not(@name) or contains(@name, '{')])][not(preceding-sibling::xsl:attribute/xslint:attribute(., 'name') = xslint:attribute(., 'name'))][not(some $held in ../@*[not(namespace-uri() = 'http://www.w3.org/1999/XSL/Transform')] satisfies local-name($held) = replace(xslint:attribute(., 'name'), '^.*:', ''))][not(@separator) and not(@_separator) and not(@type) and not(@_type) and not(@validation) and not(@_validation)][not(some $value in (. | .//@select | .//@_select) satisfies preceding-sibling::xsl:variable[contains($value, concat('$', xslint:attribute(., 'name')))])]",
         "severity": "warning",
         "message": "xsl:attribute with a static name on a literal element can be a literal attribute (an AVT for a computed value). Write it inline."
       },
@@ -292,7 +293,7 @@
         "message": "A variable or parameter is assigned via a nested xsl:value-of instead of the select attribute. Use select syntax instead."
       },
       "short-names": {
-        "xpath": "//(xsl:variable | xsl:param | xsl:template | xsl:function)[string-length(substring-after(@name, \":\")) = 1 or (string-length(@name) = 1 and not(contains(@name, \":\")))]",
+        "xpath": "//(xsl:variable | xsl:param | xsl:template | xsl:function)[string-length(substring-after(xslint:attribute(., 'name'), ':')) = 1 or (string-length(xslint:attribute(., 'name')) = 1 and not(contains(xslint:attribute(., 'name'), ':')))]",
         "severity": "warning",
         "message": "A variable, parameter, function, or template has a single-character name. Use a descriptive name that reveals intent."
       },

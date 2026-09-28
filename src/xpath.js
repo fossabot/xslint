@@ -52,7 +52,7 @@ const {
   evaluateXPath, evaluateXPathToBoolean, evaluateXPathToNodes,
   compileXPathToJavaScript, registerCustomXPathFunction,
 } = require('fontoxpath')
-const {attributeOf, nameOf} = require('./expressions')
+const {nameOf, saidOf} = require('./expressions')
 const {conditional} = require('./conditions')
 const {normalized} = require('./tokens')
 const {numbered} = require('./xsl-version')
@@ -114,16 +114,16 @@ registerCustomXPathFunction(
 )
 
 /**
- * `xslint:attribute`, what an attribute of an XSLT element says. XSLT 3.0
- * writes any of them `_x` as readily as `x`, and `_x` holds an attribute value
- * template rather than the value — `{'yes'}` where `yes` stood — so no
- * comparison against a literal reaches one, and a check asking the plain
- * spelling reads as coverage where it has none (#992).
+ * `xslint:attribute`, what an attribute of an XSLT element says in either
+ * spelling, `_x` holding an attribute value template rather than the value,
+ * so no comparison against a literal reaches one (#992). Where the run
+ * supplies the value it answers the empty sequence, so `= ''` reads an empty
+ * name and never a computed one (#997).
  */
 registerCustomXPathFunction(
   {namespaceURI: FUNCTIONS, localName: 'attribute'},
-  ['node()', 'xs:string'], 'xs:string',
-  (context, node, name) => attributeOf(node, name),
+  ['node()', 'xs:string'], 'xs:string*',
+  (context, node, name) => saidOf(node, name),
 )
 
 /**

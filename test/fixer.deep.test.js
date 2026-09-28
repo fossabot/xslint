@@ -409,6 +409,15 @@ const APPLIED = [
     after: 'incorrect-use-of-boolean-constants.fixed.xsl',
   },
   {
+    name: [
+      'should rewrite a boolean-constant test in the shadow spelling with',
+      '--fix-suggestions',
+    ].join(' '),
+    flag: '--fix-suggestions',
+    before: 'incorrect-use-of-boolean-constants-in-shadow-form.xsl',
+    after: 'incorrect-use-of-boolean-constants-in-shadow-form.fixed.xsl',
+  },
+  {
     name: 'should prepend $ to a bare variable name with --fix-suggestions',
     flag: '--fix-suggestions',
     before: 'confusing-variable-and-node.xsl',
