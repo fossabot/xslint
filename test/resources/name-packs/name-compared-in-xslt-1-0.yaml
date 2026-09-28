@@ -2,15 +2,16 @@
 # SPDX-License-Identifier: MIT
 ---
 # A prefixed `name()` reports and rewrites at 1.0, the prefix naming the
-# namespace a node test asks for. The two halves beside it draw nothing: an
-# unprefixed `name()` answers the bare name of an element in a default
-# namespace too, which only the `*:name` wildcard spells, and 1.0 has none —
-# no more than it has one for `local-name()` (#962, #1000).
+# namespace a node test asks for. An unprefixed `name()` reports with no
+# rewrite: it answers the bare name of an element in a default namespace too,
+# which only the `*:name` wildcard spells, and 1.0 has none. A `local-name()`
+# draws nothing, being the one call that is not prefix-fragile (#962, #1000,
+# #1042).
 pack: name-compared-to-string
 found:
-  amount: 1
-  positions: [ [ 4, 36 ] ]
-  fixes: [ "self::t:p" ]
+  amount: 4
+  positions: [ [ 4, 36 ], [ 6, 36 ], [ 7, 36 ], [ 8, 38 ] ]
+  fixes: [ "self::t:p", null, null, null ]
 input: |-
   <?xml version="1.0"?>
   <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:t="urn:t" version="1.0" id="s">
@@ -18,5 +19,7 @@ input: |-
       <xsl:variable name="a" select="name() = 't:p'"/>
       <xsl:variable name="b" select="local-name() = 'r'"/>
       <xsl:variable name="c" select="name() = 'q'"/>
+      <xsl:variable name="d" select="name() != 'pubdate'"/>
+      <xsl:variable name="e" select="*[name() = 'para' or local-name() = 'r']"/>
     </xsl:template>
   </xsl:stylesheet>

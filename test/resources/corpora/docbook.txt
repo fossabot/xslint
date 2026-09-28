@@ -1550,6 +1550,8 @@ xsl/fo/biblio-iso690.xsl:668:3 unused-function-template-parameter
 xsl/fo/biblio-iso690.xsl:733:3 use-choose-without-otherwise
 xsl/fo/biblio-iso690.xsl:801:3 use-choose-without-otherwise
 xsl/fo/biblio-iso690.xsl:819:3 unused-function-template-parameter
+xsl/fo/biblio-iso690.xsl:834:17 name-compared-to-string
+xsl/fo/biblio-iso690.xsl:843:23 name-compared-to-string
 xsl/fo/biblio-iso690.xsl:1018:3 use-choose-without-otherwise
 xsl/fo/biblio-iso690.xsl:1180:3 use-choose-without-otherwise
 xsl/fo/biblio-iso690.xsl:1204:3 use-choose-without-otherwise
@@ -2426,6 +2428,8 @@ xsl/html/biblio-iso690.xsl:668:3 unused-function-template-parameter
 xsl/html/biblio-iso690.xsl:733:3 use-choose-without-otherwise
 xsl/html/biblio-iso690.xsl:801:3 use-choose-without-otherwise
 xsl/html/biblio-iso690.xsl:819:3 unused-function-template-parameter
+xsl/html/biblio-iso690.xsl:834:17 name-compared-to-string
+xsl/html/biblio-iso690.xsl:843:23 name-compared-to-string
 xsl/html/biblio-iso690.xsl:1018:3 use-choose-without-otherwise
 xsl/html/biblio-iso690.xsl:1180:3 use-choose-without-otherwise
 xsl/html/biblio-iso690.xsl:1204:3 use-choose-without-otherwise
@@ -3432,6 +3436,18 @@ xsl/tools/xsl/build/xsl2jref.xsl:22:5 text-outside-xsl-text suggestion "<xsl:tex
 xsl/tools/xsl/build/xsl2jref.xsl:28:5 text-outside-xsl-text suggestion "<xsl:text>right</xsl:text>"
 xsl/tools/xsl/build/xsl2jref.xsl:29:5 text-outside-xsl-text suggestion "<xsl:text>left</xsl:text>"
 xsl/tools/xsl/build/xsl2jref.xsl:30:5 text-outside-xsl-text suggestion "<xsl:text>right</xsl:text>"
+xsl/tools/xsl/build/xsl2jref.xsl:83:46 name-compared-to-string
+xsl/tools/xsl/build/xsl2jref.xsl:84:49 name-compared-to-string
+xsl/tools/xsl/build/xsl2jref.xsl:85:49 name-compared-to-string
+xsl/tools/xsl/build/xsl2jref.xsl:86:49 name-compared-to-string
+xsl/tools/xsl/build/xsl2jref.xsl:203:36 name-compared-to-string
+xsl/tools/xsl/build/xsl2jref.xsl:231:36 name-compared-to-string
+xsl/tools/xsl/build/xsl2jref.xsl:259:36 name-compared-to-string
+xsl/tools/xsl/build/xsl2jref.xsl:304:36 name-compared-to-string
+xsl/tools/xsl/build/xsl2jref.xsl:329:36 name-compared-to-string
+xsl/tools/xsl/build/xsl2jref.xsl:329:62 name-compared-to-string
+xsl/tools/xsl/build/xsl2jref.xsl:342:36 name-compared-to-string
+xsl/tools/xsl/build/xsl2jref.xsl:354:36 name-compared-to-string
 xsl/webhelp/xsl/titlepage.templates.xsl:3:1 missing-id-in-stylesheet
 xsl/webhelp/xsl/titlepage.templates.xsl:3:1 too-many-templates
 xsl/webhelp/xsl/titlepage.templates.xsl:13:3 use-choose-without-otherwise
