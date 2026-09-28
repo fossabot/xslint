@@ -17,6 +17,14 @@ publication date only; detailed notes begin with the Unreleased section.
   Its message no longer spells the `self::name` rewrite, which 1.0 gets
   right only where the source elements are in no namespace (#1042).
 
+- Read the shadow where an XSLT element writes an attribute in both spellings.
+  XSLT 3.0 ignores the plain attribute beside a shadow one, and Saxon writes
+  `shadow` for `<xsl:value-of select="'plain'" _select="'shadow'"/>`, while
+  xslint read the plain one: an invalid `select` beside a sound `_select` drew
+  `invalid-xpath-expression`, a `use-when`, a version, an href or a type was
+  taken from the ignored spelling, and the escaping fix deleted the plain
+  attribute. The shadow outranks it everywhere now (#1114).
+
 ## 0.3.0 - 2026-09-27
 
 - Read the extension namespaces a simplified stylesheet declares.

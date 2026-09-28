@@ -52,6 +52,19 @@ const VERSIONS = xml.parsedFromString(
   ),
 )
 
+/**
+ * A 3.0 stylesheet writing a select and a name in both spellings, where XSLT
+ * ignores the plain one, and a 2.0 element doing the same, where the shadow is
+ * not read and so leaves the plain one standing.
+ * @type {Document}
+ */
+const SHADOWED = xml.parsedFromString(
+  fs.readFileSync(
+    path.resolve(__dirname, 'resources', 'attributes', 'shadow-beside-plain.xsl'),
+    'utf-8',
+  ),
+)
+
 describe('attributes', function() {
   it('reads every bare and enclosed expression in document order', function() {
     assert.deepEqual(
@@ -113,6 +126,20 @@ describe('attributes', function() {
         ['@w', '3.0'],
       ],
       'cannot read the version in force where an expression stands',
+    )
+  })
+  it('reads the shadow and not the plain attribute it overrules', function() {
+    assert.deepEqual(
+      expressionsOf(SHADOWED).map(
+        (found) => [found.node.nodeName, found.start, found.expression],
+      ),
+      [
+        ['match', 0, 'section'],
+        ['_select', 0, 'name(.)'],
+        ['_name', 1, '\'item\''],
+        ['select', 0, '@x'],
+      ],
+      'reads a plain attribute its shadow overrules',
     )
   })
 })

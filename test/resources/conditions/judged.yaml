@@ -57,3 +57,13 @@
   input: |-
     <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0"><xsl:param name="width" use-when="not(true())"/></xsl:stylesheet>
   answer: false
+- name: keeps an element whose shadow use-when overrules a false plain one in a 3.0 stylesheet
+  asked: excluded
+  input: |-
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0"><xsl:param name="width" use-when="false()" _use-when="true()"/></xsl:stylesheet>
+  answer: false
+- name: excludes an element whose false shadow use-when overrules a true plain one in a 3.0 stylesheet
+  asked: excluded
+  input: |-
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0"><xsl:param name="width" use-when="true()" _use-when="{'false()'}"/></xsl:stylesheet>
+  answer: true

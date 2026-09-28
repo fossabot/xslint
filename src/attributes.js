@@ -174,6 +174,18 @@ const shadow = function(attribute) {
 }
 
 /**
+ * Whether the attribute is a plain one of an XSLT element whose shadow stands
+ * beside it, which XSLT 3.0 ignores and Saxon never parses (#1114).
+ * @param {Node} attribute - The attribute node
+ * @return {boolean} - True when a shadow overrules it
+ */
+const overruled = function(attribute) {
+  return attribute.ownerElement.namespaceURI === XSLT &&
+    !attribute.namespaceURI &&
+    attribute.ownerElement.hasAttribute(`_${attribute.nodeName}`)
+}
+
+/**
  * Whether the attribute's whole value is an XPath expression rather than a
  * template. XSLT spells one two ways: unprefixed on an XSLT element, and in
  * the XSLT namespace on a result-vocabulary element, the only spelling a
@@ -212,7 +224,7 @@ const wholeOf = function(attribute, version) {
  * shadow attribute, otherwise each expression its braces enclose — an
  * attribute value template, or a text value template in a text node (a CDATA
  * section is one too) of a 3.0 stylesheet whose `expand-text` is on. Only an
- * attribute takes the attribute branch.
+ * attribute takes the attribute branch, and none a 3.0 shadow overrules.
  * @param {Node} node - An attribute, text, or CDATA node
  * @param {Set.<Node>} bare - Attributes holding a bare XPath
  * @param {string} version - The version in force at the node
@@ -220,9 +232,9 @@ const wholeOf = function(attribute, version) {
  */
 const carried = function(node, bare, version) {
   const three = since(version, '3.0')
-  const entire = node.nodeType === 2 &&
-    (bare.has(node) || (three && shadow(node)))
-  const braced = (node.nodeType === 2 && templated(node)) ||
+  const read = node.nodeType === 2 && !(three && overruled(node))
+  const entire = read && (bare.has(node) || (three && shadow(node)))
+  const braced = (read && templated(node)) ||
     (node.nodeType !== 2 && three && expands(node))
   let taken = []
   if (entire) {

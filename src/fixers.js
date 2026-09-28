@@ -35,10 +35,10 @@ const PLAIN = /^[^&<>{\u00A0]*$/
 
 /**
  * Fix for `using-disable-output-escaping`: delete the attribute, in whichever
- * of its two spellings the author wrote (#992), where the deletion emits what
- * the stylesheet emitted with it. That is an `xsl:text` spelling its own
- * output, and never an `xsl:value-of`, whose value the run supplies and whose
- * escaping therefore always matters (#990).
+ * spelling the author wrote and the shadow where both stand (#992, #1114),
+ * where the deletion emits what the stylesheet emitted with it. That is an
+ * `xsl:text` spelling its own output, and never an `xsl:value-of`, whose value
+ * the run supplies and whose escaping therefore always matters (#990).
  * @param {Element} node - The element carrying the attribute
  * @param {string} content - Raw source text of the file it stands in
  * @return {?object} - The fix, or nothing where the output would change
@@ -47,7 +47,7 @@ const disableOutputEscaping = function(node, content) {
   let fix = undefined
   if (node.localName === 'text' && PLAIN.test(node.textContent)) {
     fix = deletion(
-      node.getAttributeNode(ESCAPING) ?? node.getAttributeNode(`_${ESCAPING}`),
+      node.getAttributeNode(`_${ESCAPING}`) ?? node.getAttributeNode(ESCAPING),
       content,
     )
   }

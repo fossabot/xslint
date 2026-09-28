@@ -125,18 +125,20 @@ const staticOf = function(template) {
 }
 
 /**
- * What an attribute of an XSLT element says: the plain spelling where the
- * document writes one, else what its shadow names statically. XSLT 3.0 writes
- * any such attribute `_x` as readily as `x`, and `_x` holds an attribute value
- * template rather than the value — `{'yes'}` where `yes` stood — so a reader
- * asking one spelling reads half the stylesheets there are (#992).
+ * What an attribute of an XSLT element says: what its shadow names statically
+ * where the document writes one, else the plain spelling. `_x` holds an
+ * attribute value template rather than the value (#992), and where it stands
+ * XSLT ignores any `x` beside it, as Saxon does (#1114).
  * @param {Element} element - The element carrying the attribute
  * @param {string} name - The attribute's name, in its plain spelling
- * @return {string} - What it says, or empty where neither spelling does
+ * @return {string} - What it says, or empty where the one read says nothing
  */
 const attributeOf = function(element, name) {
-  return element.getAttribute(name) ||
-    staticOf(element.getAttribute(`_${name}`) || '')
+  let said = element.getAttribute(name) || ''
+  if (element.hasAttribute(`_${name}`)) {
+    said = staticOf(element.getAttribute(`_${name}`))
+  }
+  return said
 }
 
 /**

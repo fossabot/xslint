@@ -70,7 +70,7 @@ const beneath = function(version, floor) {
  * Whether a processor leaves the element out at compile time: its `use-when`
  * is a literal `falsy` answers for. XSLT reads it from 2.0 on and a shadow
  * from 3.0, at the version in force, so a 1.0 processor compiles what the
- * attribute would drop.
+ * attribute would drop; where the shadow is read the plain one is not (#1114).
  * @param {Element} element - The element to judge
  * @return {boolean} - True when no processor compiles it
  */
@@ -78,10 +78,10 @@ const excluded = function(element) {
   const {plain, shadowed} = spellings(element)
   const version = versionOf(element)
   let condition = ''
-  if (plain && since(version, MODERN)) {
-    condition = plain
-  } else if (shadowed && since(version, '3.0')) {
+  if (shadowed && since(version, '3.0')) {
     condition = staticOf(shadowed)
+  } else if (plain && since(version, MODERN)) {
+    condition = plain
   }
   return falsy(condition)
 }

@@ -135,6 +135,7 @@ const {metaOf, suppressed, defect} = require('../checks')
 const {TOKENS, normalized} = require('../tokens')
 const {XSLT, MODERN, since} = require('../xsl-version')
 const {holding} = require('../tree')
+const {attributeOf} = require('../expressions')
 const {logger} = require('../logger')
 
 /**
@@ -232,8 +233,9 @@ const CALLABLE = ['name', 'mode']
 /**
  * Whether the declaration is the template a transformation enters once: the
  * element `RANKED` names, with the root for a pattern and nothing `CALLABLE`
- * standing on it. Every attribute answers in its shadow spelling too, and the
- * pattern is read after the gaps XML keeps and XSLT throws away (#978).
+ * standing on it. Every attribute answers in its shadow spelling too, which
+ * outranks the plain one (#1114), and the pattern is read after the gaps XML
+ * keeps and XSLT throws away (#978).
  * @param {Node} declared - The top-level declaration holding the expression
  * @return {boolean} - True when the stylesheet enters it once
  */
@@ -242,9 +244,7 @@ const entered = function(declared) {
     !CALLABLE.some(
       (one) => declared.hasAttribute(one) || declared.hasAttribute(`_${one}`),
     ) &&
-    [declared.getAttribute('match'), declared.getAttribute('_match')].some(
-      (pattern) => pattern !== null && normalized(pattern) === ROOT,
-    )
+    normalized(attributeOf(declared, 'match')) === ROOT
 }
 
 /**

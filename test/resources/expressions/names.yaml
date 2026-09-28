@@ -33,3 +33,11 @@
   input: |-
     <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0"><xsl:param select="1"/></xsl:stylesheet>
   expanded: ""
+- name: reads the shadow where both spellings name one
+  input: |-
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0"><xsl:param name="height" _name="{'width'}"/></xsl:stylesheet>
+  expanded: Q{}width
+- name: expands nothing where a shadow naming nothing statically stands beside a plain name
+  input: |-
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0"><xsl:param name="height" _name="{$width}"/></xsl:stylesheet>
+  expanded: ""
