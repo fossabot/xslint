@@ -140,6 +140,16 @@ const circular = function(name, entities) {
 const CEILING = 65536
 
 /**
+ * The most characters the entities of one document may add to it. DocBook's
+ * `fo/autoidx.xsl` gains 189,859 from 270 references, the most any stylesheet
+ * of the corpora gains, so this stands five times above it, while two thousand
+ * references each resolving near `CEILING` stop here rather than at 10^8
+ * (#1044).
+ * @type {number}
+ */
+const DOCUMENT = 2 ** 20
+
+/**
  * What one declared entity resolves to, each reference to another declared
  * entity replaced by that one's resolution, remembered in `done`. A reference
  * to a name in `cyclic` stays standing, so the walk never comes back round,
@@ -368,6 +378,20 @@ const scoped = function(node) {
 }
 
 /**
+ * Whether a value may grow by so many characters, neither passing `CEILING`
+ * itself nor taking the document past what it may still gain. A reference
+ * whose replacement would pass either stays standing, the way one whose
+ * resolution passes `CEILING` does, so the bound stands where the text is
+ * built rather than on each resolution alone (#1044).
+ * @param {number} growth - Characters the value would gain
+ * @param {number} left - Characters the document may still gain
+ * @return {boolean} - True when neither bound is passed
+ */
+const affordable = function(growth, left) {
+  return growth <= Math.min(CEILING, left)
+}
+
+/**
  * The text a node holds as a parser must read it: a declared entity stands for
  * its replacement text, which is markup where it spells one, a reference this
  * run reached no declaration for stands for the content nobody read, and every
@@ -375,21 +399,26 @@ const scoped = function(node) {
  * @param {string} value - The node's parsed value
  * @param {Map.<string, string>} entities - Declared entity values
  * @param {Set.<string>} bare - Names the source spells as a reference
- * @return {string} - The value as markup
+ * @param {number} left - Characters the document may still gain
+ * @return {{text: string, grown: number}} - The value as markup, and what the
+ *   replacements added to it
  */
-const markup = function(value, entities, bare) {
+const markup = function(value, entities, bare, left) {
   let built = ''
   let at = 0
+  let grown = 0
   for (const match of value.matchAll(REFERENCE)) {
     built += escaped(value.slice(at, match.index))
-    if (entities.has(match[1])) {
+    const growth = (entities.get(match[1]) ?? '').length - match[0].length
+    if (entities.has(match[1]) && affordable(grown + growth, left)) {
       built += entities.get(match[1])
-    } else if (!bare.has(match[1])) {
+      grown += growth
+    } else if (entities.has(match[1]) || !bare.has(match[1])) {
       built += escaped(match[0])
     }
     at = match.index + match[0].length
   }
-  return `${built}${escaped(value.slice(at))}`
+  return {text: `${built}${escaped(value.slice(at))}`, grown: grown}
 }
 
 /**
@@ -501,9 +530,12 @@ const grafted = function(text, at) {
  * @param {Node} text - Text node holding at least one reference
  * @param {Map.<string, string>} entities - Declared entity values
  * @param {Set.<string>} bare - Names the source spells as a reference
+ * @param {number} left - Characters the document may still gain
+ * @return {number} - Characters the document may gain after it
  */
-const standing = function(text, entities, bare) {
-  const nodes = grafted(markup(text.nodeValue, entities, bare), text)
+const standing = function(text, entities, bare, left) {
+  const {text: built, grown} = markup(text.nodeValue, entities, bare, left)
+  const nodes = grafted(built, text)
   if (nodes.length === 1 && nodes[0].nodeType === 3) {
     text.nodeValue = nodes[0].nodeValue
   } else {
@@ -512,6 +544,7 @@ const standing = function(text, entities, bare) {
     }
     text.parentNode.removeChild(text)
   }
+  return left - grown
 }
 
 /**
@@ -519,20 +552,25 @@ const standing = function(text, entities, bare) {
  * stands for, in place. `@xmldom/xmldom` leaves the reference literal, so an
  * expression or text that uses one would otherwise read `&lowercase;` rather
  * than its replacement, and what an entity brings takes the place of the
- * reference that brought it.
+ * reference that brought it, unless `affordable` leaves it standing.
  * @param {Node} node - Node whose subtree to repair
  * @param {Map.<string, string>} entities - Declared entity values
  * @param {Set.<string>} bare - Names the source spells as a reference
+ * @param {number} left - Characters the document may still gain
+ * @return {number} - Characters the document may gain after this subtree
  */
-const expand = function(node, entities, bare) {
+const expand = function(node, entities, bare, left) {
+  let rest = left
   if (node.nodeType === 2 && node.nodeValue.includes('&')) {
     const spans = []
-    let shift = 0
+    let grown = 0
     const value = node.nodeValue.replace(REFERENCE, (whole, name, index) => {
-      const text = entities.get(name) ?? whole
-      if (entities.has(name)) {
-        spans.push([index + shift, text.length])
-        shift += text.length - whole.length
+      let text = whole
+      const growth = (entities.get(name) ?? whole).length - whole.length
+      if (entities.has(name) && affordable(grown + growth, rest)) {
+        text = entities.get(name)
+        spans.push([index + grown, text.length])
+        grown += growth
       }
       return text
     })
@@ -541,10 +579,11 @@ const expand = function(node, entities, bare) {
     }
     node.nodeValue = value
     node.value = value
+    rest -= grown
   }
   if (node.attributes) {
     for (let index = 0; index < node.attributes.length; index++) {
-      expand(node.attributes.item(index), entities, bare)
+      rest = expand(node.attributes.item(index), entities, bare, rest)
     }
   }
   const kids = []
@@ -553,11 +592,12 @@ const expand = function(node, entities, bare) {
   }
   for (const kid of kids) {
     if (kid.nodeType === 3 && kid.nodeValue.includes('&')) {
-      standing(kid, entities, bare)
+      rest = standing(kid, entities, bare, rest)
     } else if (kid.nodeType === 1) {
-      expand(kid, entities, bare)
+      rest = expand(kid, entities, bare, rest)
     }
   }
+  return rest
 }
 
 /**
@@ -781,7 +821,7 @@ const xmlFromString = function(str, subsets = new Map()) {
       throw new Error(refused)
     }
     if (entities.size || loose) {
-      expand(doc.documentElement, entities, spelled(text))
+      expand(doc.documentElement, entities, spelled(text), DOCUMENT)
     }
     return doc
   } catch (err) {

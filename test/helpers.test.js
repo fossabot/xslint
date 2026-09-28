@@ -67,6 +67,39 @@ const NESTED = [
   },
 ]
 
+/**
+ * Instructions standing in for the one `xsl:value-of` of `laughing.xsl`, each
+ * referencing `lol9` more times than one value or one document may grow by,
+ * paired with what is read back once the rest are left standing. Each
+ * resolves to sixty thousand characters, so unbounded, twenty already join
+ * over a million and two thousand take seconds (#1044).
+ * @type {Array.<{name: string, written: string,
+ *   read: function(Document): string, expected: string}>}
+ */
+const GROWN = [
+  {
+    name: 'leaves the references standing once an attribute would outgrow the cap',
+    written: `<xsl:value-of select="count(${'&lol9;'.repeat(20)})"/>`,
+    read: (doc) => doc.getElementsByTagName('xsl:value-of')[0]
+      .getAttribute('select'),
+    expected: `count(${'&lol5;'.repeat(10 ** 4)}${'&lol9;'.repeat(19)})`,
+  },
+  {
+    name: 'leaves the references standing once a text would outgrow the cap',
+    written: `<xsl:text>${'&lol9;'.repeat(20)}</xsl:text>`,
+    read: (doc) => doc.getElementsByTagName('xsl:text')[0].textContent,
+    expected: `${'&lol5;'.repeat(10 ** 4)}${'&lol9;'.repeat(19)}`,
+  },
+  {
+    name: 'leaves the references standing once a document would outgrow the cap',
+    written: '<xsl:value-of select="count(&lol9;)"/>'.repeat(40),
+    read: (doc) => String(
+      Array.from(doc.getElementsByTagName('xsl:value-of')).filter(
+        (one) => one.getAttribute('select') === 'count(&lol9;)').length),
+    expected: '23',
+  },
+]
+
 describe('helpers', function() {
   it('refuses to parse a file that does not exist', function() {
     assert.throws(() => xml.parsedFromFile(path.join(os.tmpdir(), 'no.xml')))
@@ -131,6 +164,20 @@ describe('helpers', function() {
           .getElementsByTagName('xsl:value-of')[0].getAttribute('select'),
         select,
         'did not expand the replacement text of an entity until nothing was left',
+      )
+    })
+  })
+  GROWN.forEach(({name, written, read, expected}) => {
+    it(name, function() {
+      this.timeout(5000)
+      const where = path.resolve(
+        __dirname, 'resources', 'entities', 'laughing.xsl')
+      const content = fs.readFileSync(where, 'utf-8')
+        .replace('<xsl:value-of select="count(&lol9;)"/>', written)
+      assert.equal(
+        read(xml.parsedFromString(content, subsetsOf(where, content))),
+        expected,
+        'did not leave a reference standing where expanding it would outgrow the cap',
       )
     })
   })

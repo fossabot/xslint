@@ -14,8 +14,10 @@ publication date only; detailed notes begin with the Unreleased section.
   `generate-id(&section;)` and the expression holding it was dropped unread.
   Declared values are now expanded until nothing is left to expand, and a name
   reaching itself stays an unresolved reference rather than a loop, as does one
-  whose value would pass 65536 characters, so a billion laughs cannot exhaust
-  memory (#1044).
+  whose value would pass 65536 characters. A reference also stays standing
+  once replacing it would grow one value past 65536 characters or one document
+  past 2^20, so a billion laughs cannot exhaust memory however often a
+  stylesheet references it (#1044).
 
 ## 0.3.0 - 2026-09-27
 
