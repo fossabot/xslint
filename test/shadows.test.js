@@ -49,15 +49,16 @@ const COMPARED = [
  * Every attribute a selector compares the value of. Comparing the shadow
  * spelling beside it is no remedy here, that value being an attribute value
  * template rather than the value, so what this finds is refused outright
- * rather than asked for a second clause (#992). An attribute in a namespace
- * has no shadow to read, the mechanism reaching none, so `xml:space` is left.
+ * rather than asked for a second clause (#992). Only the `xml:` namespace
+ * has no shadow, so `xml:space` is left and `xsl:expand-text` is not (#997).
  * @param {string} selector - The XPath a declarative check is written in
  * @return {Array.<string>} - The attributes whose value it compares
  */
 const compared = function(selector) {
   return COMPARED.flatMap((pattern) => Array.from(selector.matchAll(pattern)))
     .map((found) => found[1])
-    .filter((named) => !named.includes(':') && !named.startsWith('_'))
+    .filter((named) => !named.startsWith('xml:'))
+    .filter((named) => !named.split(':').pop().startsWith('_'))
 }
 
 /**
@@ -75,7 +76,47 @@ const selectors = function() {
   )
 }
 
+/**
+ * Selectors the gate must refuse, each beside the attribute it names: an
+ * attribute in the XSLT namespace has a shadow as much as one in no namespace
+ * does, `xsl:_expand-text` on a literal result element being how the 3.0 idiom
+ * spells `xsl:expand-text`, so the prefix alone exempts nothing (#997).
+ * @type {Array.<[string, Array.<string>]>}
+ */
+const REFUSED = [
+  [`//*[@xsl:expand-text = 'yes']`, ['xsl:expand-text']],
+  [`//xsl:if[normalize-space(@test) != 'q']`, ['test']],
+  [`//xsl:param[../xsl:param/@name = @name]`, ['name', 'name']],
+]
+
+/**
+ * Selectors the gate must leave, those reading an attribute no shadow spelling
+ * reaches or reading the shadow itself (#997).
+ * @type {Array.<string>}
+ */
+const LEFT = [
+  `//*[ancestor::*[@xml:space][1]/@xml:space = 'preserve']`,
+  `//*[@xsl:_expand-text = '{true()}']`,
+  `//xsl:if[@_test = '{$q}']`,
+]
+
 describe('shadows', function() {
+  for (const [selector, named] of REFUSED) {
+    it(`refuses the one spelling ${selector} compares`, function() {
+      assert.deepStrictEqual(
+        compared(selector), named,
+        `the gate does not refuse ${selector}, which compares one spelling`,
+      )
+    })
+  }
+  for (const selector of LEFT) {
+    it(`leaves ${selector}, which has no other spelling to ask`, function() {
+      assert.deepStrictEqual(
+        compared(selector), [],
+        `the gate refuses ${selector}, whose attribute has no other spelling`,
+      )
+    })
+  }
   it('asks both spellings of an attribute a selector compares the value of',
     function() {
       for (const {name, key, kind, selector} of selectors()) {
