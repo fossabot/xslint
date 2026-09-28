@@ -175,7 +175,7 @@
         "message": "Two xsl:param siblings share a @name. Each parameter of a template, function, or stylesheet must have a distinct name."
       },
       "duplicate-with-param-name": {
-        "xpath": "//xsl:with-param[@name = preceding-sibling::xsl:with-param/@name]",
+        "xpath": "//xsl:with-param[xslint:attribute(., 'name') = preceding-sibling::xsl:with-param/xslint:attribute(., 'name')]",
         "severity": "error",
         "message": "A single call passes two xsl:with-param with the same @name. Each parameter can be supplied only once."
       },
@@ -210,7 +210,7 @@
         "message": "An xsl:function requires XSLT 2.0 or later, and the version in force here is below that. Use a named template, or raise that version to 2.0."
       },
       "incorrect-use-of-boolean-constants": {
-        "xpath": "//(xsl:if | xsl:when)[xslint:normalize-space(@test) = (\"'true'\", \"'false'\", '\"true\"', '\"false\"')]",
+        "xpath": "//(xsl:if | xsl:when)[xslint:normalize-space(xslint:attribute(., 'test')) = (\"'true'\", \"'false'\", '\"true\"', '\"false\"')]",
         "severity": "warning",
         "message": "The test is the string 'true' or 'false', a non-empty string that is always true, not a boolean. Use true() or false() instead.",
         "fix": "suggestion"
@@ -226,12 +226,12 @@
         "message": "The stylesheet element has no @id attribute. Declare it to specify the unique identifier explicitly."
       },
       "missing-or-empty-href": {
-        "xpath": "//(xsl:import | xsl:include)[(not(@href) and not(@_href)) or @href = '']",
+        "xpath": "//(xsl:import | xsl:include)[(not(@href) and not(@_href)) or xslint:attribute(., 'href') = '']",
         "severity": "error",
         "message": "The @href is missing or empty, so this pulls in no module and no processor will load the stylesheet. Name the module to pull in."
       },
       "missing-or-empty-name": {
-        "xpath": "//(xsl:variable | xsl:param | xsl:call-template | xsl:function | xsl:key | xsl:attribute-set | xsl:character-map | xsl:accumulator)[not(@name) and not(@_name)] | //(xsl:variable | xsl:param | xsl:with-param | xsl:call-template | xsl:template | xsl:function | xsl:key | xsl:attribute-set | xsl:decimal-format | xsl:character-map | xsl:mode | xsl:accumulator)[@name = '']",
+        "xpath": "//(xsl:variable | xsl:param | xsl:call-template | xsl:function | xsl:key | xsl:attribute-set | xsl:character-map | xsl:accumulator)[not(@name) and not(@_name)] | //(xsl:variable | xsl:param | xsl:with-param | xsl:call-template | xsl:template | xsl:function | xsl:key | xsl:attribute-set | xsl:decimal-format | xsl:character-map | xsl:mode | xsl:accumulator)[xslint:attribute(., 'name') = '']",
         "severity": "error",
         "message": "The @name is missing or empty, so it holds no QName and no processor will load this stylesheet. Give it a name."
       },
@@ -288,7 +288,7 @@
         "message": "A variable or parameter is assigned via a nested xsl:value-of instead of the select attribute. Use select syntax instead."
       },
       "short-names": {
-        "xpath": "//(xsl:variable | xsl:param | xsl:template | xsl:function)[string-length(substring-after(@name, \":\")) = 1 or (string-length(@name) = 1 and not(contains(@name, \":\")))]",
+        "xpath": "//(xsl:variable | xsl:param | xsl:template | xsl:function)[string-length(substring-after(xslint:attribute(., 'name'), ':')) = 1 or (string-length(xslint:attribute(., 'name')) = 1 and not(contains(xslint:attribute(., 'name'), ':')))]",
         "severity": "warning",
         "message": "A variable, parameter, function, or template has a single-character name. Use a descriptive name that reveals intent."
       },
