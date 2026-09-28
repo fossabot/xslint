@@ -102,11 +102,79 @@ const {delimited, escaped} = require('./fixes')
 const REFERENCE = /&([A-Za-z_][\w.-]*);/g
 
 /**
+ * The names of the general entities a text references.
+ * @param {string} text - Replacement text, or any value spelling references
+ * @return {Array.<string>} - Every name referenced, in order
+ */
+const referenced = function(text) {
+  return Array.from(text.matchAll(REFERENCE), (match) => match[1])
+}
+
+/**
+ * Whether a declared entity reaches itself through the replacement texts of
+ * the entities it names, which XML forbids and no expansion ever finishes.
+ * @param {string} name - Declared entity name
+ * @param {Map.<string, string>} entities - Declared entity values
+ * @return {boolean} - True when a chain of its references comes back to it
+ */
+const circular = function(name, entities) {
+  const seen = new Set()
+  let pending = referenced(entities.get(name))
+  while (pending.length > 0 && !seen.has(name)) {
+    const next = pending.pop()
+    if (entities.has(next) && !seen.has(next)) {
+      seen.add(next)
+      pending = pending.concat(referenced(entities.get(next)))
+    }
+  }
+  return seen.has(name)
+}
+
+/**
+ * What one declared entity resolves to, each reference to another declared
+ * entity replaced by that one's resolution, remembered in `done`. A reference
+ * to a name in `cyclic` stays standing, so the walk never comes back round.
+ * @param {string} name - Declared entity name
+ * @param {Map.<string, string>} entities - Declared entity values
+ * @param {Set.<string>} cyclic - Names reaching themselves
+ * @param {Map.<string, string>} done - Resolutions already taken
+ * @return {string} - Its replacement text with nothing left to expand
+ */
+const resolution = function(name, entities, cyclic, done) {
+  if (!done.has(name)) {
+    done.set(name, entities.get(name).replace(REFERENCE, (whole, inner) => {
+      let text = whole
+      if (entities.has(inner) && !cyclic.has(inner)) {
+        text = resolution(inner, entities, cyclic, done)
+      }
+      return text
+    }))
+  }
+  return done.get(name)
+}
+
+/**
+ * The declared values with every reference to another declared entity
+ * replaced by what that one resolves to, until nothing is left to expand, the
+ * way XML reads a replacement text again (#1044). A name reaching itself is
+ * unresolved: its references stay standing, so the rest form no cycle.
+ * @param {Map.<string, string>} entities - Declared entity values
+ * @return {Map.<string, string>} - The same names, their values resolved
+ */
+const resolved = function(entities) {
+  const cyclic = new Set(
+    [...entities.keys()].filter((name) => circular(name, entities)))
+  const done = new Map()
+  return new Map([...entities.keys()].map(
+    (name) => [name, resolution(name, entities, cyclic, done)]))
+}
+
+/**
  * The general entities the given source declares in its internal DTD subset,
- * mapped to their replacement text. `@xmldom/xmldom` never expands them, so a
- * reference stays literal in the parsed value. XML binds the first of two
- * declarations of a name, so a later one — inline behind a subset a parameter
- * entity brought, most often — is ignored rather than winning.
+ * mapped to their replacement text, resolved. `@xmldom/xmldom` never expands
+ * them, so a reference stays literal in the parsed value. XML binds the first
+ * of two declarations of a name, so a later one — inline behind a subset a
+ * parameter entity brought, most often — is ignored rather than winning.
  * @param {string} str - XML source
  * @return {Map.<string, string>} - Declared entity names to their values
  */
@@ -122,7 +190,7 @@ const declaredEntities = function(str) {
       entities.set(match[1], match[2] ?? match[3])
     }
   }
-  return entities
+  return resolved(entities)
 }
 
 /**

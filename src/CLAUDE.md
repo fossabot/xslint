@@ -607,7 +607,8 @@ engine would be answering two different questions.
 
 ## `src/helpers.js`
 
-XML parsing (expands every entity it reads a declaration of, #1010), YAML parsing, file recursion.
+XML parsing (expands every entity it reads a declaration of, #1010, and one naming another to the
+end, #1044), YAML parsing, file recursion.
 What a replacement text stands for once it spells markup, why a reference is neither text nor a
 place a fix may be written, and which sequences a document may not hold where `@xmldom/xmldom`
 would repair one rather than refuse it, stand at the top of the module itself

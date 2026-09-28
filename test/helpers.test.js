@@ -31,6 +31,37 @@ const REFUSED = [
   },
 ]
 
+/**
+ * Stylesheets whose entities name one another, each paired with the `select`
+ * its one `xsl:value-of` reads once every reference is resolved. XML expands a
+ * replacement text again until nothing is left to expand, and a name reaching
+ * itself is left standing as the reference it is rather than walked forever
+ * (#1044).
+ * @type {Array.<{name: string, file: string, select: string}>}
+ */
+const NESTED = [
+  {
+    name: 'resolves an inline entity naming another that names a third',
+    file: 'nested-inline.xsl',
+    select: 'count(//alpha | //beta)',
+  },
+  {
+    name: 'resolves an entity naming another behind a parameter entity',
+    file: 'nested-behind-a-parameter-entity.xsl',
+    select: 'generate-id((ancestor::section)[last()])',
+  },
+  {
+    name: 'leaves a reference standing where two entities name each other',
+    file: 'cyclic.xsl',
+    select: 'count(&pong;)',
+  },
+  {
+    name: 'leaves a reference standing where an entity names itself',
+    file: 'self-reaching.xsl',
+    select: 'count(&self;)',
+  },
+]
+
 describe('helpers', function() {
   it('refuses to parse a file that does not exist', function() {
     assert.throws(() => xml.parsedFromFile(path.join(os.tmpdir(), 'no.xml')))
@@ -84,5 +115,17 @@ describe('helpers', function() {
         'brought, where XML binds the first a document gives',
       ].join(' '),
     )
+  })
+  NESTED.forEach(({name, file, select}) => {
+    it(name, function() {
+      const where = path.resolve(__dirname, 'resources', 'entities', file)
+      const content = fs.readFileSync(where, 'utf-8')
+      assert.equal(
+        xml.parsedFromString(content, subsetsOf(where, content))
+          .getElementsByTagName('xsl:value-of')[0].getAttribute('select'),
+        select,
+        'did not expand the replacement text of an entity until nothing was left',
+      )
+    })
   })
 })

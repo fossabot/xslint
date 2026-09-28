@@ -7,6 +7,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Entries for releases before this file was introduced record their npm
 publication date only; detailed notes begin with the Unreleased section.
 
+## Unreleased
+
+- Resolve an entity whose replacement text names another. Each reference was
+  replaced once, so DocBook's `&section.id;` reached the validator as
+  `generate-id(&section;)` and the expression holding it was dropped unread.
+  Declared values are now expanded until nothing is left to expand, and a name
+  reaching itself stays an unresolved reference rather than a loop (#1044).
+
 ## 0.3.0 - 2026-09-27
 
 - Read the extension namespaces a simplified stylesheet declares.
