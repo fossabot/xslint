@@ -2313,6 +2313,8 @@ xsl/html/autoidx.xsl:290:88 string-length-compared-to-zero
 xsl/html/autoidx.xsl:290:88 string-length-compared-to-zero
 xsl/html/autoidx.xsl:306:58 string-length-compared-to-zero
 xsl/html/autoidx.xsl:306:58 string-length-compared-to-zero
+xsl/html/autoidx.xsl:332:123 string-length-compared-to-zero
+xsl/html/autoidx.xsl:332:123 string-length-compared-to-zero
 xsl/html/autoidx.xsl:343:53 string-length-compared-to-zero
 xsl/html/autoidx.xsl:343:53 string-length-compared-to-zero
 xsl/html/autoidx.xsl:355:128 string-length-compared-to-zero
@@ -2324,6 +2326,8 @@ xsl/html/autoidx.xsl:379:104 string-length-compared-to-zero
 xsl/html/autoidx.xsl:379:104 string-length-compared-to-zero
 xsl/html/autoidx.xsl:404:60 string-length-compared-to-zero
 xsl/html/autoidx.xsl:404:60 string-length-compared-to-zero
+xsl/html/autoidx.xsl:423:125 string-length-compared-to-zero
+xsl/html/autoidx.xsl:423:125 string-length-compared-to-zero
 xsl/html/autoidx.xsl:434:54 string-length-compared-to-zero
 xsl/html/autoidx.xsl:434:54 string-length-compared-to-zero
 xsl/html/autoidx.xsl:446:141 string-length-compared-to-zero
@@ -2335,6 +2339,8 @@ xsl/html/autoidx.xsl:471:103 string-length-compared-to-zero
 xsl/html/autoidx.xsl:471:103 string-length-compared-to-zero
 xsl/html/autoidx.xsl:497:59 string-length-compared-to-zero
 xsl/html/autoidx.xsl:497:59 string-length-compared-to-zero
+xsl/html/autoidx.xsl:516:124 string-length-compared-to-zero
+xsl/html/autoidx.xsl:516:124 string-length-compared-to-zero
 xsl/html/autoidx.xsl:526:49 string-length-compared-to-zero
 xsl/html/autoidx.xsl:526:49 string-length-compared-to-zero
 xsl/html/autoidx.xsl:538:153 string-length-compared-to-zero

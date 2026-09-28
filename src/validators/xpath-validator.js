@@ -43,10 +43,11 @@ const META = {
 }
 
 /**
- * A reference to an entity left unresolved in a parsed expression — an entity
- * declared in an external DTD the parser never read. Such an expression cannot
- * be validated (`&` is not an XPath operator), so it is neither reported nor
- * kept: reporting it would be a false positive over a resolution gap.
+ * A reference to an entity left unresolved in a parsed expression — one
+ * declared in a DTD never read, reaching itself, or past what entities may
+ * add (#1044). Such an expression cannot be validated (`&` is not an XPath
+ * operator), so it is neither reported nor kept: reporting it would be a
+ * false positive over a resolution gap.
  * @type {RegExp}
  */
 const UNRESOLVED = /&[A-Za-z_][\w.-]*;/
@@ -109,7 +110,8 @@ const validate = function(corpus, suppressions = []) {
       logger.info(
         [
           `Skipped ${skipped} expression(s) in ${source.file} holding an`,
-          `entity no declaration this run read resolves`,
+          'entity reference left unexpanded, as undeclared in what this run',
+          'read, reaching itself, or past the bound on what entities may add',
         ].join(' '),
       )
     }
