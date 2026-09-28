@@ -14,7 +14,7 @@ publication date only; detailed notes begin with the Unreleased section.
   defects a processor refuses under thousands of style findings. The default
   now holds every check graded an error and the dead-code checks that proved
   almost never wrong over DocBook-XSL, TEI and DITA-OT, 57 reports where the
-  whole catalog draws 10,958. `unused-variable` is not among them: its reports
+  whole catalog draws 10,964. `unused-variable` is not among them: its reports
   hold, but they ask for cleanup rather than name a bug, and they were 234 of
   the 291 it would add. `--preset all`, or `preset: all` in `.xslint.yml`,
   restores the whole catalog. `--only` still reaches any check, and a check
@@ -23,6 +23,16 @@ publication date only; detailed notes begin with the Unreleased section.
   `recommended` too, so a caller passing no `preset`, an editor integration
   among them, reports far less after upgrading; pass `preset: 'all'` to keep
   the whole catalog (#1094).
+- Resolve an entity whose replacement text names another. Each reference was
+  replaced once, so DocBook's `&section.id;` reached the validator as
+  `generate-id(&section;)` and the expression holding it was dropped unread.
+  Declared values are now expanded until nothing is left to expand, and a name
+  reaching itself stays an unresolved reference rather than a loop, as does one
+  whose value would pass 65536 characters. A reference also stays standing
+  once replacing it would grow one value past 65536 characters or one document
+  past 2^20, so a billion laughs cannot exhaust memory however often a
+  stylesheet references it (#1044).
+
 - Report an unprefixed `name()` compared with a string in XSLT 1.0 again.
   `name-compared-to-string` withheld the whole report where the `*:name`
   wildcard it rewrites to cannot be spelled, so `name() = 'para'` went silent

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
 # SPDX-License-Identifier: MIT
 ---
-xpath: "//(xsl:import | xsl:include)[(not(@href) and not(@_href)) or @href = '']"
+xpath: "//(xsl:import | xsl:include)[(not(@href) and not(@_href)) or xslint:attribute(., 'href') = '']"
 severity: error
 preset: recommended
 message: "The @href is missing or empty, so this pulls in no module and no processor will load the stylesheet. Name the module to pull in."

@@ -24,12 +24,12 @@
  * below forced here — takes it out of the reach of the gate holding a
  * guide's counts to the code, `DOCUMENTS` naming guides and the README and
  * no source file but `src/attributes.js`. So the two counts that note
- * states of the vocabulary's reach, 43 of 56, are computed here from
+ * states of the vocabulary's reach, 44 of 56, are computed here from
  * `checks.json` and held to it: every branch a selector splits into that
  * the walk serves, parted by the `weighed` a run parts with, each
  * predicate asked once. Both kinds are read, a corpus check's declaration
  * and usage reaching `predicateOf` as a per-file selector does — the
- * `xpath` kind alone answers 41 of 53, which is no number a run ever sees,
+ * `xpath` kind alone answers 42 of 53, which is no number a run ever sees,
  * and counting it that way is how the note came to say 33 and 24. Two
  * sentences carry the pair in opposite orders, so both are read and
  * rewording either fails, the lesson `test/guides.test.js` records.
@@ -37,7 +37,7 @@
  * Neither table asks whether an answer is *correct*: that is `CANDIDATES`
  * in `test/selectors.test.js`, which asks fontoxpath what each spelling
  * selects over `candidates.xsl` and fails where serving answers anything
- * else — the oracle, 160 rows here against 32 before, and armed against the
+ * else — the oracle, 167 rows here against 32 before, and armed against the
  * engine before a line of the compiler existed. A row there is a question
  * rather than a claim, so enriching the fixture can only strengthen it; the
  * fixture grew five variables and a non-XSLT child so that presence, a
@@ -52,7 +52,7 @@
  * branch one kind reaches counts as covered for the other; a lone no-break
  * space, which JavaScript reads as a gap and XPath does not; and a
  * variable holding a comment and a processing instruction and no text at
- * all. Twenty candidates answer the sweep now. That width is held to it
+ * all. Twenty-four candidates answer the sweep now. That width is held to it
  * from here on, having drifted twice inside a paragraph that reads like a
  * question asked per spelling. One thing it cannot hold is a prefix
  * `src/xpath.js` does not bind: `my:thing` stands in the document for
@@ -231,6 +231,9 @@ const COMPILED = [
   'count(text()) = 1',
   'local-name() = "template"',
   'not(local-name() = (\'text\', \'param\'))',
+  'xslint:attribute(., \'disable-output-escaping\') = \'yes\'',
+  'xslint:attribute(., \'name\') = preceding-sibling::xsl:with-param/xslint:attribute(., \'name\')',
+  'string-length(xslint:attribute(., \'name\')) = 1',
 ]
 
 /**
@@ -338,11 +341,16 @@ const REFUSED = [
     ].join(' '),
   },
   {
-    text: 'xslint:attribute(., \'disable-output-escaping\') = \'yes\'',
-    why: [
-      'the third, whose answer is an attribute in either of the two',
-      'spellings XSLT gives one, where a bucket keeps the written one',
-    ].join(' '),
+    text: 'xslint:attribute(@name, \'x\') = \'y\'',
+    why: 'the third handed an attribute, which carries no attribute of its own',
+  },
+  {
+    text: 'xslint:attribute(., @name) = \'y\'',
+    why: 'the third asked of a name no literal spells',
+  },
+  {
+    text: 'xsl:param/attribute::name/xslint:attribute(., \'x\') = \'y\'',
+    why: 'the third behind a step reaching an attribute rather than an element',
   },
 ]
 

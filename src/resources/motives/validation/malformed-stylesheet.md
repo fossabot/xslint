@@ -24,6 +24,17 @@ characters that happen to fall together at the end of an array subscript or a
 piece of quoted code are still the close of a section that never opened. Escape
 the bracket or the angle: `]]&gt;` reads as the text it looks like.
 
+A prefix is part of the same contract. XML with namespaces reads `xsl:template`
+as a name in whatever namespace `xsl` is bound to, so a file that spells the
+prefix without an `xmlns:xsl` declaration in scope has elements no processor can
+place in any namespace, and it refuses the file before it reads a single
+template. This is how a fragment cut out of a larger stylesheet breaks: the
+declaration stayed on the root it was cut from. Declare the prefix on the root
+of the file itself, bound to the namespace it stood for. Two prefixes take no
+declaration at all: `xml` is bound to its own namespace already, so rebinding it
+to another URI breaks the file rather than repairing it, and `xmlns` belongs to
+declarations alone, so an element spelled with it has to be renamed.
+
 Both are fine where they are not content. Inside a comment and inside a
 processing instruction, XML reads neither as opening or closing anything, and
 inside a CDATA section an `&` is ordinary text while a `]]>` is the close it is
@@ -88,6 +99,28 @@ Correct:
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
   <xsl:template match="/">
     <code>rows[cells[0]]&gt; 1</code>
+  </xsl:template>
+</xsl:stylesheet>
+```
+
+Incorrect:
+
+```xsl
+<xsl:template match="ulink" name="ulink">
+  <a href="{@url}">
+    <xsl:apply-templates/>
+  </a>
+</xsl:template>
+```
+
+Correct:
+
+```xsl
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+  <xsl:template match="ulink" name="ulink">
+    <a href="{@url}">
+      <xsl:apply-templates/>
+    </a>
   </xsl:template>
 </xsl:stylesheet>
 ```

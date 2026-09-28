@@ -497,6 +497,14 @@ const SHAPED = {
 }
 
 /**
+ * The keys a check words a message under: `message` on every check, and
+ * `namespace` on `malformed-stylesheet`, what a prefix nothing binds earns in
+ * place of a syntax fault (#1019).
+ * @type {Array.<string>}
+ */
+const WORDINGS = ['message', 'namespace']
+
+/**
  * Every way one message departs from `SHAPED`.
  * @param {string} message - What a check tells the user
  * @return {Array.<string>} - The departures, none for a message in shape
@@ -592,7 +600,10 @@ describe('conformance', function() {
     const found = {}
     for (const kind of KINDS) {
       for (const [name, check] of Object.entries(kinds[kind])) {
-        const departed = departures(check.message)
+        const departed = WORDINGS
+          .filter((key) => Object.hasOwn(check, key))
+          .flatMap((key) => departures(check[key])
+            .map((departure) => `${key} ${departure}`))
         if (departed.length > 0) {
           found[`${kind}/${name}`] = departed
         }
