@@ -82,6 +82,9 @@
  * moved an unprefixed `name()` onto the wildcard: an element in a default
  * namespace answers its bare name, and a bare `self::pubdate` asks for no
  * namespace, which xsltproc confirms over DocBook's `biblio-iso690.xsl`.
+ * In 1.0, which has no wildcard, that took the report with the rewrite until
+ * #1042, though the comparison is as prefix-fragile there as anywhere: it
+ * stands now, with no fix, where a `local-name()` in 1.0 is still withheld.
  */
 
 const {VALUED, calls, isValid, offsetOf, operatorOf, parseOf, stringOf,
@@ -465,16 +468,15 @@ const bound = function(found, literal) {
 }
 
 /**
- * The node test that replaces a comparison, or null when it cannot be built
- * with one edit — a string XML cannot spell a name with, or one that takes the
- * `*:name` wildcard in a 1.0 stylesheet, where it does not exist. An
- * unprefixed `name()` takes it too: an element in a default namespace answers
- * its bare local name, where a bare name test asks for no namespace (#1000).
+ * What a comparison is reported with: the node test replacing it, a null one
+ * where an unprefixed `name()` needs the `*:name` wildcard 1.0 lacks (#1042),
+ * or null where nothing is reported — a string XML cannot spell a name with,
+ * or a `local-name()` in 1.0, which is not prefix-fragile (#962, #1000).
  * @param {{local: string, literal: string}} pair - The call and the string
  * @param {string} operator - The comparison operator, `=` or `!=`
  * @param {boolean} modern - Whether the stylesheet is 2.0 or 3.0
  * @param {boolean} spaced - Whether `xpath-default-namespace` is in force
- * @return {?string} - The replacement expression, or null
+ * @return {?{replacement: ?string}} - The verdict, or null
  */
 const test = function(pair, operator, modern, spaced) {
   const literal = pair.literal
@@ -482,20 +484,22 @@ const test = function(pair, operator, modern, spaced) {
   if (pair.local === 'name' && (literal.includes(':') || spaced)) {
     node = `self::${literal}`
   }
-  let replacement = node
-  if (!qualified(literal) || (node.includes('*:') && !modern)) {
-    replacement = null
+  let verdict = {replacement: node}
+  if (!qualified(literal) || (pair.local === 'local-name' && !modern)) {
+    verdict = null
+  } else if (node.includes('*:') && !modern) {
+    verdict = {replacement: null}
   } else if (operator === '!=') {
-    replacement = `not(${node})`
+    verdict = {replacement: `not(${node})`}
   }
-  return replacement
+  return verdict
 }
 
 /**
- * The `name()`/`local-name()`-versus-string comparisons a node test replaces:
- * the offset, the verbatim text, and that test — null where nothing binds its
- * prefix (#991), and absent where no test replaces it, the report being
- * withheld whole there (#962). Both classes are gathered (#763), and the
+ * The `name()`/`local-name()`-versus-string comparisons reported: the
+ * offset, the verbatim text, and the node test — null where nothing binds its
+ * prefix (#991) or 1.0 cannot spell it (#1042), and absent where `test`
+ * withholds the report (#962). Both classes are gathered (#763), and the
  * string is what the literal holds rather than how it is written (#598).
  * @param {{node: Node, expression: string, pattern: boolean}} found - The
  *  expression, whole, as `expressionsOf` yields it
@@ -509,17 +513,17 @@ const comparisons = function(found, modern) {
   for (const {node, names} of weighed(found)) {
     const pair = paired(found, node)
     const operator = operatorOf(found, node.children[0], node.children[1])
-    let replacement = null
+    let verdict = null
     let settles = names
     if (pair !== null && OPERATORS.includes(operator) && names === null) {
       around = around ?? outer(found)
       settles = around
     }
     if (pair !== null && OPERATORS.includes(operator) && settles) {
-      replacement = test(pair, operator, modern, modern && defaulted(found))
+      verdict = test(pair, operator, modern, modern && defaulted(found))
     }
-    if (replacement !== null) {
-      let offered = replacement
+    if (verdict !== null) {
+      let offered = verdict.replacement
       if (!bound(found, pair.literal)) {
         offered = null
       }
