@@ -4,8 +4,8 @@
  */
 
 /*
- * What a `use-when` does to an element, in the four spellings and at the two
- * floors — 2.0 for the plain attribute, 3.0 for the shadow — asked in one
+ * What a `use-when` does to an element, in the four spellings — the plain
+ * attribute from 2.0 on, the shadow at any version (#1114) — asked in one
  * place so the pruning and the checks cannot part on which spelling counts
  * where. `excluded` is certain, and `src/validators/xsl-validator.js` prunes
  * what it answers for; `conditional` is the doubt left over, so a check whose
@@ -68,9 +68,9 @@ const beneath = function(version, floor) {
 
 /**
  * Whether a processor leaves the element out at compile time: its `use-when`
- * is a literal `falsy` answers for. XSLT reads it from 2.0 on and a shadow
- * from 3.0, at the version in force, so a 1.0 processor compiles what the
- * attribute would drop; where the shadow is read the plain one is not (#1114).
+ * is a literal `falsy` answers for. XSLT reads the plain one from 2.0 on, at
+ * the version in force, so a 1.0 processor compiles what it would drop; a
+ * shadow is read at any version, and where it is the plain one is not (#1114).
  * @param {Element} element - The element to judge
  * @return {boolean} - True when no processor compiles it
  */
@@ -78,7 +78,7 @@ const excluded = function(element) {
   const {plain, shadowed} = spellings(element)
   const version = versionOf(element)
   let condition = ''
-  if (shadowed && since(version, '3.0')) {
+  if (shadowed) {
     condition = staticOf(shadowed)
   } else if (plain && since(version, MODERN)) {
     condition = plain
@@ -97,8 +97,7 @@ const excluded = function(element) {
 const conditional = function(element) {
   const {plain, shadowed} = spellings(element)
   const version = versionOf(element)
-  return Boolean(plain && !beneath(version, MODERN)) ||
-    Boolean(shadowed && !beneath(version, '3.0'))
+  return Boolean(shadowed) || Boolean(plain && !beneath(version, MODERN))
 }
 
 module.exports = {

@@ -8,5 +8,6 @@
     <xsl:value-of select="(((" _select="name(.)"/>
     <xsl:element name="{(((}" _name="{'item'}"/>
     <xsl:value-of version="2.0" select="@x" _select="@y"/>
+    <xsl:value-of version="1.0" select="@v" _select="@w"/>
   </xsl:template>
 </xsl:stylesheet>

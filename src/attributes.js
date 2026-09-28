@@ -4,7 +4,7 @@
  */
 
 const {enclosed} = require('./expressions')
-const {XSLT, since, versionOf} = require('./xsl-version')
+const {XSLT, versionOf} = require('./xsl-version')
 const {walked} = require('./tree')
 
 /**
@@ -138,9 +138,9 @@ const ON = ['yes', 'true', '1']
 /**
  * Whether text value templates expand around the given text node — the nearest
  * ancestor to set `expand-text` (an XSLT element) or `xsl:expand-text` (a
- * literal result element) wins, and expansion is off until one does. In XSLT
- * 3.0 an on setting turns the `{...}` of a text node into real expressions, the
- * way a `select` carries one.
+ * literal result element) wins, and expansion is off until one does. An on
+ * setting turns the `{...}` of a text node into real expressions, the way a
+ * `select` carries one, at any version a 3.0 processor runs (#1114).
  * @param {Node} text - The text node
  * @return {boolean} - True when its braces expand
  */
@@ -161,8 +161,9 @@ const expands = function(text) {
 /**
  * Whether the attribute is a shadow attribute standing in for a bare-XPath one
  * — `_select` for `select` — on an XSLT element, with no braces, so its whole
- * value is the static expression that becomes the real attribute (XSLT 3.0).
- * A shadow attribute that does carry braces is a template, left to `enclosed`.
+ * value is the static expression that becomes the real attribute, whatever
+ * version is in force (#1114). One that carries braces is a template, left to
+ * `enclosed`.
  * @param {Node} attribute - The attribute node
  * @return {boolean} - True when its whole value is an expression
  */
@@ -175,7 +176,8 @@ const shadow = function(attribute) {
 
 /**
  * Whether the attribute is a plain one of an XSLT element whose shadow stands
- * beside it, which XSLT 3.0 ignores and Saxon never parses (#1114).
+ * beside it, which XSLT ignores at every version and Saxon never parses
+ * (#1114).
  * @param {Node} attribute - The attribute node
  * @return {boolean} - True when a shadow overrules it
  */
@@ -223,19 +225,18 @@ const wholeOf = function(attribute, version) {
  * The expressions a node contributes: a whole value when it is a bare-XPath or
  * shadow attribute, otherwise each expression its braces enclose — an
  * attribute value template, or a text value template in a text node (a CDATA
- * section is one too) of a 3.0 stylesheet whose `expand-text` is on. Only an
- * attribute takes the attribute branch, and none a 3.0 shadow overrules.
+ * section is one too) whose `expand-text` is on. Only an attribute takes the
+ * attribute branch, and none a shadow overrules.
  * @param {Node} node - An attribute, text, or CDATA node
  * @param {Set.<Node>} bare - Attributes holding a bare XPath
  * @param {string} version - The version in force at the node
  * @return {Array.<{node: Node, start: number, expression: string}>} - Found
  */
 const carried = function(node, bare, version) {
-  const three = since(version, '3.0')
-  const read = node.nodeType === 2 && !(three && overruled(node))
-  const entire = read && (bare.has(node) || (three && shadow(node)))
+  const read = node.nodeType === 2 && !overruled(node)
+  const entire = read && (bare.has(node) || shadow(node))
   const braced = (read && templated(node)) ||
-    (node.nodeType !== 2 && three && expands(node))
+    (node.nodeType !== 2 && expands(node))
   let taken = []
   if (entire) {
     taken = [wholeOf(node, version)]
@@ -251,7 +252,7 @@ const carried = function(node, bare, version) {
 /**
  * Every expression a stylesheet carries, in document order. An attribute
  * holding a bare XPath contributes its whole value; another attribute, and a
- * text node under an on `expand-text` in a 3.0 stylesheet, contribute each
+ * text node under an on `expand-text`, contribute each
  * expression their braces enclose. Each names the node, the offset inside its
  * value, the text, and the version in force there, derived once here (#845).
  * @param {Document} xsl - XSL document parsed as {@link Document}

@@ -469,13 +469,14 @@ expression but is a whole pattern rather than a step inside one, so `y|.` does
 not parse and a bare `match="."` outranks the `self::node()` it replaced. A
 fixer touching a step withholds inside a pattern; where the shorter form does
 not exist there at all, the check does not report it either, the way it stays
-quiet on a `parent::n` (#583). In an XSLT 3.0
-stylesheet it also reads a **text value template** — the braces of a text node
+quiet on a `parent::n` (#583). At any version it
+also reads a **text value template** — the braces of a text node
 whose nearest `expand-text`/`xsl:expand-text` is on — and a **shadow attribute**
 (`_select` for `select`), the same expressions the modern idiom hides outside an
 attribute (#606). A shadow overrules the plain attribute beside it, which XSLT
 ignores and Saxon never parses, so that one yields nothing, and `attributeOf`
-reads the shadow first too (#1114). The namespace decides and never the name: an attribute a
+reads the shadow first too — below 3.0 as well, a 3.0 processor reading both
+there as Saxon does (#1114). The namespace decides and never the name: an attribute a
 literal result element happens to call `test` or
 `select` holds text destined for the result tree, so it is left alone — reading it
 as XPath let `--fix` rewrite the output — while the `xsl:use-when` beside it is

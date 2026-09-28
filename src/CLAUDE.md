@@ -214,7 +214,7 @@ gives, this chain having reached the bar once #846 grew the guide below it (#821
 
 ## `src/attributes.js`
 
-`expressionsOf(xsl)` — every expression a stylesheet carries: a bare/AVT attribute, a 3.0 text value
+`expressionsOf(xsl)` — every expression a stylesheet carries: a bare/AVT attribute, a text value
 template, or a shadow attribute, each saying whether it is a `pattern`; `PATTERNS` names the five
 attributes that hold one; and `whole(found, name)` for a linter that narrows to one attribute out of
 the records it is handed. That helper replaced `selectorOf`, an XPath of this module's own over

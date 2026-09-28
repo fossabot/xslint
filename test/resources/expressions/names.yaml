@@ -41,3 +41,11 @@
   input: |-
     <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0"><xsl:param name="height" _name="{$width}"/></xsl:stylesheet>
   expanded: ""
+- name: reads the shadow where both spellings name one in a 1.0 stylesheet
+  input: |-
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"><xsl:param name="height" _name="{'depth'}"/></xsl:stylesheet>
+  expanded: Q{}depth
+- name: reads the shadow where both spellings name one in a 2.0 stylesheet
+  input: |-
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0"><xsl:param name="height" _name="{'breadth'}"/></xsl:stylesheet>
+  expanded: Q{}breadth
