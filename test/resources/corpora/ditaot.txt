@@ -1076,6 +1076,7 @@ src/main/plugins/org.dita.xhtml/xsl/xslhtml/xml-d.xsl:9:1 missing-id-in-styleshe
 src/test/resources/BranchFilterModuleTest/src/input.xsl:2:1 missing-id-in-stylesheet
 src/test/resources/BranchFilterModuleTest/src/input.xsl:40:5 unused-function-template-parameter
 src/test/resources/IntegratorTest/exp/plugins/dummy/xsl/shell.xsl:2:1 missing-id-in-stylesheet
+src/test/resources/IntegratorTest/exp/plugins/dummy/xsl/shell.xsl:5:3 broken-href
 src/test/resources/IntegratorTest/exp/xsl/shell.xsl:2:1 missing-id-in-stylesheet
 src/test/resources/IntegratorTest/src/plugins/dummy/xsl/shell_template.xsl:2:1 missing-id-in-stylesheet
 src/test/resources/IntegratorTest/src/plugins/dummy/xsl/shell_template.xsl:2:1 stylesheet-has-no-templates
