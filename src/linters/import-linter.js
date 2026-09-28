@@ -35,7 +35,7 @@ const BROKEN = 'broken-href'
 const XML = 'http://www.w3.org/XML/1998/namespace'
 
 /**
- * Metadata of both checks, keyed by name.
+ * Metadata of the three checks, keyed by name.
  * @type {{[check: string]: {severity: string, message: string}}}
  */
 const META = {

@@ -100,4 +100,17 @@ describe('helpers', function() {
         ].join(' '),
       )
     })
+  it('names the href a shadow quotes where no file stands behind it',
+    function() {
+      const file = path.resolve(
+        __dirname, 'resources', 'hrefs', 'shadowed.xsl')
+      assert.deepEqual(
+        [...absentOf(file, fs.readFileSync(file, 'utf-8'))],
+        ['gone-m3.xsl'],
+        [
+          'cannot read a braced literal in a _href as the href it quotes,',
+          'so the module it names goes unreported or its braces are (#209)',
+        ].join(' '),
+      )
+    })
 })

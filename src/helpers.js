@@ -92,6 +92,7 @@ const fs = require('fs')
 const path = require('path')
 const {DOMParser} = require('@xmldom/xmldom')
 const {GAP, WHITESPACE} = require('./tokens')
+const {staticOf} = require('./expressions')
 const {NAMED, parted, offsetAt, placeAt} = require('./source')
 const {delimited, escaped} = require('./fixes')
 
@@ -169,12 +170,13 @@ const subsetsOf = function(file, str) {
 }
 
 /**
- * An `href` or `_href` attribute, capturing the value either quote holds.
+ * An `href` or `_href` attribute, capturing the underscore a shadow carries
+ * and the value either quote holds.
  * @type {RegExp}
  */
 const HREF = new RegExp(
   [
-    `(?<![\\w:.-])_?href${GAP}*=${GAP}*`,
+    `(?<![\\w:.-])(_?)href${GAP}*=${GAP}*`,
     `(?:"([^"]*)"|'([^']*)')`,
   ].join(''), 'g')
 
@@ -189,9 +191,10 @@ const RELATIVE = new RegExp(
 
 /**
  * The relative hrefs a stylesheet writes that no file stands behind, read
- * relative to it, by the value as written. A URL, an absolute path and a
- * `plugin:` URI are a catalog's to resolve and never named here, and a value
- * spelled otherwise than it parses matches no href a check reads (#209).
+ * relative to it, by the value as written, or the literal a shadow quotes. A
+ * URL, an absolute path and a `plugin:` URI are a catalog's to resolve and
+ * never named here, and a value spelled otherwise than it parses matches no
+ * href a check reads (#209).
  * @param {string} file - Path of the stylesheet
  * @param {string} str - XML source
  * @return {Set.<string>} - The hrefs naming no file
@@ -199,7 +202,13 @@ const RELATIVE = new RegExp(
 const absentOf = function(file, str) {
   return new Set(
     [...str.matchAll(HREF)]
-      .map((match) => match[1] ?? match[2])
+      .map((match) => {
+        let href = match[2] ?? match[3]
+        if (match[1]) {
+          href = staticOf(href)
+        }
+        return href
+      })
       .filter((href) => RELATIVE.test(href))
       .filter((href) => {
         const whole = path.resolve(path.dirname(file), href)

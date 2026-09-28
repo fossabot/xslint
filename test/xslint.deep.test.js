@@ -379,7 +379,8 @@ describe('xslint', function() {
   })
   it('should report every import the disk holds no file for', function() {
     assert.equal(
-      runXslint(['test/resources/hrefs']).split('(broken-href)').length - 1,
+      runXslint(['test/resources/hrefs/importing.xsl'])
+        .split('(broken-href)').length - 1,
       3,
       [
         'reported other than the three relative hrefs naming no file, where a',
