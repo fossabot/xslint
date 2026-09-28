@@ -68,31 +68,30 @@ const NESTED = [
 ]
 
 /**
- * Instructions standing in for the one `xsl:value-of` of `laughing.xsl`, each
- * referencing `lol9` more times than one value or one document may grow by,
- * paired with what is read back once the rest are left standing. Each
- * resolves to sixty thousand characters, so unbounded, twenty already join
- * over a million and two thousand take seconds (#1044).
- * @type {Array.<{name: string, written: string,
+ * Stylesheets referencing `lol9` of `laughing.xsl` more often than one value
+ * or one document may grow by, each paired with what is read back once the
+ * rest are left standing. Each resolves to sixty thousand characters, so
+ * unbounded, twenty already join over a million (#1044).
+ * @type {Array.<{name: string, file: string,
  *   read: function(Document): string, expected: string}>}
  */
 const GROWN = [
   {
     name: 'leaves the references standing once an attribute would outgrow the cap',
-    written: `<xsl:value-of select="count(${'&lol9;'.repeat(20)})"/>`,
+    file: 'laughing-in-an-attribute.xsl',
     read: (doc) => doc.getElementsByTagName('xsl:value-of')[0]
       .getAttribute('select'),
     expected: `count(${'&lol5;'.repeat(10 ** 4)}${'&lol9;'.repeat(19)})`,
   },
   {
     name: 'leaves the references standing once a text would outgrow the cap',
-    written: `<xsl:text>${'&lol9;'.repeat(20)}</xsl:text>`,
+    file: 'laughing-in-a-text.xsl',
     read: (doc) => doc.getElementsByTagName('xsl:text')[0].textContent,
     expected: `${'&lol5;'.repeat(10 ** 4)}${'&lol9;'.repeat(19)}`,
   },
   {
     name: 'leaves the references standing once a document would outgrow the cap',
-    written: '<xsl:value-of select="count(&lol9;)"/>'.repeat(40),
+    file: 'laughing-in-a-document.xsl',
     read: (doc) => String(
       Array.from(doc.getElementsByTagName('xsl:value-of')).filter(
         (one) => one.getAttribute('select') === 'count(&lol9;)').length),
@@ -167,13 +166,11 @@ describe('helpers', function() {
       )
     })
   })
-  GROWN.forEach(({name, written, read, expected}) => {
+  GROWN.forEach(({name, file, read, expected}) => {
     it(name, function() {
       this.timeout(5000)
-      const where = path.resolve(
-        __dirname, 'resources', 'entities', 'laughing.xsl')
+      const where = path.resolve(__dirname, 'resources', 'entities', file)
       const content = fs.readFileSync(where, 'utf-8')
-        .replace('<xsl:value-of select="count(&lol9;)"/>', written)
       assert.equal(
         read(xml.parsedFromString(content, subsetsOf(where, content))),
         expected,
