@@ -189,6 +189,7 @@ src/main/plugins/org.dita.html5/xsl/map2html5Impl.xsl:9:1 missing-id-in-styleshe
 src/main/plugins/org.dita.html5/xsl/map2html5Impl.xsl:54:94 redundant-whitespace fix ""
 src/main/plugins/org.dita.html5/xsl/mapwalker.xsl:11:1 missing-id-in-stylesheet
 src/main/plugins/org.dita.html5/xsl/mapwalker.xsl:11:1 not-using-output
+src/main/plugins/org.dita.html5/xsl/mapwalker.xsl:44:48 undefined-variable
 src/main/plugins/org.dita.html5/xsl/mapwalker.xsl:75:5 unused-function-template-parameter
 src/main/plugins/org.dita.html5/xsl/mapwalker.xsl:76:5 unused-function-template-parameter
 src/main/plugins/org.dita.html5/xsl/mapwalker.xsl:77:5 unused-function-template-parameter

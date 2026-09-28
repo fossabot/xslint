@@ -18,6 +18,12 @@ publication date only; detailed notes begin with the Unreleased section.
   point too. A stylesheet started with `-it` from another name stays unjudged,
   being indistinguishable from a library of named templates (#1046).
 
+- Add the `undefined-variable` check (error): a `$name` no binding in scope
+  declares is a static error every processor raises before it transforms
+  anything. A global counts across the whole import tree, a local only from
+  the sibling after its binding onward, and a text value template starts its
+  scope at its own text node (#208).
+
 - Resolve an entity whose replacement text names another. Each reference was
   replaced once, so DocBook's `&section.id;` reached the validator as
   `generate-id(&section;)` and the expression holding it was dropped unread.

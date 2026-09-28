@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: undefined-variable
+found:
+  amount: 1
+  positions: [ [ 2, 4, 27 ] ]
+  fixes: [ null ]
+inputs:
+  - |-
+    <?xml version="1.0"?>
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
+      <xsl:import href="file2.xsl"/>
+      <xsl:template match="/">
+        <xsl:apply-templates/>
+      </xsl:template>
+    </xsl:stylesheet>
+  - |-
+    <?xml version="1.0"?>
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
+      <xsl:import href="file2.xsl"/>
+      <xsl:import href="elsewhere.xsl"/>
+      <xsl:template match="/">
+        <xsl:apply-templates/>
+      </xsl:template>
+    </xsl:stylesheet>
+  - |-
+    <?xml version="1.0"?>
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
+      <xsl:template match="item">
+        <xsl:value-of select="$from-elsewhere"/>
+      </xsl:template>
+    </xsl:stylesheet>
