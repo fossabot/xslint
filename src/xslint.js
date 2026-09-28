@@ -177,7 +177,7 @@
 
 const path = require('path')
 const fs = require('fs')
-const {allFilesFrom, slashed, subsetsOf} = require('./helpers')
+const {absentOf, allFilesFrom, slashed, subsetsOf} = require('./helpers')
 const {ignoring} = require('./gitignore')
 const {parted} = require('./source')
 const {SUGGESTION, suppressed} = require('./checks')
@@ -658,9 +658,9 @@ const ranked = function(one, two) {
  * wraps and an editor or LSP can call in-process. Each defect carries `{name,
  * severity, message, file, line, pos}` and, when fixable, a `fix`. Inline
  * `xslint-disable` directives are honored.
- * @param {Array.<{file: string, content: string, subsets: Map}>} sources -
- *  Raw stylesheets as read, a byte order mark held aside by `parted`, and
- *  the files their parameter entities name, read by the caller (#1010)
+ * @param {Array.<{file: string, content: string, subsets: Map,
+ *  absent: Set}>} sources - Raw stylesheets, what their parameter entities
+ *  name, and the hrefs no file stands behind, read by the caller (#1010, #209)
  * @param {{suppress: Array.<string>, overrides: {[check: string]: string},
  *  only: Array}} options - Skips, re-grades and choices
  * @return {Array.<object>} - The defects that survive suppression
@@ -675,6 +675,7 @@ const lint = function(
   const read = sources.map((source) => ({
     file: source.file, content: parted(source.content).text,
     subsets: source.subsets ?? new Map(),
+    absent: source.absent ?? new Set(),
   }))
   const {corpus, defects: malformed} = validateXsls(read, suppressions)
   const {expressions, defects: invalid} = validateXpaths(corpus, suppressions)
@@ -776,6 +777,7 @@ const xslint = function(pths, options) {
       file: stylesheet,
       content: content,
       subsets: subsetsOf(stylesheet, content),
+      absent: absentOf(stylesheet, content),
     }))
   let only = config.only
   if (options.only?.length > 0) {

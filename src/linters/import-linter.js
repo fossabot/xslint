@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
+const path = require('path')
 const {metaOf, suppressed} = require('../checks')
+const {conditional} = require('../conditions')
 const {excision} = require('../fixes')
 const {importsOf, graphOf} = require('../import-graph')
 const {logger} = require('../logger')
@@ -21,16 +23,32 @@ const CIRCULAR = 'circular-import'
 const REDUNDANT = 'redundant-import'
 
 /**
+ * Name of the check for an href naming no file.
+ * @type {string}
+ */
+const BROKEN = 'broken-href'
+
+/**
+ * The namespace XML binds its own `xml:` prefix to.
+ * @type {string}
+ */
+const XML = 'http://www.w3.org/XML/1998/namespace'
+
+/**
  * Metadata of both checks, keyed by name.
  * @type {{[check: string]: {severity: string, message: string}}}
  */
-const META = {[CIRCULAR]: metaOf(CIRCULAR), [REDUNDANT]: metaOf(REDUNDANT)}
+const META = {
+  [CIRCULAR]: metaOf(CIRCULAR),
+  [REDUNDANT]: metaOf(REDUNDANT),
+  [BROKEN]: metaOf(BROKEN),
+}
 
 /**
  * Names of the checks this linter owns.
  * @type {Array.<string>}
  */
-const names = [CIRCULAR, REDUNDANT]
+const names = [CIRCULAR, REDUNDANT, BROKEN]
 
 /**
  * A defect of one of the import checks.
@@ -219,10 +237,46 @@ const byRedundancy = function(corpus) {
 }
 
 /**
+ * Whether the href of an import resolves against its own file and is sure to
+ * be loaded: no `xml:base` on it or above it moves where it points, and no
+ * `use-when` there may drop it, a module one processor never reads being one
+ * it need not find (#209).
+ * @param {Element} node - The `xsl:import`/`xsl:include` element
+ * @return {boolean} - True when a missing module is a fault
+ */
+const settled = function(node) {
+  let element = node
+  let answer = true
+  while (answer && element.nodeType === 1) {
+    answer = !element.hasAttributeNS(XML, 'base') && !conditional(element)
+    element = element.parentNode
+  }
+  return answer
+}
+
+/**
+ * Defects for `broken-href` — every `xsl:import`/`xsl:include` whose href the
+ * caller found no file behind. The disk is read before `lint`, by whoever
+ * hands it the sources, so a run reading none reports none (#209).
+ * @param {Array.<{file: string, xsl: Document, absent: Set}>} corpus -
+ *  Parsed stylesheets, each with the hrefs no file stands behind
+ * @return {Array.<object>} - Defects found
+ */
+const byAbsence = function(corpus) {
+  const absent = new Map(corpus.map(
+    ({file, absent = new Set()}) => [path.normalize(file), absent],
+  ))
+  return importsOf(corpus)
+    .filter(({file, href, node}) => absent.get(file).has(href) && settled(node))
+    .map(({file, node}) => defect(BROKEN, file, node))
+}
+
+/**
  * Lint the corpus for import-graph defects: `xsl:import`/`xsl:include` cycles
- * (`circular-import`, an error) and the same module imported more than once in
- * one stylesheet (`redundant-import`, a warning). Both resolve hrefs against
- * the importing file's directory (`src/import-graph.js`).
+ * (`circular-import`, an error), the same module imported more than once in
+ * one stylesheet (`redundant-import`, a warning), and a module no file stands
+ * for (`broken-href`, an error). All three resolve hrefs against the importing
+ * file's directory (`src/import-graph.js`).
  * @param {Array.<{file: string, content: string, xsl: Document}>} corpus -
  *  Parsed stylesheets
  * @param {Array.<string>} suppressions - Array of suppressed checks
@@ -237,6 +291,9 @@ const lintByImports = function(corpus, suppressions = []) {
   }
   if (!suppressed(REDUNDANT, suppressions)) {
     defects = defects.concat(byRedundancy(corpus))
+  }
+  if (!suppressed(BROKEN, suppressions)) {
+    defects = defects.concat(byAbsence(corpus))
   }
   logger.debug(`Found ${defects.length} import defects`)
   return defects

@@ -454,4 +454,32 @@ describe('lint (programmatic API)', function() {
       ].join(' '),
     )
   })
+  it('reports an import naming no file where its caller read the disk',
+    function() {
+      assert.deepEqual(
+        lint([{
+          ...source('hrefs/importing.xsl'),
+          absent: new Set(['modules/vanished-7q.xsl', 'lost-w4.xsl']),
+        }])
+          .filter((defect) => defect.name === 'broken-href')
+          .map((defect) => defect.line),
+        [8, 15],
+        [
+          'cannot report the xsl:import and the xsl:include whose href the',
+          'caller found no file behind (#209)',
+        ].join(' '),
+      )
+    })
+  it('stays quiet about an href where nobody read the disk',
+    function() {
+      assert.deepEqual(
+        lint([source('hrefs/importing.xsl')])
+          .filter((defect) => defect.name === 'broken-href'),
+        [],
+        [
+          'reported an href as naming no file though nothing handed the run',
+          'an answer about the disk, which lint never reads itself',
+        ].join(' '),
+      )
+    })
 })

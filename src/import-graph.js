@@ -59,11 +59,11 @@ const referenced = function(element) {
  * file, declaring element, and the path its href resolves to. No file is
  * read. A reference naming no module yields no import, joining an absent
  * href onto a directory having taken the run's report down (#668, #597); each
- * carries the raw text a fix reads its span from (#793).
+ * carries its href and the raw text a fix reads its span from (#793, #209).
  * @param {Array.<{file: string, content: string, xsl: Document}>} corpus -
  *  Parsed stylesheets
  * @return {Array.<{file: string, content: string, node: Element,
- *  to: string}>} - The imports
+ *  href: string, to: string}>} - The imports
  */
 const importsOf = function(corpus) {
   const files = corpus.map(({file}) => path.normalize(file))
@@ -80,6 +80,7 @@ const importsOf = function(corpus) {
         file: path.normalize(file),
         content: content,
         node: node,
+        href: href,
         to: target(file, href, files),
       })))
 }

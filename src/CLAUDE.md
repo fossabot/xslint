@@ -512,7 +512,10 @@ no module and yields no import, rather than joining a null onto the directory an
 run's report down (#597); no check reports that malformed reference yet (#668). Each import carries
 the raw text of the file it stands in beside its node, because a fix that cuts one reads its span
 from the source rather than rebuilding the element (#793). An href spelled `plugin:<id>:<path>`,
-DITA-OT's, resolves to the linted file standing at `<id>/<path>` (#1004).
+DITA-OT's, resolves to the linted file standing at `<id>/<path>` (#1004). Whether a file stands
+behind an href is not asked here but of `absentOf` in `src/helpers.js`, which `xslint()` calls
+before `lint`, so `broken-href` in `import-linter` reads a set it is handed and `lint` stays pure
+(#209).
 
 ## `src/fixers.js`
 

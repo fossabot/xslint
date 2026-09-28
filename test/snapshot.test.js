@@ -183,6 +183,8 @@ const GRADED = new Map(
  * @type {{[key: string]: string}}
  */
 const REFUSED = {
+  'broken-href':
+    'XTSE0165, an xsl:import or xsl:include naming no file to retrieve',
   'malformed-stylesheet':
     'not well-formed XML, so no parser reaches a tree through it',
   'mode-or-priority-without-match':

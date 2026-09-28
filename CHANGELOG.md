@@ -7,6 +7,17 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Entries for releases before this file was introduced record their npm
 publication date only; detailed notes begin with the Unreleased section.
 
+## Unreleased
+
+- Report an `xsl:import` or `xsl:include` whose `href` names no file. A
+  processor refuses such a stylesheet with XTSE0165, and nothing said so until
+  the transformation ran. The new `broken-href` error judges only a relative
+  `href`, read against the file holding it; a URL, an absolute path, a
+  `plugin:` URI, an `xml:base` in scope and a `use-when` that may drop the
+  import are left alone. The command line reads the disk before linting, so
+  `lint` stays pure and reports this only where its caller says which hrefs
+  name no file (#209).
+
 ## 0.3.0 - 2026-09-27
 
 - Read the extension namespaces a simplified stylesheet declares.
