@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+pack: duplicate-with-param-name
+found:
+  amount: 2
+  positions: [ [ 12, 7 ], [ 13, 7 ] ]
+input: |-
+  <?xml version="1.0"?>
+  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0" id="style1">
+    <xsl:output encoding="UTF-8" method="xml"/>
+    <xsl:param name="dyn" select="'tango'" static="yes"/>
+    <xsl:template name="render">
+      <xsl:param name="prefix" select="'a'"/>
+      <xsl:value-of select="$prefix"/>
+    </xsl:template>
+    <xsl:template match="/objects/o">
+      <xsl:call-template name="render">
+        <xsl:with-param name="prefix" select="'a'"/>
+        <xsl:with-param _name="{'prefix'}" select="'b'"/>
+        <xsl:with-param _name="prefix" select="'c'"/>
+        <xsl:with-param _name="{'suffix'}" select="'d'"/>
+        <xsl:with-param _name="{$dyn}" select="'e'"/>
+        <xsl:with-param _name="{$dyn}" select="'f'"/>
+      </xsl:call-template>
+    </xsl:template>
+  </xsl:stylesheet>

@@ -16,6 +16,12 @@ template that resolved to nothing. Nothing about the element says which module
 was meant, so the repair is always to write the path rather than to drop the
 attribute: an `xsl:include` that includes nothing has no reason to stand.
 
+XSLT 3.0 writes the reference `_href` as readily as `href`, the underscore form
+an attribute value template evaluated before the stylesheet compiles. So
+`_href=""` and `_href="{''}"` name the module itself exactly as `href=""` does,
+while `_href="{$base}"` names whatever that static parameter holds and is left
+alone.
+
 Incorrect:
 
 ```xsl
