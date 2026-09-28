@@ -65,6 +65,15 @@
     font-weight: 600;
     white-space: nowrap;
   }
+  .preset-recommended {
+    background: #ddf4ff;
+    color: #0969da;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
   .fix-note {
     background: #f6f8fa;
     border-left: 4px solid #57606a;
@@ -123,7 +132,11 @@
   that has shipped for decades.</p>
 
   <h2>Checks</h2>
-  <p>71 checks, each with its rationale:</p>
+  <p>71 checks, each with its rationale. A run reports the
+  33 marked
+  <span class="preset-recommended">recommended</span> unless asked for
+  <code>--preset all</code>: what a processor refuses, and the dead code whose
+  report is almost never wrong.</p>
   <table>
     <thead>
       <tr>
@@ -143,25 +156,25 @@
   <tr>
     <td><a href="checks/duplicate-param-name.html">duplicate-param-name</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>Two xsl:param siblings share a @name. Each parameter of a template, function, or stylesheet must have a distinct name.</td>
   </tr>
   <tr>
     <td><a href="checks/duplicate-with-param-name.html">duplicate-with-param-name</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>A single call passes two xsl:with-param with the same @name. Each parameter can be supplied only once.</td>
   </tr>
   <tr>
     <td><a href="checks/empty-choose.html">empty-choose</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:choose has no xsl:when branch. Add one, or drop the xsl:choose and keep its content directly.</td>
   </tr>
   <tr>
     <td><a href="checks/empty-content-in-instructions.html">empty-content-in-instructions</a></td>
     <td>xpath</td>
-    <td><span class="severity-warning">warning</span></td>
+    <td><span class="severity-warning">warning</span> <span class="preset-recommended">recommended</span></td>
     <td>An instruction element such as xsl:for-each or xsl:if has no content. Add content or remove the empty element.</td>
   </tr>
   <tr>
@@ -179,25 +192,25 @@
   <tr>
     <td><a href="checks/function-template-is-not-child-of-stylesheet.html">function-template-is-not-child-of-stylesheet</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:function or xsl:template is nested inside another element. Move it up to the top level, as a child of the stylesheet element.</td>
   </tr>
   <tr>
     <td><a href="checks/function-use-in-xslt-1.html">function-use-in-xslt-1</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:function requires XSLT 2.0 or later, and the version in force here is below that. Use a named template, or raise that version to 2.0.</td>
   </tr>
   <tr>
     <td><a href="checks/incorrect-use-of-boolean-constants.html">incorrect-use-of-boolean-constants</a></td>
     <td>xpath</td>
-    <td><span class="severity-warning">warning</span> <span class="fix-suggestion">suggested fix</span></td>
+    <td><span class="severity-warning">warning</span> <span class="fix-suggestion">suggested fix</span> <span class="preset-recommended">recommended</span></td>
     <td>The test is the string 'true' or 'false', a non-empty string that is always true, not a boolean. Use true() or false() instead.</td>
   </tr>
   <tr>
     <td><a href="checks/malformed-version-in-stylesheet.html">malformed-version-in-stylesheet</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>A declared version is not a decimal number, so it names no XSLT version and every check gated on one stays quiet. Declare it as a decimal, such as 2.0.</td>
   </tr>
   <tr>
@@ -209,13 +222,13 @@
   <tr>
     <td><a href="checks/missing-or-empty-href.html">missing-or-empty-href</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>The @href is missing or empty, so this pulls in no module and no processor will load the stylesheet. Name the module to pull in.</td>
   </tr>
   <tr>
     <td><a href="checks/missing-or-empty-name.html">missing-or-empty-name</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>The @name is missing or empty, so it holds no QName and no processor will load this stylesheet. Give it a name.</td>
   </tr>
   <tr>
@@ -227,19 +240,19 @@
   <tr>
     <td><a href="checks/mode-or-priority-without-match.html">mode-or-priority-without-match</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span> <span class="fix-suggestion">suggested fix</span></td>
+    <td><span class="severity-error">error</span> <span class="fix-suggestion">suggested fix</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:template that has no match attribute must have no mode attribute and no priority attribute. Add match attribute or remove mode or priority.</td>
   </tr>
   <tr>
     <td><a href="checks/modern-construct-in-xslt-1.html">modern-construct-in-xslt-1</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>This XSLT 2.0 construct stands where the version in force is below 2.0, which a conformant 1.0 processor rejects. Use a 1.0 equivalent, or raise that version to 2.0.</td>
   </tr>
   <tr>
     <td><a href="checks/name-starts-with-numeric.html">name-starts-with-numeric</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>A variable, parameter, function, or template name starts with a digit, so no processor loads this stylesheet. Rename it to start with a letter.</td>
   </tr>
   <tr>
@@ -251,13 +264,13 @@
   <tr>
     <td><a href="checks/not-using-attribute-test-in-if-when-node.html">not-using-attribute-test-in-if-when-node</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:if or xsl:when has no @test attribute. Add one, or remove the element.</td>
   </tr>
   <tr>
     <td><a href="checks/otherwise-not-last.html">otherwise-not-last</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:otherwise must be the last child of its xsl:choose. Move it after every xsl:when.</td>
   </tr>
   <tr>
@@ -269,7 +282,7 @@
   <tr>
     <td><a href="checks/param-after-content.html">param-after-content</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:param must be declared before any other content in its xsl:template or xsl:function. Move it above the content.</td>
   </tr>
   <tr>
@@ -287,7 +300,7 @@
   <tr>
     <td><a href="checks/sort-not-first.html">sort-not-first</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:sort must come before any other content in its xsl:for-each or xsl:apply-templates. Move it to the front.</td>
   </tr>
   <tr>
@@ -299,7 +312,7 @@
   <tr>
     <td><a href="checks/template-has-no-name-or-match.html">template-has-no-name-or-match</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:template must have a @match or @name attribute, or both. Add one of them.</td>
   </tr>
   <tr>
@@ -335,43 +348,43 @@
   <tr>
     <td><a href="checks/using-not-outermost-stylesheet.html">using-not-outermost-stylesheet</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:stylesheet, xsl:transform or xsl:package is nested inside another element. It must be the outermost element of the document.</td>
   </tr>
   <tr>
     <td><a href="checks/variable-or-param-with-select-and-content.html">variable-or-param-with-select-and-content</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span> <span class="fix-suggestion">suggested fix</span></td>
+    <td><span class="severity-error">error</span> <span class="fix-suggestion">suggested fix</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:variable, xsl:param or xsl:with-param has both a select attribute and a non-empty body. Use only one way to set the value.</td>
   </tr>
   <tr>
     <td><a href="checks/when-or-otherwise-outside-choose.html">when-or-otherwise-outside-choose</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>An xsl:when or xsl:otherwise is valid only as a child of xsl:choose. Move it into an xsl:choose, or use xsl:if.</td>
   </tr>
   <tr>
     <td><a href="checks/with-param-use-in-invalid-parent-node.html">with-param-use-in-invalid-parent-node</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>xsl:with-param is allowed only within xsl:call-template, xsl:apply-templates, xsl:next-match, xsl:next-iteration, or an xsl:apply-imports whose version in force is 2.0 or later. Move it into a call, or raise that version.</td>
   </tr>
   <tr>
     <td><a href="checks/with-param-without-name.html">with-param-without-name</a></td>
     <td>xpath</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>xsl:with-param requires a @name attribute to bind the parameter it passes. Add one.</td>
   </tr>
   <tr>
     <td><a href="checks/unreachable-function.html">unreachable-function</a></td>
     <td>corpus</td>
-    <td><span class="severity-warning">warning</span></td>
+    <td><span class="severity-warning">warning</span> <span class="preset-recommended">recommended</span></td>
     <td>A stylesheet function is called only from functions that are themselves never reached, so it can never run. Remove it, or call it from a template.</td>
   </tr>
   <tr>
     <td><a href="checks/unused-function.html">unused-function</a></td>
     <td>corpus</td>
-    <td><span class="severity-warning">warning</span></td>
+    <td><span class="severity-warning">warning</span> <span class="preset-recommended">recommended</span></td>
     <td>A stylesheet function is never called in any expression across the corpus. Remove it or call it.</td>
   </tr>
   <tr>
@@ -389,31 +402,31 @@
   <tr>
     <td><a href="checks/invalid-xpath-expression.html">invalid-xpath-expression</a></td>
     <td>validation</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>An XPath expression is malformed and cannot be parsed. Fix its syntax.</td>
   </tr>
   <tr>
     <td><a href="checks/malformed-stylesheet.html">malformed-stylesheet</a></td>
     <td>validation</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>The stylesheet is not well-formed XML and cannot be parsed. Fix its syntax.</td>
   </tr>
   <tr>
     <td><a href="checks/syntax-newer-than-xslt-version.html">syntax-newer-than-xslt-version</a></td>
     <td>validation</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>This XPath syntax belongs to a later XSLT version than the one in force, so a conformant processor rejects it. Raise the version, or respell the construct.</td>
   </tr>
   <tr>
     <td><a href="checks/broken-href.html">broken-href</a></td>
     <td>format</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>The @href names no file on disk, so no processor will load this stylesheet. Point it at the module, or restore the file.</td>
   </tr>
   <tr>
     <td><a href="checks/circular-import.html">circular-import</a></td>
     <td>format</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>The stylesheet pulls in itself, or a module that pulls it back, through xsl:import or xsl:include, which is a static error. Break the cycle.</td>
   </tr>
   <tr>
@@ -479,7 +492,7 @@
   <tr>
     <td><a href="checks/redundant-import.html">redundant-import</a></td>
     <td>format</td>
-    <td><span class="severity-warning">warning</span> <span class="fix-suggestion">suggested fix</span></td>
+    <td><span class="severity-warning">warning</span> <span class="fix-suggestion">suggested fix</span> <span class="preset-recommended">recommended</span></td>
     <td>The stylesheet imports or includes the same module more than once. Keep a single xsl:import/xsl:include of it and remove the other.</td>
   </tr>
   <tr>
@@ -515,7 +528,7 @@
   <tr>
     <td><a href="checks/template-writes-nothing.html">template-writes-nothing</a></td>
     <td>format</td>
-    <td><span class="severity-warning">warning</span></td>
+    <td><span class="severity-warning">warning</span> <span class="preset-recommended">recommended</span></td>
     <td>This template declares variables and writes nothing to the result tree, so applying it produces nothing. Write the output it was meant to build, or empty it.</td>
   </tr>
   <tr>
@@ -533,7 +546,7 @@
   <tr>
     <td><a href="checks/undefined-variable.html">undefined-variable</a></td>
     <td>format</td>
-    <td><span class="severity-error">error</span></td>
+    <td><span class="severity-error">error</span> <span class="preset-recommended">recommended</span></td>
     <td>A variable is referenced where no binding in scope declares it. Declare it, or correct the name to one in scope.</td>
   </tr>
   <tr>

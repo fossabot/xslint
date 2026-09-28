@@ -65,6 +65,15 @@
     font-weight: 600;
     white-space: nowrap;
   }
+  .preset-recommended {
+    background: #ddf4ff;
+    color: #0969da;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
   .fix-note {
     background: #f6f8fa;
     border-left: 4px solid #57606a;
@@ -96,7 +105,7 @@
 <body>
   <a class="back" href="../index.html">← all checks</a>
   <div class="meta">
-    <span class="severity-error">error</span>
+    <span class="severity-error">error</span> <span class="preset-recommended">recommended</span>
     <code class="xpath">//xsl:sort[preceding-sibling::*[not(self::xsl:sort) and not(self::xsl:with-param)]]</code>
   </div>
   <div class="check-content">

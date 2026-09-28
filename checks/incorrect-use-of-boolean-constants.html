@@ -65,6 +65,15 @@
     font-weight: 600;
     white-space: nowrap;
   }
+  .preset-recommended {
+    background: #ddf4ff;
+    color: #0969da;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
   .fix-note {
     background: #f6f8fa;
     border-left: 4px solid #57606a;
@@ -96,7 +105,7 @@
 <body>
   <a class="back" href="../index.html">← all checks</a>
   <div class="meta">
-    <span class="severity-warning">warning</span> <span class="fix-suggestion">suggested fix</span>
+    <span class="severity-warning">warning</span> <span class="fix-suggestion">suggested fix</span> <span class="preset-recommended">recommended</span>
     <code class="xpath">//(xsl:if | xsl:when)[xslint:normalize-space(xslint:attribute(., 'test')) = ("'true'", "'false'", '"true"', '"false"')]</code>
   </div>
   <p class="fix-note"><code>--fix-suggestions</code> rewrites this one, and a plain
