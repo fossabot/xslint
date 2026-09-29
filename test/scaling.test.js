@@ -175,8 +175,9 @@
  * tree whose own pull request was green, `empty-content-in-instructions`
  * printing 16.53% on one attempt of a run that never faulted it and under
  * 3% on another attempt of that same process. Flooring alone can only
- * deflate, so the inflation is the clock summing every thread Windows
- * charges a whole tick at each interrupt. `RESOLVED` is the geometric
+ * deflate, so the inflation was the clock summing every thread Windows
+ * charges a whole tick at each interrupt, which the wall now caps (#908);
+ * a zero stays a zero under the cap, so `RESOLVED` stands. It is the geometric
  * middle of those two distributions, and a tier the clock cannot resolve
  * is registered **pending** rather than passed, which is #645's rule. The
  * stage tier keeps an `it` of its own and is unaffected, a share being
@@ -198,6 +199,7 @@ const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
 const {GAPS} = require('../src/tokens')
+const {clocked} = require('./clock')
 const {ROOT, GUIDES} = require('./guides')
 const {STAGES} = require('../src/xslint')
 const {validate: validateXsls} = require('../src/validators/xsl-validator')
@@ -420,19 +422,6 @@ const corpus = function(from, files) {
 }
 
 /**
- * Microseconds of processor time this process has been charged, user and
- * system together. Not the wall clock, which charges a stage for every slice
- * the scheduler hands to something else: under sixteen processes over ten
- * cores the wall failed seven runs of eight and read the cross-file linter at
- * 0.78 of the middle stage, which would have called #755 settled.
- * @return {number} - Microseconds spent on a processor
- */
-const charged = function() {
-  const spent = process.cpuUsage()
-  return spent.user + spent.system
-}
-
-/**
  * Whether V8 is counting branches in this process, which makes it the wrong
  * process to ask about speed. c8's bookkeeping falls unevenly across the
  * stages — it charges `xpath-linter` 65% to 69% of a run an uninstrumented one
@@ -446,14 +435,13 @@ const instrumented = function() {
 
 /**
  * How much processor time a call spends, in milliseconds, beside whatever it
- * answers.
+ * answers, charged as `test/clock.js` charges a window.
  * @param {function(): object} fun - What to time
  * @return {{span: number, answer: object}} - Milliseconds and the answer
  */
 const timed = function(fun) {
-  const began = charged()
-  const answer = fun()
-  return {span: (charged() - began) / 1000, answer: answer}
+  const reading = clocked(fun)
+  return {span: reading.span / 1000, answer: reading.answer}
 }
 
 /**

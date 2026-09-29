@@ -5,26 +5,27 @@
 
 const {lintByImports} = require('../src/linters/import-linter')
 const {xml} = require('../src/helpers')
+const {clocked} = require('./clock')
 const {harness} = require('./packs')
 const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
 
 /*
- * `capped` is why a window here is charged the smaller of two clocks.
- * `process.cpuUsage` sums every thread the process has, and Windows charges
- * each one it finds running at an interrupt a whole tick of some 15,625
- * microseconds — so a concurrent marker that ran a fraction of a millisecond
- * is charged a tick, and a window of sixty milliseconds is charged four of
- * them for every thread that woke inside it. The long chain allocates four
- * times as much per pass and is the one whose window provokes that marker, so
- * the phantom lands on the numerator of the growth rather than on both sides
- * of it, and the floor over three attempts does not reach what is systematic
- * on one side. That read 16.80 on `build (windows-2022, 20)` at `b9a201a`,
- * inside the distribution a walk-per-edge defect reads at, on a tree the same
- * runner had passed hours before under its own pull request; re-run at that
- * very commit the job came back green, which is the signature #892 named one
- * gate over — a verdict belonging to the clock and not to the tree.
+ * `capped` in `test/clock.js` is why a window here is charged the smaller of
+ * two clocks. `process.cpuUsage` sums every thread the process has, and Windows
+ * charges each one it finds running at an interrupt a whole tick of some 15,625
+ * microseconds — so a concurrent marker that ran a fraction of a millisecond is
+ * charged a tick, and a window of sixty milliseconds is charged four of them
+ * for every thread that woke inside it. The long chain allocates four times as
+ * much per pass and is the one whose window provokes that marker, so the
+ * phantom lands on the numerator of the growth rather than on both sides of it,
+ * and the floor over three attempts does not reach what is systematic on one
+ * side. That read 16.80 on `build (windows-2022, 20)` at `b9a201a`, inside the
+ * distribution a walk-per-edge defect reads at, on a tree the same runner had
+ * passed hours before under its own pull request; re-run at that very commit
+ * the job came back green, which is the signature #892 named one gate over — a
+ * verdict belonging to the clock and not to the tree.
  *
  * No single thread can spend more processor time than the wall its window
  * spanned, so the wall is the cap, and the reason a processor clock was chosen
@@ -119,50 +120,15 @@ const chained = function(from, files) {
 }
 
 /**
- * Processor time spent so far, in microseconds. The wall clock charges the
- * check for every slice the scheduler hands to something else, which is what
- * made the wall-clock spelling of `test/scaling.test.js` unusable on a busy
- * machine.
- * @return {number} - Microseconds of processor time
- */
-const charged = function() {
-  const spent = process.cpuUsage()
-  return spent.user + spent.system
-}
-
-/**
- * Wall time spent so far, in microseconds, off the monotonic clock rather than
- * a calendar one a machine may set back under a running window.
- * @return {number} - Microseconds since a point this process fixed
- */
-const spanned = function() {
-  return Number(process.hrtime.bigint() / 1000n)
-}
-
-/**
- * What one window may be charged: the processor time the clock summed over it,
- * or the wall time it spanned, whichever a single thread could have spent. The
- * note at the top of this file says whose the difference is (#906).
- * @param {number} cpu - Microseconds of processor time the clock summed
- * @param {number} wall - Microseconds of wall time the window spanned
- * @return {number} - What one thread can have spent in the window
- */
-const capped = function(cpu, wall) {
-  return Math.min(cpu, wall)
-}
-
-/**
  * Processor time one import linting of a corpus costs.
  * @param {{corpus: Array.<{file: string, content: string, xsl: Document}>,
  *  passes: number}} chain - Parsed stylesheets, and how many passes to time
  * @return {number} - Microseconds spent on one pass
  */
 const spentOn = function(chain) {
-  const began = {cpu: charged(), wall: spanned()}
-  for (let pass = 0; pass < chain.passes; pass++) {
-    lintByImports(chain.corpus)
-  }
-  return capped(charged() - began.cpu, spanned() - began.wall) / chain.passes
+  return clocked(() => Array.from(
+    {length: chain.passes}, () => lintByImports(chain.corpus),
+  )).span / chain.passes
 }
 
 /**
@@ -188,17 +154,6 @@ describe('import-linter', function() {
     dir: 'import-packs',
     noun: 'import defects',
     run: (corpus, off) => lintByImports(corpus, off),
-  })
-  it('charges no window what one thread cannot have spent in it', function() {
-    assert.deepEqual(
-      [capped(136600, 70100), capped(46200, 46300)],
-      [70100, 46200],
-      [
-        'a window whose processor clock summed the threads Windows charges a',
-        'whole tick apiece is no longer charged the wall it spanned, or one',
-        'a single thread could have spent is no longer charged what it read',
-      ].join(' '),
-    )
   })
   it('cannot cost the square of the chain it is handed', function() {
     const chains = [
