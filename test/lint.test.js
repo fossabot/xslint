@@ -577,14 +577,13 @@ describe('lint (programmatic API)', function() {
   SPELLED.forEach(([check, names, files, fault]) => {
     it(`reports ${fault} on the path its caller spelled`, function() {
       assert.deepEqual(
-        Array.from(new Set(
-          lint(
-            names.map((name) => ({...source(name), file: `./${name}`})),
-            {preset: 'all'},
-          )
-            .filter((defect) => defect.name === check)
-            .map((defect) => defect.file),
-        )).sort(),
+        lint(
+          names.map((name) => ({...source(name), file: `./${name}`})),
+          {preset: 'all'},
+        )
+          .filter((defect) => defect.name === check)
+          .map((defect) => defect.file)
+          .sort(),
         files,
         [
           `cannot report ${fault} on the file as its caller spelled it, a`,
