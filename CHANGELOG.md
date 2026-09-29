@@ -86,8 +86,9 @@ publication date only; detailed notes begin with the Unreleased section.
   put every report at 1:1 and called a prefix nothing declares "not well-formed
   XML", so the 18 DocBook-XSL files using `xsl:` undeclared were told to fix
   their syntax at the first character. A report now stands where the parser
-  gave up, the place xmllint gives, and a namespace fault draws a message of
-  its own asking for the prefix to be declared (#1019).
+  gave up, which for those 18 files is the place xmllint gives, and a
+  namespace fault draws a message of its own asking for the prefix to be
+  declared (#1019).
 
 ## 0.3.0 - 2026-09-27
 
