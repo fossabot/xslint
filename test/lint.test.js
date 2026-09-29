@@ -194,8 +194,18 @@ const PRESETED = [
  * @type {Array.<Array>}
  */
 const SPELLED = [
-  ['circular-import', ['./cycles/looped.xsl', './cycles/looping.xsl'], 'a cycle'],
-  ['redundant-import', ['./cycles/looping.xsl'], 'a repeated import'],
+  [
+    'circular-import',
+    ['cycles/looping.xsl', 'cycles/looped.xsl'],
+    ['./cycles/looped.xsl', './cycles/looping.xsl'],
+    'a cycle',
+  ],
+  [
+    'redundant-import',
+    ['repeats/repeating.xsl', 'repeats/repeated.xsl'],
+    ['./repeats/repeating.xsl'],
+    'a repeated import',
+  ],
 ]
 
 describe('lint (programmatic API)', function() {
@@ -563,15 +573,12 @@ describe('lint (programmatic API)', function() {
         ].join(' '),
       )
     })
-  SPELLED.forEach(([check, files, fault]) => {
+  SPELLED.forEach(([check, names, files, fault]) => {
     it(`reports ${fault} on the path its caller spelled`, function() {
       assert.deepEqual(
         Array.from(new Set(
           lint(
-            ['looping.xsl', 'looped.xsl'].map((name) => ({
-              ...source(`cycles/${name}`),
-              file: `./cycles/${name}`,
-            })),
+            names.map((name) => ({...source(name), file: `./${name}`})),
             {preset: 'all'},
           )
             .filter((defect) => defect.name === check)
