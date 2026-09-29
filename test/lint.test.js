@@ -186,6 +186,29 @@ const PRESETED = [
   ],
 ]
 
+/**
+ * What each import check reports over two stylesheets it alone fires on, named
+ * with a leading `./`: a pure cycle for `circular-import`, a repeated import
+ * with no cycle for `redundant-import`. Each row is the check, the sources it
+ * lints, the files its defects name, and the fault. A defect names the file as
+ * its caller spelled it, or `lint` finds no directives for it (#1115).
+ * @type {Array.<Array>}
+ */
+const SPELLED = [
+  [
+    'circular-import',
+    ['cycles/looping.xsl', 'cycles/looped.xsl'],
+    ['./cycles/looped.xsl', './cycles/looping.xsl'],
+    'a cycle',
+  ],
+  [
+    'redundant-import',
+    ['repeats/repeating.xsl', 'repeats/repeated.xsl'],
+    ['./repeats/repeating.xsl'],
+    'a repeated import',
+  ],
+]
+
 describe('lint (programmatic API)', function() {
   PRESETED.forEach(([options, expected, what]) => {
     it(`reports what ${what} runs`, function() {
@@ -551,6 +574,24 @@ describe('lint (programmatic API)', function() {
         ].join(' '),
       )
     })
+  SPELLED.forEach(([check, names, files, fault]) => {
+    it(`reports ${fault} on the path its caller spelled`, function() {
+      assert.deepEqual(
+        lint(
+          names.map((name) => ({...source(name), file: `./${name}`})),
+          {preset: 'all'},
+        )
+          .filter((defect) => defect.name === check)
+          .map((defect) => defect.file)
+          .sort(),
+        files,
+        [
+          `cannot report ${fault} on the file as its caller spelled it, a`,
+          'normalized path matching no source it was handed (#1115)',
+        ].join(' '),
+      )
+    })
+  })
   it('stays quiet about an href where nobody read the disk',
     function() {
       assert.deepEqual(

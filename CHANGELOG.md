@@ -9,6 +9,13 @@ publication date only; detailed notes begin with the Unreleased section.
 
 ## Unreleased
 
+- Name the file its caller spelled in `circular-import` and
+  `redundant-import`. Both stamped the normalized path of the importing file
+  on their defect, so `lint` over a source named `./a.xsl`, or any forward
+  slash path on Windows, looked up no directives for it and threw a
+  `TypeError` instead of handing back a report. The defect now names the file
+  exactly as the source spells it, as `broken-href` already did (#1115).
+
 - Judge an identity transform in `not-using-output`. Since #1031 the check
   judged a stylesheet nothing imports only when a template of it matched the
   document root or was `xsl:initial-template`, so a standalone identity

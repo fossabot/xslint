@@ -69,6 +69,17 @@ const defect = function(check, file, node) {
 }
 
 /**
+ * Every source as its caller handed it, keyed by the path `importsOf`
+ * normalizes its file to, so a defect names a file `lint` holds directives for
+ * (#1115).
+ * @param {Array.<{file: string}>} corpus - Parsed stylesheets
+ * @return {Map.<string, {file: string}>} - Sources by normalized path
+ */
+const spelled = function(corpus) {
+  return new Map(corpus.map((source) => [path.normalize(source.file), source]))
+}
+
+/**
  * Add one file to the list another is indexed against.
  * @param {Map.<string, Array.<string>>} sides - Files by file
  * @param {string} key - File the list belongs to
@@ -180,9 +191,10 @@ const byCircularity = function(corpus) {
   const edges = graphOf(corpus)
   const {ahead, back} = linked(edges)
   const groups = grouped(back, finished(ahead))
+  const files = spelled(corpus)
   return edges
     .filter((edge) => groups.get(edge.from) === groups.get(edge.to))
-    .map((edge) => defect(CIRCULAR, edge.from, edge.node))
+    .map((edge) => defect(CIRCULAR, files.get(edge.from).file, edge.node))
 }
 
 /**
@@ -218,13 +230,14 @@ const crossed = function(imports) {
 const byRedundancy = function(corpus) {
   const imports = importsOf(corpus)
   const mixed = crossed(imports)
+  const files = spelled(corpus)
   const last = new Map()
   imports.forEach(({file, to}, at) => last.set(`${file}|${to}`, at))
   const defects = []
   imports.forEach(({file, content, node, to}, at) => {
     const key = `${file}|${to}`
     if (last.get(key) !== at) {
-      const report = defect(REDUNDANT, file, node)
+      const report = defect(REDUNDANT, files.get(file).file, node)
       const cut = excision(node, content)
       if (mixed.has(key) || !cut) {
         defects.push(report)
@@ -264,11 +277,9 @@ const settled = function(node) {
  * @return {Array.<object>} - Defects found
  */
 const byAbsence = function(corpus) {
-  const sources = new Map(corpus.map(
-    ({file, absent = new Set()}) => [path.normalize(file), {file, absent}],
-  ))
+  const sources = spelled(corpus)
   return importsOf(corpus)
-    .filter(({file, href, node}) => sources.get(file).absent.has(href) &&
+    .filter(({file, href, node}) => sources.get(file).absent?.has(href) &&
       settled(node))
     .map(({file, node}) => defect(BROKEN, sources.get(file).file, node))
 }
