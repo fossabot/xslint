@@ -187,10 +187,11 @@ const PRESETED = [
 ]
 
 /**
- * What each import check reports over two stylesheets named with a leading
- * `./`, each importing the other and one importing it twice: the check, the
- * files its defects name, and the fault. A defect names the file as its
- * caller spelled it, or `lint` finds no directives for it (#1115).
+ * What each import check reports over two stylesheets it alone fires on, named
+ * with a leading `./`: a pure cycle for `circular-import`, a repeated import
+ * with no cycle for `redundant-import`. Each row is the check, the sources it
+ * lints, the files its defects name, and the fault. A defect names the file as
+ * its caller spelled it, or `lint` finds no directives for it (#1115).
  * @type {Array.<Array>}
  */
 const SPELLED = [
