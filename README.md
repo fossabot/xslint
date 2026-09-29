@@ -22,7 +22,7 @@ exact line and column, in your terminal or in CI.
 Run it on your stylesheets — no install needed:
 
 ```bash
-npx @maxonfjvipon/xslint@0.3.0 path/to/stylesheets
+npx @maxonfjvipon/xslint@0.4.0 path/to/stylesheets
 ```
 
 Given a stylesheet like this:
@@ -72,7 +72,7 @@ Or run it on commit with [pre-commit](https://pre-commit.com) — add to your
 ```yaml
 repos:
   - repo: https://github.com/xslint/xslint
-    rev: 0.3.0
+    rev: 0.4.0
     hooks:
       - id: xslint
 ```
@@ -103,7 +103,7 @@ the build fails while it is not.
 To install `xslint` globally, install [npm] first, then run:
 
 ```bash
-npm install -g @maxonfjvipon/xslint@0.3.0
+npm install -g @maxonfjvipon/xslint@0.4.0
 xslint --version
 ```
 
