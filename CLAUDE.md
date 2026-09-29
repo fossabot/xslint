@@ -113,8 +113,9 @@ README advertises (#755, #756). Two tiers hold it now, each beside its gate: `te
 `test/budget.test.js` for the nightly one.
 
 `test/scaling.test.js` is the per-pull-request tier. It charges every stage its
-own **processor time** — `process.cpuUsage` capped at the wall, never the wall
-alone, which charges a stage for every slice the scheduler hands elsewhere — over a corpus it
+own **processor time** — `process.cpuUsage` capped at the wall a window spanned,
+never the wall alone, which charges a stage for every slice the scheduler hands
+to something else — over a corpus it
 builds at 40 stylesheets and again at 160, and asks two questions of each: what
 percentage of the whole run it cost, and how it grew beside the middle stage's
 growth. Both are quotients taken inside one process, which is what cancels the
@@ -1083,6 +1084,7 @@ one of them.
 | `test/helpers.js` | The only door to a child process in the suite: `runXslint`, `xslintStatus`, `xslintStreams`, `xslintUnread`, `xcopped`, `walkedWith` |
 | `test/predicates.test.js` | The vocabulary held from both sides: every spelling it answers, and every one it refuses beside what puts that out of reach |
 | `test/tiers.test.js` | The tiers a check declares, held to the ones a run over `test/resources/fix` offers, and the README held to naming none of them |
+| `test/clock.js` | The one clock both speed instruments read: processor time, capped at the wall a window spanned |
 | `test/packs.js` | The one harness every pack directory is read through |
 | `test/scaling.test.js` | The speed gate: every stage's own processor time as a share of the run, at two corpus sizes |
 | `test/xcop.deep.test.js` | Writes every pack's inline XSL to one directory and runs xcop over it |

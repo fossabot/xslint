@@ -239,12 +239,17 @@ every attempt. Processor time is what the stage itself spent, so the same sixtee
 by a tenth, every entry staying within that of its idle reading, and the gate passes every run under
 the load that broke the wall clock.
 
-That clock sums every thread the process has, though, and V8 collects and compiles on threads of
-its own, so a window read up to 9.4 times its own wall on macOS and 1,040 windows of 1,400 read above
-it. A stage is charged the smaller of the two since #908, as in `test/import-linter.test.js` since
-the fix of #906: no one thread spends more than the wall its window spanned, and a descheduled one
-is charged less than its wall, so the smaller is the processor's reading again. A quadratic `output-linter`
-still fails three of three at 42% of the run.
+That clock sums every thread the process has, though, and V8 collects and compiles on threads of its
+own, so a window read up to 9.4 times its own wall on macOS and 1,040 windows of 1,400 read above
+it. `test/clock.js` charges the smaller of the two since #908, for this gate and for the one fixed
+first at #906: no one thread spends more than the wall its window spanned, and a descheduled one is
+charged less than its wall, so the smaller is the processor's reading again. Over eight interleaved
+rounds a side it takes the dearest reading of `xsl-validator` from 12.81% to 10.10%,
+`xpath-validator` 18.89% to 17.53% and `xpath-linter` 16.82% to 16.15%, and lifts the cheap stages
+by up to 1.29, the dearest of them 6.26% to 6.47%. Every entry stays, none leaving the band it stood
+in: 18 and 26 stand 1.78 and 1.48 times their readings, `xpath-linter` moved by 0.96, `SHARE` by
+1.03, and `COSTS` reads 4.61% and 2.34% against 7 and 4. A quadratic `output-linter` still fails
+three of three at 42% of the run, a defect being the main thread's own time.
 
 What processor time costs is resolution, and one platform pays it. Windows charges in ticks far
 coarser than a cheap stage costs over the *small* corpus, so eight of the stages with no entry

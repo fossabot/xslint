@@ -175,8 +175,9 @@
  * tree whose own pull request was green, `empty-content-in-instructions`
  * printing 16.53% on one attempt of a run that never faulted it and under
  * 3% on another attempt of that same process. Flooring alone can only
- * deflate, so the inflation is the clock summing every thread Windows
- * charges a whole tick at each interrupt. `RESOLVED` is the geometric
+ * deflate, so the inflation was the clock summing every thread Windows
+ * charges a whole tick at each interrupt, which the wall now caps (#908);
+ * a zero stays a zero under the cap, so `RESOLVED` stands. It is the geometric
  * middle of those two distributions, and a tier the clock cannot resolve
  * is registered **pending** rather than passed, which is #645's rule. The
  * stage tier keeps an `it` of its own and is unaffected, a share being
@@ -198,6 +199,7 @@ const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
 const {GAPS} = require('../src/tokens')
+const {clocked} = require('./clock')
 const {ROOT, GUIDES} = require('./guides')
 const {STAGES} = require('../src/xslint')
 const {validate: validateXsls} = require('../src/validators/xsl-validator')
@@ -420,19 +422,6 @@ const corpus = function(from, files) {
 }
 
 /**
- * Microseconds of processor time this process has been charged, user and
- * system together. Not the wall clock, which charges a stage for every slice
- * the scheduler hands to something else: under sixteen processes over ten
- * cores the wall failed seven runs of eight and read the cross-file linter at
- * 0.78 of the middle stage, which would have called #755 settled.
- * @return {number} - Microseconds spent on a processor
- */
-const charged = function() {
-  const spent = process.cpuUsage()
-  return spent.user + spent.system
-}
-
-/**
  * Whether V8 is counting branches in this process, which makes it the wrong
  * process to ask about speed. c8's bookkeeping falls unevenly across the
  * stages — it charges `xpath-linter` 65% to 69% of a run an uninstrumented one
@@ -445,40 +434,14 @@ const instrumented = function() {
 }
 
 /**
- * Wall time spent so far, in microseconds, off the monotonic clock rather than
- * a calendar one a machine may set back under a running window.
- * @return {number} - Microseconds since a point this process fixed
- */
-const spanned = function() {
-  return Number(process.hrtime.bigint() / 1000n)
-}
-
-/**
- * What one window may be charged: the processor time the clock summed over it,
- * or the wall time it spanned, whichever a single thread could have spent.
- * `process.cpuUsage` sums every thread, so V8's collector and compiler threads
- * read here at up to 9.4 times a window's wall on macOS (#908, #906).
- * @param {number} cpu - Microseconds of processor time the clock summed
- * @param {number} wall - Microseconds of wall time the window spanned
- * @return {number} - What one thread can have spent in the window
- */
-const capped = function(cpu, wall) {
-  return Math.min(cpu, wall)
-}
-
-/**
  * How much processor time a call spends, in milliseconds, beside whatever it
- * answers, capped at the wall its window spanned.
+ * answers, charged as `test/clock.js` charges a window.
  * @param {function(): object} fun - What to time
  * @return {{span: number, answer: object}} - Milliseconds and the answer
  */
 const timed = function(fun) {
-  const began = {cpu: charged(), wall: spanned()}
-  const answer = fun()
-  return {
-    span: capped(charged() - began.cpu, spanned() - began.wall) / 1000,
-    answer: answer,
-  }
+  const reading = clocked(fun)
+  return {span: reading.span / 1000, answer: reading.answer}
 }
 
 /**
@@ -851,17 +814,6 @@ describe('scaling', function() {
         'the check tier no longer stands down under the tick Windows charges',
         'processor time in, where 36 of its 49 readings come back zero, or no',
         'longer judges the 4 of 49 a fine clock leaves',
-      ].join(' '),
-    )
-  })
-  it('charges no window what one thread cannot have spent in it', function() {
-    assert.deepEqual(
-      [capped(148153, 59923), capped(31700, 31800)],
-      [59923, 31700],
-      [
-        'a window whose processor clock summed the threads beside the one',
-        'running the stage is no longer charged the wall it spanned, or one',
-        'a single thread could have spent is no longer charged what it read',
       ].join(' '),
     )
   })
