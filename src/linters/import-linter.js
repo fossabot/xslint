@@ -69,6 +69,16 @@ const defect = function(check, file, node) {
 }
 
 /**
+ * Every file as its caller spelled it, keyed by the path `importsOf` normalizes
+ * it to, so a defect names a file `lint` holds directives for (#1115).
+ * @param {Array.<{file: string}>} corpus - Parsed stylesheets
+ * @return {Map.<string, string>} - Spelled files by normalized path
+ */
+const spelled = function(corpus) {
+  return new Map(corpus.map(({file}) => [path.normalize(file), file]))
+}
+
+/**
  * Add one file to the list another is indexed against.
  * @param {Map.<string, Array.<string>>} sides - Files by file
  * @param {string} key - File the list belongs to
@@ -180,9 +190,10 @@ const byCircularity = function(corpus) {
   const edges = graphOf(corpus)
   const {ahead, back} = linked(edges)
   const groups = grouped(back, finished(ahead))
+  const files = spelled(corpus)
   return edges
     .filter((edge) => groups.get(edge.from) === groups.get(edge.to))
-    .map((edge) => defect(CIRCULAR, edge.from, edge.node))
+    .map((edge) => defect(CIRCULAR, files.get(edge.from), edge.node))
 }
 
 /**
@@ -218,13 +229,14 @@ const crossed = function(imports) {
 const byRedundancy = function(corpus) {
   const imports = importsOf(corpus)
   const mixed = crossed(imports)
+  const files = spelled(corpus)
   const last = new Map()
   imports.forEach(({file, to}, at) => last.set(`${file}|${to}`, at))
   const defects = []
   imports.forEach(({file, content, node, to}, at) => {
     const key = `${file}|${to}`
     if (last.get(key) !== at) {
-      const report = defect(REDUNDANT, file, node)
+      const report = defect(REDUNDANT, files.get(file), node)
       const cut = excision(node, content)
       if (mixed.has(key) || !cut) {
         defects.push(report)

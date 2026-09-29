@@ -186,6 +186,18 @@ const PRESETED = [
   ],
 ]
 
+/**
+ * What each import check reports over two stylesheets named with a leading
+ * `./`, each importing the other and one importing it twice: the check, the
+ * files its defects name, and the fault. A defect names the file as its
+ * caller spelled it, or `lint` finds no directives for it (#1115).
+ * @type {Array.<Array>}
+ */
+const SPELLED = [
+  ['circular-import', ['./cycles/looped.xsl', './cycles/looping.xsl'], 'a cycle'],
+  ['redundant-import', ['./cycles/looping.xsl'], 'a repeated import'],
+]
+
 describe('lint (programmatic API)', function() {
   PRESETED.forEach(([options, expected, what]) => {
     it(`reports what ${what} runs`, function() {
@@ -551,6 +563,28 @@ describe('lint (programmatic API)', function() {
         ].join(' '),
       )
     })
+  SPELLED.forEach(([check, files, fault]) => {
+    it(`reports ${fault} on the path its caller spelled`, function() {
+      assert.deepEqual(
+        Array.from(new Set(
+          lint(
+            ['looping.xsl', 'looped.xsl'].map((name) => ({
+              ...source(`cycles/${name}`),
+              file: `./cycles/${name}`,
+            })),
+            {preset: 'all'},
+          )
+            .filter((defect) => defect.name === check)
+            .map((defect) => defect.file),
+        )).sort(),
+        files,
+        [
+          `cannot report ${fault} on the file as its caller spelled it, a`,
+          'normalized path matching no source it was handed (#1115)',
+        ].join(' '),
+      )
+    })
+  })
   it('stays quiet about an href where nobody read the disk',
     function() {
       assert.deepEqual(
