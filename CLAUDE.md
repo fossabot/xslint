@@ -113,8 +113,8 @@ README advertises (#755, #756). Two tiers hold it now, each beside its gate: `te
 `test/budget.test.js` for the nightly one.
 
 `test/scaling.test.js` is the per-pull-request tier. It charges every stage its
-own **processor time** — `process.cpuUsage`, never the wall clock, which charges
-a stage for every slice the scheduler hands to something else — over a corpus it
+own **processor time** — `process.cpuUsage` capped at the wall, never the wall
+alone, which charges a stage for every slice the scheduler hands elsewhere — over a corpus it
 builds at 40 stylesheets and again at 160, and asks two questions of each: what
 percentage of the whole run it cost, and how it grew beside the middle stage's
 growth. Both are quotients taken inside one process, which is what cancels the

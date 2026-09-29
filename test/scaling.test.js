@@ -445,15 +445,40 @@ const instrumented = function() {
 }
 
 /**
+ * Wall time spent so far, in microseconds, off the monotonic clock rather than
+ * a calendar one a machine may set back under a running window.
+ * @return {number} - Microseconds since a point this process fixed
+ */
+const spanned = function() {
+  return Number(process.hrtime.bigint() / 1000n)
+}
+
+/**
+ * What one window may be charged: the processor time the clock summed over it,
+ * or the wall time it spanned, whichever a single thread could have spent.
+ * `process.cpuUsage` sums every thread, so V8's collector and compiler threads
+ * read here at up to 9.4 times a window's wall on macOS (#908, #906).
+ * @param {number} cpu - Microseconds of processor time the clock summed
+ * @param {number} wall - Microseconds of wall time the window spanned
+ * @return {number} - What one thread can have spent in the window
+ */
+const capped = function(cpu, wall) {
+  return Math.min(cpu, wall)
+}
+
+/**
  * How much processor time a call spends, in milliseconds, beside whatever it
- * answers.
+ * answers, capped at the wall its window spanned.
  * @param {function(): object} fun - What to time
  * @return {{span: number, answer: object}} - Milliseconds and the answer
  */
 const timed = function(fun) {
-  const began = charged()
+  const began = {cpu: charged(), wall: spanned()}
   const answer = fun()
-  return {span: (charged() - began) / 1000, answer: answer}
+  return {
+    span: capped(charged() - began.cpu, spanned() - began.wall) / 1000,
+    answer: answer,
+  }
 }
 
 /**
@@ -826,6 +851,17 @@ describe('scaling', function() {
         'the check tier no longer stands down under the tick Windows charges',
         'processor time in, where 36 of its 49 readings come back zero, or no',
         'longer judges the 4 of 49 a fine clock leaves',
+      ].join(' '),
+    )
+  })
+  it('charges no window what one thread cannot have spent in it', function() {
+    assert.deepEqual(
+      [capped(148153, 59923), capped(31700, 31800)],
+      [59923, 31700],
+      [
+        'a window whose processor clock summed the threads beside the one',
+        'running the stage is no longer charged the wall it spanned, or one',
+        'a single thread could have spent is no longer charged what it read',
       ].join(' '),
     )
   })
