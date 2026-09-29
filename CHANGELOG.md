@@ -74,6 +74,21 @@ publication date only; detailed notes begin with the Unreleased section.
   attribute. The shadow outranks it everywhere now, below 3.0 too, where
   Saxon reads it as surely, and so does a text value template (#1114).
 
+- Compare a shadowable attribute's value in both spellings. Five selectors
+  compared `@name`, `@href` or `@test` in the plain spelling alone, so an XSLT
+  3.0 stylesheet writing `_href=""` or `_test="'true'"` drew nothing, three of
+  those being stylesheets Saxon refuses. Each asks `xslint:attribute` now and
+  reads either spelling, a shadow whose value the run supplies counting as no
+  value rather than an empty one, and the `incorrect-use-of-boolean-constants`
+  fixer rewrites a shadow `_test` instead of crashing on it (#997).
+
+- Report a malformed stylesheet where the parser stopped. `malformed-stylesheet`
+  put every report at 1:1 and called a prefix nothing declares "not well-formed
+  XML", so the 18 DocBook-XSL files using `xsl:` undeclared were told to fix
+  their syntax at the first character. A report now stands where the parser
+  gave up, the place xmllint gives, and a namespace fault draws a message of
+  its own asking for the prefix to be declared (#1019).
+
 ## 0.3.0 - 2026-09-27
 
 - Read the extension namespaces a simplified stylesheet declares.
