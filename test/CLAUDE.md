@@ -246,10 +246,13 @@ first at #906: no one thread spends more than the wall its window spanned, and a
 charged less than its wall, so the smaller is the processor's reading again. Over eight interleaved
 rounds a side it takes the dearest reading of `xsl-validator` from 12.81% to 10.10%,
 `xpath-validator` 18.89% to 17.53% and `xpath-linter` 16.82% to 16.15%, and lifts the cheap stages
-by up to 1.29, the dearest of them 6.26% to 6.47%. Every entry stays, none leaving the band it stood
-in: 18 and 26 stand 1.78 and 1.48 times their readings, `xpath-linter` moved by 0.96, `SHARE` by
-1.03, and `COSTS` reads 4.61% and 2.34% against 7 and 4. A quadratic `output-linter` still fails
-three of three at 42% of the run, a defect being the main thread's own time.
+by up to 1.29 times, the dearest of them 6.26% to 6.47%. Every entry stays, none leaving the band it
+stood in: 18 and 26 stand 1.78 and 1.48 times their readings, `xpath-linter` moved by 0.96, `SHARE`
+by 1.03, and `COSTS` reads 4.61% and 2.34% against 7 and 4. `SHARE` keeps 7 by the rule and not by
+room: the cap moves nothing across it, but 7 stood 1.12 times the dearest cheap stage here before
+and 1.08 after, so it does not answer a `corpus-linter` read at 7.73% on macOS. A quadratic
+`output-linter` still fails three of three at 42% of the run, a defect being the main thread's own
+time.
 
 What processor time costs is resolution, and one platform pays it. Windows charges in ticks far
 coarser than a cheap stage costs over the *small* corpus, so eight of the stages with no entry

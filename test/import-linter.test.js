@@ -13,20 +13,19 @@ const path = require('path')
 
 /*
  * `capped` in `test/clock.js` is why a window here is charged the smaller of
- * two clocks.
- * `process.cpuUsage` sums every thread the process has, and Windows charges
- * each one it finds running at an interrupt a whole tick of some 15,625
- * microseconds — so a concurrent marker that ran a fraction of a millisecond
- * is charged a tick, and a window of sixty milliseconds is charged four of
- * them for every thread that woke inside it. The long chain allocates four
- * times as much per pass and is the one whose window provokes that marker, so
- * the phantom lands on the numerator of the growth rather than on both sides
- * of it, and the floor over three attempts does not reach what is systematic
- * on one side. That read 16.80 on `build (windows-2022, 20)` at `b9a201a`,
- * inside the distribution a walk-per-edge defect reads at, on a tree the same
- * runner had passed hours before under its own pull request; re-run at that
- * very commit the job came back green, which is the signature #892 named one
- * gate over — a verdict belonging to the clock and not to the tree.
+ * two clocks. `process.cpuUsage` sums every thread the process has, and Windows
+ * charges each one it finds running at an interrupt a whole tick of some 15,625
+ * microseconds — so a concurrent marker that ran a fraction of a millisecond is
+ * charged a tick, and a window of sixty milliseconds is charged four of them
+ * for every thread that woke inside it. The long chain allocates four times as
+ * much per pass and is the one whose window provokes that marker, so the
+ * phantom lands on the numerator of the growth rather than on both sides of it,
+ * and the floor over three attempts does not reach what is systematic on one
+ * side. That read 16.80 on `build (windows-2022, 20)` at `b9a201a`, inside the
+ * distribution a walk-per-edge defect reads at, on a tree the same runner had
+ * passed hours before under its own pull request; re-run at that very commit
+ * the job came back green, which is the signature #892 named one gate over — a
+ * verdict belonging to the clock and not to the tree.
  *
  * No single thread can spend more processor time than the wall its window
  * spanned, so the wall is the cap, and the reason a processor clock was chosen
@@ -127,12 +126,9 @@ const chained = function(from, files) {
  * @return {number} - Microseconds spent on one pass
  */
 const spentOn = function(chain) {
-  return clocked(() => {
-    for (let pass = 0; pass < chain.passes; pass++) {
-      lintByImports(chain.corpus)
-    }
-    return chain
-  }).span / chain.passes
+  return clocked(() => Array.from(
+    {length: chain.passes}, () => lintByImports(chain.corpus),
+  )).span / chain.passes
 }
 
 /**
