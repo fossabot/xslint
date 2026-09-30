@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-const {lint, fixed, settingsOf} = require('../src/xslint')
+const {
+  lint, fixed, settingsOf, stylesheetsOf, sourceOf,
+} = require('../src/xslint')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
@@ -226,6 +228,25 @@ const configured = function(name) {
 }
 
 /**
+ * A project directory holding the one configuration named and a copy of a
+ * committed stylesheet at every path given, for a walk to find.
+ * @param {string} config - Configuration fixture path under test/resources
+ * @param {Array.<string>} names - Paths under the directory to copy it to
+ * @return {string} - Absolute path of the directory
+ */
+const planted = function(config, names) {
+  const dir = configured(config)
+  names.forEach((name) => {
+    fs.mkdirSync(path.dirname(path.join(dir, name)), {recursive: true})
+    fs.copyFileSync(
+      path.resolve(__dirname, 'resources', 'presets', 'a-short-name-beside-dead-code.xsl'),
+      path.join(dir, name),
+    )
+  })
+  return dir
+}
+
+/**
  * What a run over one stylesheet reports under the settings a configuration
  * and the flags beside it make: the configuration, the flags, each defect as
  * its check and severity, and the way. An exact name in `rules` adds its
@@ -289,6 +310,21 @@ describe('lint (programmatic API)', function() {
         ].join(' '),
       )
     })
+  })
+  it('names the configuration file the settings were read from', function() {
+    const dir = configured('presets/regraded.yml')
+    assert.equal(
+      settingsOf(dir).file, path.join(dir, '.xslint.yml'),
+      'did not name the configuration file the settings came from',
+    )
+  })
+  it('answers the directory the exclusions resolve against', function() {
+    const dir = configured('presets/regraded.yml')
+    fs.mkdirSync(path.join(dir, 'deep', 'er'), {recursive: true})
+    assert.equal(
+      settingsOf(path.join(dir, 'deep', 'er')).base, dir,
+      'did not answer the directory of the configuration as the one its globs resolve against',
+    )
   })
   it('excludes a file the configuration excludes', function() {
     const dir = configured('presets/regraded.yml')
@@ -705,4 +741,79 @@ describe('lint (programmatic API)', function() {
         ].join(' '),
       )
     })
+})
+
+describe('stylesheetsOf and sourceOf (programmatic API)', function() {
+  it('finds a stylesheet spelled with either suffix', function() {
+    const dir = planted('presets/regraded.yml', ['one.xsl', 'two.xslt', 'three.xml'])
+    assert.deepEqual(
+      stylesheetsOf([dir], settingsOf(dir)).stylesheets.sort(),
+      [path.join(dir, 'one.xsl'), path.join(dir, 'two.xslt')],
+      'did not find the stylesheets the command line reads, by both suffixes a stylesheet wears',
+    )
+  })
+  it('leaves out a directory the project ignores', function() {
+    const dir = planted('presets/regraded.yml', ['shut/buried.xsl', 'own/kept.xsl'])
+    fs.writeFileSync(path.join(dir, '.gitignore'), 'shut/\n')
+    assert.deepEqual(
+      stylesheetsOf([dir], settingsOf(dir)).stylesheets,
+      [path.join(dir, 'own', 'kept.xsl')],
+      'found a stylesheet under a directory the project .gitignore names',
+    )
+  })
+  it('leaves out a directory the configuration excludes', function() {
+    const dir = planted('presets/regraded.yml', ['vendor/kept.xsl', 'own/kept.xsl'])
+    assert.deepEqual(
+      stylesheetsOf([dir], settingsOf(dir)).stylesheets,
+      [path.join(dir, 'own', 'kept.xsl')],
+      'found a stylesheet under a directory the exclusions of the configuration name',
+    )
+  })
+  it('answers the problems of the paths it was handed', function() {
+    const dir = planted('presets/regraded.yml', ['own/kept.xsl', 'notes.txt'])
+    assert.deepEqual(
+      stylesheetsOf(
+        [path.join(dir, 'gone-8k'), path.join(dir, 'notes.txt'), dir],
+        settingsOf(dir),
+      ).problems,
+      [
+        `File or directory ${path.join(dir, 'gone-8k')} does not exist`,
+        `File ${path.join(dir, 'notes.txt')} was not read, a stylesheet being named .xsl or .xslt`,
+        `Exclusion 'vendor/**' in configuration excluded nothing`,
+      ],
+      'did not hand back every warning of the discovery, in the order the command line prints them',
+    )
+  })
+  it('writes nothing while finding stylesheets', function() {
+    const dir = planted('presets/regraded.yml', ['own/kept.xsl'])
+    assert.deepEqual(
+      noted(() => stylesheetsOf([path.join(dir, 'gone-3v'), dir], settingsOf(dir))),
+      [],
+      'wrote a warning of the discovery where no caller can read it back',
+    )
+  })
+  it('names the hrefs no file stands behind beside the content given', function() {
+    assert.deepEqual(
+      [
+        ...sourceOf(
+          path.resolve(__dirname, 'resources', 'hrefs', 'unsaved.xsl'),
+          source('hrefs/importing.xsl').content,
+        ).absent,
+      ].sort(),
+      ['lost-w4.xsl', 'modules', 'modules/vanished-7q.xsl'],
+      'did not name the hrefs the content writes that nothing beside the file stands behind',
+    )
+  })
+  it('reads the parameter entities the content given declares', function() {
+    assert.deepEqual(
+      [
+        ...sourceOf(
+          path.resolve(__dirname, 'resources', 'entities', 'unsaved.xsl'),
+          source('entities/behind-a-parameter-entity.xsl').content,
+        ).subsets.keys(),
+      ],
+      ['shared.ent'],
+      'did not read the parameter entity file the content names beside the file',
+    )
+  })
 })

@@ -399,9 +399,11 @@ and the flags, printing the problems it answers, applies
 `process.exitCode`, a `no-restricted-syntax` selector banning the
 `process.exit` that ends the process where it stands and abandons every write
 the kernel has not taken (#767, #822). The package `main` re-exports `lint`,
-`fixed` and `settingsOf` for the `xslint-lsp` server VS Code and
-`xslint-jetbrains` run on a live buffer (#336, #1128); the bin is
-`src/index.mjs`.
+`fixed`, `settingsOf`, `stylesheetsOf` and `sourceOf` for the `xslint-lsp`
+server VS Code and `xslint-jetbrains` run on a live buffer, the last three
+being what `xslint` itself calls, so an editor reads the configuration, the
+corpus and each record the way the command line does (#336, #1128, #1136);
+the bin is `src/index.mjs`.
 
 `src/index.mjs` reaches `xslint.js` through a dynamic `import` inside the
 command action, not a top-level one, and so runs `program.parseAsync`. Importing
@@ -1028,7 +1030,7 @@ one of them.
 | File | Role |
 | --- | --- |
 | `src/index.mjs` | CLI entry (commander.js, ESM); imports the pipeline inside the command action, so `--help` loads none of it |
-| `src/xslint.js` | Discovery, config, staging, output; exports the pure `lint` (package `main`), `fixed`, `settingsOf` (what `.xslint.yml` hands `lint`, printing nothing), and the `STAGES` the speed gate times |
+| `src/xslint.js` | Discovery, config, staging, output; exports the pure `lint` (package `main`), `fixed`, `settingsOf` (what `.xslint.yml` hands `lint`), `stylesheetsOf` (the files a run reads, its warnings as data) and `sourceOf` (the record `lint` takes), none logging above debug, and the `STAGES` the speed gate times |
 | `src/config.js` | Resolves `.xslint.yml` (severities/`off`, excludes, `max-warnings`) |
 | `src/gitignore.js` | `ignoring(start)` — what the project's own `.gitignore` files refuse: a directory the walk never opens, a stylesheet it drops |
 | `src/directives.js` | Parses inline `xslint-disable-*` comment directives |

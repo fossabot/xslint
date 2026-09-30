@@ -138,21 +138,21 @@ const normalized = function(raw) {
 /**
  * Resolve the configuration: the file named by '--config' when given, otherwise
  * the nearest '.xslint.yml' from the working directory upward, otherwise the
- * empty defaults so that no file means the previous behaviour. The 'base' is
- * the directory the glob-based settings resolve against — where the file lives,
- * or the search origin when there is no file.
+ * empty defaults. The 'file' is the one read, absent when there is none, and
+ * the 'base' the directory the globs resolve against — where the file lives,
+ * or the search origin when there is no file (#1136).
  * @param {string|undefined} explicit - Path from '--config', if any
  * @param {string} from - Directory the search starts in
- * @return {{rules: object, exclude: Array.<string>, only: Array.<string>,
- *  preset: ?string, maxWarnings: ?number, logLevel: ?string, quiet: ?boolean,
- *  problems: Array.<string>, base: string}} - Configuration
+ * @return {{rules: object, exclude: Array, only: Array, preset: ?string,
+ *  maxWarnings: ?number, logLevel: ?string, quiet: ?boolean, problems: Array,
+ *  base: string, file: (string|undefined)}} - Configuration
  */
 const configFrom = function(explicit, from = process.cwd()) {
   let file
   if (explicit) {
     file = path.resolve(from, explicit)
   } else {
-    file = located(from)
+    file = located(from) ?? undefined
   }
   let raw = null
   let base = from
@@ -161,7 +161,7 @@ const configFrom = function(explicit, from = process.cwd()) {
     base = path.dirname(file)
     logger.debug(`Configuration loaded from ${file}`)
   }
-  return {...normalized(raw), base: base}
+  return {...normalized(raw), base: base, file: file}
 }
 
 module.exports = {

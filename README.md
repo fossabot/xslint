@@ -473,8 +473,9 @@ the defects back in the order the reports print them — file, line, column, rul
 `settingsOf(dir, flags)` reads the `.xslint.yml` nearest to `dir` the way the
 command line does, `flags` taking `config`, `preset`, `only` and `suppress`
 over it, and answers options to hand straight to `lint`, plus `excluded(path)`,
-whether `exclude:` keeps the stylesheet at that absolute path out, and
-`problems`, one sentence per
+whether `exclude:` keeps the stylesheet at that absolute path out, `file`, the
+absolute path of the configuration it read (undefined when none), `base`, the
+directory its globs resolve against, and `problems`, one sentence per
 unknown key, mistyped value or rule naming no check. It prints nothing, and
 throws rather than answering a problem where the preset names no check list or
 the file is not YAML at all, as the command line fails on both:
@@ -485,6 +486,29 @@ const {lint, settingsOf} = require('@maxonfjvipon/xslint')
 const settings = settingsOf('/path/to/project')
 const defects = lint(
   sources.filter((source) => !settings.excluded(source.file)), settings,
+)
+```
+
+`stylesheetsOf(paths, settings)` answers `{stylesheets, problems}`: the absolute
+paths of the stylesheets a run over `paths` reads, found the way the command
+line finds them — both suffixes, what `.gitignore` and `exclude:` keep out —
+and one sentence per warning it prints on the way, logging nothing above the
+debug level itself. A relative path resolves against the working directory of
+the process, not against `settings.base`, so pass absolute ones.
+`sourceOf(file, content)` answers the source `lint` takes for that content,
+reading the parameter entities it declares and the hrefs it writes that no file
+stands behind relative to `file`, so a buffer nobody saved lints as the file
+would:
+
+```js
+const fs = require('fs')
+const {lint, settingsOf, stylesheetsOf, sourceOf} = require('@maxonfjvipon/xslint')
+
+const settings = settingsOf('/path/to/project')
+const {stylesheets} = stylesheetsOf(['/path/to/project'], settings)
+const defects = lint(
+  stylesheets.map((file) => sourceOf(file, fs.readFileSync(file, 'utf-8'))),
+  settings,
 )
 ```
 
