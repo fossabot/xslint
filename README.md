@@ -472,14 +472,18 @@ the defects back in the order the reports print them — file, line, column, rul
 
 `settingsOf(dir, flags)` reads the `.xslint.yml` nearest to `dir` the way the
 command line does, `flags` taking `config`, `preset`, `only` and `suppress`
-over it, and answers options to hand straight to `lint`, plus `exclusions`,
-whose `file(path)` says whether `exclude:` keeps a stylesheet out:
+over it, and answers options to hand straight to `lint`, plus `excluded(path)`,
+whether `exclude:` keeps the stylesheet at that absolute path out, and
+`problems`, one sentence per
+unknown key, mistyped value or rule naming no check. It prints nothing:
 
 ```js
 const {lint, settingsOf} = require('@maxonfjvipon/xslint')
 
 const settings = settingsOf('/path/to/project')
-const defects = lint(sources, settings)
+const defects = lint(
+  sources.filter((source) => !settings.excluded(source.file)), settings,
+)
 ```
 
 ## Editors

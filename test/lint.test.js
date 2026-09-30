@@ -293,15 +293,37 @@ describe('lint (programmatic API)', function() {
   it('excludes a file the configuration excludes', function() {
     const dir = configured('presets/regraded.yml')
     assert.ok(
-      settingsOf(dir).exclusions.file(path.join(dir, 'vendor', 'kept.xsl')),
+      settingsOf(dir).excluded(path.join(dir, 'vendor', 'kept.xsl')),
       'did not exclude a stylesheet under a directory the exclusions name',
     )
   })
   it('keeps a file the configuration does not exclude', function() {
     const dir = configured('presets/regraded.yml')
     assert.ok(
-      !settingsOf(dir).exclusions.file(path.join(dir, 'own', 'kept.xsl')),
+      !settingsOf(dir).excluded(path.join(dir, 'own', 'kept.xsl')),
       'excluded a stylesheet under a directory no exclusion names',
+    )
+  })
+  it('answers the problems a troubled configuration holds', function() {
+    assert.deepEqual(
+      settingsOf(configured('presets/troubled.yml')).problems,
+      [
+        `Unknown key 'bogus' in .xslint.yml`,
+        [
+          `Invalid severity 'loud' for rule 'short-names' in .xslint.yml,`,
+          'use one of off, warning, error',
+        ].join(' '),
+        `Value of 'exclude' in .xslint.yml must be a list of strings, ignoring it`,
+        `Rule 'no-such-rule' in configuration does not exist`,
+      ],
+      'did not hand back every problem the configuration holds, in the order the command line prints them',
+    )
+  })
+  it('writes nothing while reading a troubled configuration', function() {
+    assert.deepEqual(
+      noted(() => settingsOf(configured('presets/troubled.yml'))),
+      [],
+      'wrote a problem of the configuration where no caller can read it back',
     )
   })
   it('refuses a preset that does not exist', function() {

@@ -51,21 +51,22 @@ const located = function(from) {
 }
 
 /**
- * Value of a known key when it holds the expected type, warning and falling
- * back to the default otherwise, so a mistyped value is as visible as a
- * mistyped key rather than silently ignored.
+ * Value of a known key when it holds the expected type, noting a problem and
+ * falling back to the default otherwise, so a mistyped value is as visible as
+ * a mistyped key rather than silently ignored.
  * @param {object|null} raw - Parsed YAML, or null when there is no file
  * @param {string} key - Key to read
  * @param {function(*): boolean} ok - Whether the value has the expected type
- * @param {string} expected - Human name of the expected type, for the warning
+ * @param {string} expected - Human name of the expected type, for the problem
  * @param {*} fallback - Value to use when the key is absent or mistyped
+ * @param {Array.<string>} problems - Where a mistyped value is noted
  * @return {*} - The value when it fits, the fallback otherwise
  */
-const typed = function(raw, key, ok, expected, fallback) {
+const typed = function(raw, key, ok, expected, fallback, problems) {
   const present = Boolean(raw) && Object.hasOwn(raw, key)
   const fits = present && ok(raw[key])
   if (present && !fits) {
-    logger.warn(`Value of '${key}' in ${NAME} must be ${expected}, ignoring it`)
+    problems.push(`Value of '${key}' in ${NAME} must be ${expected}, ignoring it`)
   }
   let value = fallback
   if (fits) {
@@ -76,25 +77,24 @@ const typed = function(raw, key, ok, expected, fallback) {
 
 /**
  * Normalize the parsed YAML into the configuration the linter consumes,
- * reporting any unknown top-level key, any rule graded to an unknown severity,
- * and any known key holding the wrong type rather than dropping them silently.
+ * answering any unknown top-level key, any rule graded to an unknown severity,
+ * and any known key holding the wrong type as a problem rather than dropping
+ * them silently, for the caller to print or show where it will (#1128).
  * @param {object|null} raw - Parsed YAML, or null when there is no file
  * @return {{rules: object, exclude: Array.<string>, only: Array.<string>,
  *  preset: string|null, maxWarnings: number|null, logLevel: string|null,
- *  quiet: boolean|null}} - Normalized configuration
+ *  quiet: boolean|null, problems: Array.<string>}} - Normalized configuration
  */
 const normalized = function(raw) {
-  for (const key of Object.keys(raw || {})) {
-    if (!KEYS.includes(key)) {
-      logger.warn(`Unknown key '${key}' in ${NAME}`)
-    }
-  }
+  const problems = Object.keys(raw || {})
+    .filter((key) => !KEYS.includes(key))
+    .map((key) => `Unknown key '${key}' in ${NAME}`)
   const rules = {}
   for (const [name, severity] of Object.entries(raw && raw.rules || {})) {
     if (SEVERITIES.includes(severity)) {
       rules[name] = severity
     } else {
-      logger.warn(
+      problems.push(
         [
           `Invalid severity '${severity}' for rule '${name}' in ${NAME},`,
           `use one of ${SEVERITIES.join(', ')}`,
@@ -107,26 +107,31 @@ const normalized = function(raw) {
     exclude: typed(
       raw, 'exclude',
       (val) => Array.isArray(val) && val.every((it) => typeof it === 'string'),
-      'a list of strings', [],
+      'a list of strings', [], problems,
     ),
     only: typed(
       raw, 'only',
       (val) => Array.isArray(val) && val.every((it) => typeof it === 'string'),
-      'a list of strings', [],
+      'a list of strings', [], problems,
     ),
     preset: typed(
       raw, 'preset', (val) => typeof val === 'string', 'a string', null,
+      problems,
     ),
     maxWarnings: typed(
       raw, 'max-warnings',
       (val) => typeof val === 'number' && !Number.isNaN(val), 'a number', null,
+      problems,
     ),
     logLevel: typed(
       raw, 'log-level', (val) => typeof val === 'string', 'a string', null,
+      problems,
     ),
     quiet: typed(
       raw, 'quiet', (val) => typeof val === 'boolean', 'a boolean', null,
+      problems,
     ),
+    problems: problems,
   }
 }
 
@@ -139,8 +144,8 @@ const normalized = function(raw) {
  * @param {string|undefined} explicit - Path from '--config', if any
  * @param {string} from - Directory the search starts in
  * @return {{rules: object, exclude: Array.<string>, only: Array.<string>,
- *  preset: string|null, maxWarnings: number|null, logLevel: string|null,
- *  quiet: boolean|null, base: string}} - Configuration
+ *  preset: ?string, maxWarnings: ?number, logLevel: ?string, quiet: ?boolean,
+ *  problems: Array.<string>, base: string}} - Configuration
  */
 const configFrom = function(explicit, from = process.cwd()) {
   let file

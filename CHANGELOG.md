@@ -14,8 +14,9 @@ publication date only; detailed notes begin with the Unreleased section.
   `lint` read no configuration at all and, since the `recommended` default,
   could not get back the checks `preset: all` restores. `settingsOf(dir)`
   answers the `preset`, `only`, `suppress` and `overrides` the nearest
-  `.xslint.yml` spells, and whether its `exclude:` keeps a file out, through
-  the one translation the command line itself now runs (#1128).
+  `.xslint.yml` spells, `excluded(file)` for its `exclude:`, and the
+  `problems` the file holds, printing nothing, through the one translation
+  the command line itself now runs (#1128).
 
 ## 0.4.0 - 2026-09-29
 

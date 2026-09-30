@@ -214,6 +214,45 @@ const PRESETED = [
     'a glob over the whole catalog'],
 ]
 
+/**
+ * What a run prints to stderr over a configuration holding a problem of each
+ * kind: the configuration, the lines, and the way. The file's problems are
+ * printed before its own `log-level` takes hold and a rule naming no check
+ * after, so a file raising the level to `error` silences that one alone
+ * (#1128).
+ * @type {Array.<Array>}
+ */
+const TROUBLED = [
+  [
+    'test/resources/presets/troubled.yml',
+    [
+      `[WARNING] Unknown key 'bogus' in .xslint.yml`,
+      [
+        `[WARNING] Invalid severity 'loud' for rule 'short-names' in`,
+        '.xslint.yml, use one of off, warning, error',
+      ].join(' '),
+      [
+        `[WARNING] Value of 'exclude' in .xslint.yml must be a list of`,
+        'strings, ignoring it',
+      ].join(' '),
+      `[WARNING] Rule 'no-such-rule' in configuration does not exist`,
+      [
+        '[INFO] Directories and files to process:',
+        'test/resources/presets/a-short-name-beside-dead-code.xsl',
+      ].join(' '),
+      '[INFO] Processed files: 1',
+      '[INFO] Defects found: 1',
+      '',
+    ],
+    'the level left alone',
+  ],
+  [
+    'test/resources/presets/troubled-quietly.yml',
+    [`[WARNING] Unknown key 'bogus' in .xslint.yml`, ''],
+    'the level the file raises',
+  ],
+]
+
 describe('xslint', function() {
   it('should print its own version', function() {
     const stdout = runXslint(['--version'])
@@ -577,6 +616,21 @@ describe('xslint', function() {
       [],
       'the help screen leaves out a preset a run may start from',
     )
+  })
+  TROUBLED.forEach(([cfg, expected, what]) => {
+    it(`should print the problems of a configuration under ${what}`, function() {
+      assert.deepEqual(
+        xslintStreams([
+          'test/resources/presets/a-short-name-beside-dead-code.xsl',
+          `--config=${cfg}`,
+        ]).stderr.split(/\r?\n/),
+        expected,
+        [
+          `cannot print anything but what it printed before #1128 under ${what},`,
+          'the problems of a configuration being logged where they were',
+        ].join(' '),
+      )
+    })
   })
   it('should disable a rule named off in the config file', function() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xslint-'))
