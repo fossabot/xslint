@@ -841,10 +841,10 @@ const settingsOf = function(from, flags = {}) {
 
 /**
  * The stylesheets a run over the paths named reads, each resolved against the
- * working directory, walked by the rules the command line walks by, and the
- * warnings it prints on the way handed back as `problems` rather than printed,
- * so an editor linting a workspace reads the corpus the command line does
- * (#1136).
+ * working directory and walked by the rules the command line walks by, and the
+ * warnings it prints on the way handed back as `problems`, so it logs nothing
+ * above the debug level and an editor linting a workspace reads the corpus the
+ * command line does (#1136).
  * @param {Array.<string>} pths - Files or directories holding stylesheets
  * @param {{exclude: Array.<string>, base: string}} settings - What
  *  `settingsOf` answers, whose exclusions prune the walk

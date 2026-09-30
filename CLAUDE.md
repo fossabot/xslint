@@ -1030,7 +1030,7 @@ one of them.
 | File | Role |
 | --- | --- |
 | `src/index.mjs` | CLI entry (commander.js, ESM); imports the pipeline inside the command action, so `--help` loads none of it |
-| `src/xslint.js` | Discovery, config, staging, output; exports the pure `lint` (package `main`), `fixed`, `settingsOf` (what `.xslint.yml` hands `lint`), `stylesheetsOf` (the files a run reads) and `sourceOf` (the record `lint` takes), each printing nothing, and the `STAGES` the speed gate times |
+| `src/xslint.js` | Discovery, config, staging, output; exports the pure `lint` (package `main`), `fixed`, `settingsOf` (what `.xslint.yml` hands `lint`), `stylesheetsOf` (the files a run reads, its warnings as data) and `sourceOf` (the record `lint` takes), none logging above debug, and the `STAGES` the speed gate times |
 | `src/config.js` | Resolves `.xslint.yml` (severities/`off`, excludes, `max-warnings`) |
 | `src/gitignore.js` | `ignoring(start)` — what the project's own `.gitignore` files refuse: a directory the walk never opens, a stylesheet it drops |
 | `src/directives.js` | Parses inline `xslint-disable-*` comment directives |

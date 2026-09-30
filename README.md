@@ -492,13 +492,16 @@ const defects = lint(
 `stylesheetsOf(paths, settings)` answers `{stylesheets, problems}`: the absolute
 paths of the stylesheets a run over `paths` reads, found the way the command
 line finds them — both suffixes, what `.gitignore` and `exclude:` keep out —
-and one sentence per warning it prints on the way, printing nothing itself.
+and one sentence per warning it prints on the way, logging nothing above the
+debug level itself. A relative path resolves against the working directory of
+the process, not against `settings.base`, so pass absolute ones.
 `sourceOf(file, content)` answers the source `lint` takes for that content,
 reading the parameter entities it declares and the hrefs it writes that no file
 stands behind relative to `file`, so a buffer nobody saved lints as the file
 would:
 
 ```js
+const fs = require('fs')
 const {lint, settingsOf, stylesheetsOf, sourceOf} = require('@maxonfjvipon/xslint')
 
 const settings = settingsOf('/path/to/project')
