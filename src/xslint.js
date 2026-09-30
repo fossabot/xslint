@@ -769,23 +769,27 @@ const lint = function(
 }
 
 /**
- * Entry point for the command line.
- * @param {Array.<string>} pths - Files or directories with .xsl to lint
- * @param {object} options - CLI options: `logLevel`, `quiet`, `suppress`,
- *  `maxWarnings`, `config`, `format`, `only`, `preset`, `fix`, `fixDryRun`,
- *  `fixSuggestions`
+ * What a run over one project hands `lint`: the preset, the choice, the
+ * suppressions and the re-grades its `.xslint.yml` spells with the flags laid
+ * over it, and what its `exclude:` keeps out. An exact name in `rules` adds
+ * its check to the run while a glob re-grades only what already runs (#1094);
+ * the command line and an editor read a project through this alone (#1128).
+ * @param {string} from - Directory the search for `.xslint.yml` starts in
+ * @param {{config: string, preset: string, only: Array.<string>,
+ *  suppress: Array.<string>}} flags - What the caller says over the file
+ * @param {object} config - The configuration, `configFrom` resolving it
+ * @return {{suppress: Array.<string>, overrides: {[check: string]: string},
+ *  only: Array.<string>, preset: string, exclusions: object}} - The options
+ *  `lint` takes, and `reaching` over the configured exclusions
  */
-const xslint = function(pths, options) {
-  logger.setLevel(leveled(options.quiet, options.logLevel))
-  const config = configFrom(options.config)
-  if (options.quiet == null && options.logLevel == null) {
-    logger.setLevel(leveled(config.quiet, config.logLevel))
-  }
-  const preset = options.preset ?? config.preset ?? PRESET
+const settingsOf = function(
+  from, flags = {}, config = configFrom(flags.config, from),
+) {
+  const preset = flags.preset ?? config.preset ?? PRESET
   const listed = presetted(preset)
   let only = config.only
-  if (options.only?.length > 0) {
-    only = options.only
+  if (flags.only?.length > 0) {
+    only = flags.only
   }
   const disabled = []
   const overrides = {}
@@ -804,10 +808,32 @@ const xslint = function(pths, options) {
       }
     }
   }
+  return {
+    suppress: [...flags.suppress ?? [], ...disabled],
+    overrides: overrides,
+    only: only,
+    preset: preset,
+    exclusions: reaching(config.exclude, config.base),
+  }
+}
+
+/**
+ * Entry point for the command line.
+ * @param {Array.<string>} pths - Files or directories with .xsl to lint
+ * @param {object} options - CLI options: `logLevel`, `quiet`, `suppress`,
+ *  `maxWarnings`, `config`, `format`, `only`, `preset`, `fix`, `fixDryRun`,
+ *  `fixSuggestions`
+ */
+const xslint = function(pths, options) {
+  logger.setLevel(leveled(options.quiet, options.logLevel))
+  const config = configFrom(options.config)
+  if (options.quiet == null && options.logLevel == null) {
+    logger.setLevel(leveled(config.quiet, config.logLevel))
+  }
+  const settings = settingsOf(process.cwd(), options, config)
   const maxWarnings = options.maxWarnings ?? config.maxWarnings ?? -1
   logger.info(`Directories and files to process: ${pths.join(', ')}`)
   pths = pths.map((pth) => path.resolve(process.cwd(), pth))
-  const reach = reaching(config.exclude, config.base)
   let stylesheets = []
   for (const pth of pths) {
     if (!fs.existsSync(pth)) {
@@ -820,11 +846,11 @@ const xslint = function(pths, options) {
         ].join(' '),
       )
     } else {
-      stylesheets = [...stylesheets, ...sheets(pth, reach)]
+      stylesheets = [...stylesheets, ...sheets(pth, settings.exclusions)]
     }
   }
-  stylesheets = stylesheets.filter((file) => !reach.file(file))
-  for (const pattern of reach.unreached()) {
+  stylesheets = stylesheets.filter((file) => !settings.exclusions.file(file))
+  for (const pattern of settings.exclusions.unreached()) {
     logger.warn(`Exclusion '${pattern}' in configuration excluded nothing`)
   }
   logger.debug(`Found ${stylesheets.length} stylesheets to process`)
@@ -836,12 +862,7 @@ const xslint = function(pths, options) {
       subsets: subsetsOf(stylesheet, content),
       absent: absentOf(stylesheet, content),
     }))
-  let reported = lint(sources, {
-    suppress: [...options.suppress, ...disabled],
-    overrides: overrides,
-    only: only,
-    preset: preset,
-  })
+  let reported = lint(sources, settings)
   if (options.fix || options.fixDryRun || options.fixSuggestions) {
     /**
      * @todo #571:60min Fix over several passes until nothing changes: a fix
@@ -892,6 +913,7 @@ const xslint = function(pths, options) {
 module.exports = xslint
 module.exports.lint = lint
 module.exports.fixed = fixed
+module.exports.settingsOf = settingsOf
 module.exports.STAGES = STAGES
 module.exports.PRESETS = PRESETS
 module.exports.SUFFIXES = SUFFIXES
