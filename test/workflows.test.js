@@ -158,6 +158,12 @@
  * own: no step spending a script of ours may stand after one that rewrites the
  * checkout, which is the two substitutions above and the `npm version` writing
  * the manifest beside them (#946).
+ *
+ * The dispatch closing the job raced the registry it follows: 0.5.0 fired it
+ * the moment `npm publish` returned, and the `xslint-action` cascade asked npm
+ * for a version it was not serving yet and died on `notarget`. So a step
+ * resolving the exact version stands between the publish and the dispatch
+ * (#1134).
  */
 
 const {GAP, WHITESPACE} = require('../src/tokens')
@@ -495,14 +501,25 @@ const stamps = function(script) {
 }
 
 /**
+ * How a step asks the registry for one exact version of a package.
+ * @type {RegExp}
+ */
+const RESOLVES = new RegExp(`npm${GAP}+view${GAP}+[^${WHITESPACE}]+@`)
+
+/**
  * Every step of the release job in the order it runs, each knowing whether it
- * spends a script of ours and whether it stamps the checkout (#946).
- * @type {Array.<{where: string, spends: boolean, stamps: boolean}>}
+ * spends a script of ours, stamps the checkout, publishes, waits on the
+ * registry or dispatches the downstream cascade (#946, #1134).
+ * @type {Array.<{where: string, spends: boolean, stamps: boolean,
+ *   publishes: boolean, resolves: boolean, dispatches: boolean}>}
  */
 const RELEASED = RELEASE.jobs.release.steps.map((step) => ({
   where: step.name ?? step.run ?? step.uses,
   spends: spends(step.run ?? ''),
   stamps: stamps(step.run ?? ''),
+  publishes: (step.run ?? '').includes('npm publish'),
+  resolves: RESOLVES.test(step.run ?? ''),
+  dispatches: (step.run ?? '').includes('/dispatches'),
 }))
 
 describe('workflows', function() {
@@ -696,6 +713,24 @@ describe('workflows', function() {
           'tree, so a placeholder rewritten in front of them reaches nothing',
           'and the release dies at a test that is green everywhere else',
           '(#946)',
+        ].join(' '),
+      )
+    })
+
+  it('resolves the published version before the release dispatches',
+    function() {
+      assert.deepStrictEqual(
+        RELEASED.filter(
+          (step, index) => step.dispatches && !RELEASED.slice(0, index).some(
+            (earlier, at) => earlier.resolves &&
+              RELEASED.slice(0, at).some((one) => one.publishes),
+          ),
+        ).map((step) => step.where),
+        [],
+        [
+          'cannot dispatch the downstream cascade before the registry serves',
+          'the version just published, a cascade starting first dying on',
+          'notarget (#1134)',
         ].join(' '),
       )
     })

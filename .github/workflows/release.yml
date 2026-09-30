@@ -46,6 +46,20 @@ jobs:
             --notes-file notes.md \
             || gh release create "${VERSION}" --title "${VERSION}" \
               --notes-file notes.md
+      - name: Wait until npm serves the published version
+        timeout-minutes: 12
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          for _ in $(seq 60); do
+            served="$(npm view "@maxonfjvipon/xslint@${VERSION}" version || true)"
+            if [ "${served}" = "${VERSION}" ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::npm did not serve @maxonfjvipon/xslint@${VERSION} within ten minutes of publishing it"
+          exit 1
       - name: Trigger the downstream release cascade
         env:
           GH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}

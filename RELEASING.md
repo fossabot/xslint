@@ -23,7 +23,8 @@ Rultor validates and tests, tags the commit, and the tag triggers
 1. runs the tests, stamps the version, and publishes `@maxonfjvipon/xslint`
    to npm over OIDC (no token);
 2. cuts the GitHub release from the `CHANGELOG.md` section;
-3. fires a `repository_dispatch` (`xslint-released`, carrying the version) to
+3. waits until npm serves the published version, failing after ten minutes;
+4. fires a `repository_dispatch` (`xslint-released`, carrying the version) to
    `xslint-lsp` and `xslint-action`.
 
 Each downstream repo then bumps its pinned `@maxonfjvipon/xslint`, validates
