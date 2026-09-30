@@ -7,7 +7,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Entries for releases before this file was introduced record their npm
 publication date only; detailed notes begin with the Unreleased section.
 
-## Unreleased
+## 0.6.0 - 2026-09-30
 
 - Export `stylesheetsOf` and `sourceOf`, the discovery and the source building
   the command line ran inline. An editor calling `lint` walked the workspace
