@@ -7,6 +7,20 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Entries for releases before this file was introduced record their npm
 publication date only; detailed notes begin with the Unreleased section.
 
+## Unreleased
+
+- Export `stylesheetsOf` and `sourceOf`, the discovery and the source building
+  the command line ran inline. An editor calling `lint` walked the workspace
+  its own way, so it read no `.xslt`, walked what `.gitignore` and `exclude:`
+  keep out, and handed `lint` no parameter entities and no missing hrefs, so
+  `broken-href` never fired there. `stylesheetsOf(paths, settings)` answers the
+  stylesheets a run reads and the warnings it prints on the way as `problems`,
+  and `sourceOf(file, content)` the record `lint` takes for content nobody
+  saved, both through the one path the command line itself now runs.
+  `settingsOf` also answers `file`, the configuration it read, and `base`, the
+  directory its globs resolve against, so an editor no longer searches for
+  `.xslint.yml` itself to know where to show its problems (#1136).
+
 ## 0.5.0 - 2026-09-30
 
 - Export `settingsOf`, what a run over a project hands `lint`. The command

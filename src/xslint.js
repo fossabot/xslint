@@ -777,9 +777,9 @@ const lint = function(
  * @param {object} config - The configuration, as `configFrom` resolves it
  * @param {{preset: string, only: Array.<string>, suppress: Array.<string>}}
  *  flags - What the caller says over the file
- * @return {{suppress: Array.<string>, overrides: {[check: string]: string},
- *  only: Array.<string>, preset: string, excluded: function(string): boolean,
- *  problems: Array.<string>}} - The options `lint` takes, and the rest
+ * @return {{suppress: Array, overrides: object, preset: string, only: Array,
+ *  excluded: function(string): boolean, exclude: Array, base: string,
+ *  file: (string|undefined), problems: Array}} - What `lint` takes, and more
  */
 const settingsFrom = function(config, flags = {}) {
   const preset = flags.preset ?? config.preset ?? PRESET
@@ -812,6 +812,9 @@ const settingsFrom = function(config, flags = {}) {
     only: only,
     preset: preset,
     excluded: (file) => excluded(file, config.exclude, config.base),
+    exclude: config.exclude,
+    base: config.base,
+    file: config.file,
     problems: problems,
   }
 }
@@ -824,9 +827,9 @@ const settingsFrom = function(config, flags = {}) {
  * @param {string} from - Directory the search for `.xslint.yml` starts in
  * @param {{config: string, preset: string, only: Array.<string>,
  *  suppress: Array.<string>}} flags - What the caller says over the file
- * @return {{suppress: Array.<string>, overrides: {[check: string]: string},
- *  only: Array.<string>, preset: string, excluded: function(string): boolean,
- *  problems: Array.<string>}} - The options `lint` takes, and the rest
+ * @return {{suppress: Array, overrides: object, preset: string, only: Array,
+ *  excluded: function(string): boolean, exclude: Array, base: string,
+ *  file: (string|undefined), problems: Array}} - What `lint` takes, and more
  * @throws {Error} - On a preset naming no check list, or a file no YAML parser
  *  reads, as the command line fails on both before it lints
  */
@@ -834,6 +837,67 @@ const settingsOf = function(from, flags = {}) {
   const config = configFrom(flags.config, from)
   const settings = settingsFrom(config, flags)
   return {...settings, problems: [...config.problems, ...settings.problems]}
+}
+
+/**
+ * The stylesheets a run over the paths named reads, each resolved against the
+ * working directory, walked by the rules the command line walks by, and the
+ * warnings it prints on the way handed back as `problems` rather than printed,
+ * so an editor linting a workspace reads the corpus the command line does
+ * (#1136).
+ * @param {Array.<string>} pths - Files or directories holding stylesheets
+ * @param {{exclude: Array.<string>, base: string}} settings - What
+ *  `settingsOf` answers, whose exclusions prune the walk
+ * @return {{stylesheets: Array.<string>, problems: Array.<string>}} - The
+ *  absolute paths of the stylesheets found, and one sentence per warning
+ */
+const stylesheetsOf = function(pths, settings) {
+  const reach = reaching(settings.exclude, settings.base)
+  const problems = []
+  let stylesheets = []
+  for (const pth of pths.map((named) => path.resolve(process.cwd(), named))) {
+    if (!fs.existsSync(pth)) {
+      problems.push(`File or directory ${pth} does not exist`)
+    } else if (!fs.statSync(pth).isDirectory() && !suffixed(pth)) {
+      problems.push(
+        [
+          `File ${pth} was not read,`,
+          `a stylesheet being named ${SUFFIXES.join(' or ')}`,
+        ].join(' '),
+      )
+    } else {
+      stylesheets = [...stylesheets, ...sheets(pth, reach)]
+    }
+  }
+  stylesheets = stylesheets.filter((file) => !reach.file(file))
+  return {
+    stylesheets: stylesheets,
+    problems: [
+      ...problems,
+      ...reach.unreached().map(
+        (pattern) => `Exclusion '${pattern}' in configuration excluded nothing`,
+      ),
+    ],
+  }
+}
+
+/**
+ * The record `lint` takes for one stylesheet, built from the content given
+ * rather than from the disk, so an editor hands over a buffer nobody saved:
+ * the parameter entity files and the missing hrefs are still read beside the
+ * file, as the command line reads them (#1010, #209, #1136).
+ * @param {string} file - Path of the stylesheet
+ * @param {string} content - Its source
+ * @return {{file: string, content: string, subsets: Map.<string, string>,
+ *  absent: Set.<string>}} - The source `lint` takes
+ */
+const sourceOf = function(file, content) {
+  return {
+    file: file,
+    content: content,
+    subsets: subsetsOf(file, content),
+    absent: absentOf(file, content),
+  }
 }
 
 /**
@@ -854,36 +918,12 @@ const xslint = function(pths, options) {
   settings.problems.forEach((problem) => logger.warn(problem))
   const maxWarnings = options.maxWarnings ?? config.maxWarnings ?? -1
   logger.info(`Directories and files to process: ${pths.join(', ')}`)
-  pths = pths.map((pth) => path.resolve(process.cwd(), pth))
-  const reach = reaching(config.exclude, config.base)
-  let stylesheets = []
-  for (const pth of pths) {
-    if (!fs.existsSync(pth)) {
-      logger.warn(`File or directory ${pth} does not exist`)
-    } else if (!fs.statSync(pth).isDirectory() && !suffixed(pth)) {
-      logger.warn(
-        [
-          `File ${pth} was not read,`,
-          `a stylesheet being named ${SUFFIXES.join(' or ')}`,
-        ].join(' '),
-      )
-    } else {
-      stylesheets = [...stylesheets, ...sheets(pth, reach)]
-    }
-  }
-  stylesheets = stylesheets.filter((file) => !reach.file(file))
-  for (const pattern of reach.unreached()) {
-    logger.warn(`Exclusion '${pattern}' in configuration excluded nothing`)
-  }
-  logger.debug(`Found ${stylesheets.length} stylesheets to process`)
-  const sources = stylesheets
-    .map((stylesheet) => [stylesheet, fs.readFileSync(stylesheet, 'utf-8')])
-    .map(([stylesheet, content]) => ({
-      file: stylesheet,
-      content: content,
-      subsets: subsetsOf(stylesheet, content),
-      absent: absentOf(stylesheet, content),
-    }))
+  const found = stylesheetsOf(pths, settings)
+  found.problems.forEach((problem) => logger.warn(problem))
+  logger.debug(`Found ${found.stylesheets.length} stylesheets to process`)
+  const sources = found.stylesheets.map(
+    (stylesheet) => sourceOf(stylesheet, fs.readFileSync(stylesheet, 'utf-8')),
+  )
   let reported = lint(sources, settings)
   if (options.fix || options.fixDryRun || options.fixSuggestions) {
     /**
@@ -915,7 +955,7 @@ const xslint = function(pths, options) {
       logger.info(`${suggested.length} more fixable with --fix-suggestions`)
     }
   }
-  logger.info(`Processed files: ${stylesheets.length}`)
+  logger.info(`Processed files: ${found.stylesheets.length}`)
   if (reported.length > 0) {
     logger.info(`Defects found: ${reported.length}`)
   } else {
@@ -936,6 +976,8 @@ module.exports = xslint
 module.exports.lint = lint
 module.exports.fixed = fixed
 module.exports.settingsOf = settingsOf
+module.exports.stylesheetsOf = stylesheetsOf
+module.exports.sourceOf = sourceOf
 module.exports.STAGES = STAGES
 module.exports.PRESETS = PRESETS
 module.exports.SUFFIXES = SUFFIXES

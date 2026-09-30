@@ -127,6 +127,7 @@ describe('config', function() {
       quiet: null,
       problems: [],
       base: dir,
+      file: undefined,
     })
   })
   it('reads the rules from a file named explicitly', function() {
@@ -145,6 +146,16 @@ describe('config', function() {
     const config = configFrom(undefined, nested)
     fs.rmSync(root, {recursive: true, force: true})
     assert.equal(config.maxWarnings, 5)
+  })
+  it('names the file it found walking up from a directory', function() {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'xslint-cfg-'))
+    fs.writeFileSync(path.join(root, '.xslint.yml'), 'max-warnings: 7\n')
+    const nested = path.join(root, 'c', 'd')
+    fs.mkdirSync(nested, {recursive: true})
+    assert.equal(
+      configFrom(undefined, nested).file, path.join(root, '.xslint.yml'),
+      'did not name the configuration file it read, which a caller publishing its problems needs',
+    )
   })
   it('resolves the base to the directory of the config file', function() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xslint-cfg-'))
