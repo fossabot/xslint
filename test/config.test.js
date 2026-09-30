@@ -87,6 +87,29 @@ const CASES = [
     field: 'exclude',
     expected: [],
   },
+  {
+    name: 'answers an unknown key as a problem',
+    content: 'bogus: 1\n',
+    field: 'problems',
+    expected: [`Unknown key 'bogus' in .xslint.yml`],
+  },
+  {
+    name: 'answers a rule graded to an unknown severity as a problem',
+    content: 'rules:\n  short-names: loud\n',
+    field: 'problems',
+    expected: [
+      [
+        `Invalid severity 'loud' for rule 'short-names' in .xslint.yml,`,
+        'use one of off, warning, error',
+      ].join(' '),
+    ],
+  },
+  {
+    name: 'answers a mistyped value as a problem',
+    content: 'quiet: 3\n',
+    field: 'problems',
+    expected: [`Value of 'quiet' in .xslint.yml must be a boolean, ignoring it`],
+  },
 ]
 
 describe('config', function() {
@@ -102,6 +125,7 @@ describe('config', function() {
       maxWarnings: null,
       logLevel: null,
       quiet: null,
+      problems: [],
       base: dir,
     })
   })

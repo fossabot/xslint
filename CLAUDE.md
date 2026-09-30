@@ -393,13 +393,15 @@ and hands the defects back in one total order rather than in the order the
 walk or the wiring happened to give (#638). The command-line `xslint(paths,
 options)` in the same module wraps it — resolves config, reads the `.xsl`
 files, what their parameter entities name and the hrefs missing
-(#1010, #209), calls `lint`, applies
+(#1010, #209), calls `lint` with what `settingsFrom` makes of `.xslint.yml`
+and the flags, printing the problems it answers, applies
 `--fix`, reports, and sets the exit code as
 `process.exitCode`, a `no-restricted-syntax` selector banning the
 `process.exit` that ends the process where it stands and abandons every write
-the kernel has not taken (#767, #822). The package `main` re-exports `lint`
-and `fixed` for the `xslint-lsp` server VS Code and `xslint-jetbrains` run on
-a live buffer (#336); the bin is `src/index.mjs`.
+the kernel has not taken (#767, #822). The package `main` re-exports `lint`,
+`fixed` and `settingsOf` for the `xslint-lsp` server VS Code and
+`xslint-jetbrains` run on a live buffer (#336, #1128); the bin is
+`src/index.mjs`.
 
 `src/index.mjs` reaches `xslint.js` through a dynamic `import` inside the
 command action, not a top-level one, and so runs `program.parseAsync`. Importing
@@ -1026,7 +1028,7 @@ one of them.
 | File | Role |
 | --- | --- |
 | `src/index.mjs` | CLI entry (commander.js, ESM); imports the pipeline inside the command action, so `--help` loads none of it |
-| `src/xslint.js` | Discovery, config, staging, output; exports the pure `lint` (package `main`), `fixed`, and the `STAGES` the speed gate times |
+| `src/xslint.js` | Discovery, config, staging, output; exports the pure `lint` (package `main`), `fixed`, `settingsOf` (what `.xslint.yml` hands `lint`, printing nothing), and the `STAGES` the speed gate times |
 | `src/config.js` | Resolves `.xslint.yml` (severities/`off`, excludes, `max-warnings`) |
 | `src/gitignore.js` | `ignoring(start)` — what the project's own `.gitignore` files refuse: a directory the walk never opens, a stylesheet it drops |
 | `src/directives.js` | Parses inline `xslint-disable-*` comment directives |

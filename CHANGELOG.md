@@ -7,6 +7,17 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Entries for releases before this file was introduced record their npm
 publication date only; detailed notes begin with the Unreleased section.
 
+## Unreleased
+
+- Export `settingsOf`, what a run over a project hands `lint`. The command
+  line read `.xslint.yml` into `lint` options inline, so an editor calling
+  `lint` read no configuration at all and, since the `recommended` default,
+  could not get back the checks `preset: all` restores. `settingsOf(dir)`
+  answers the `preset`, `only`, `suppress` and `overrides` the nearest
+  `.xslint.yml` spells, `excluded(file)` for its `exclude:`, and the
+  `problems` the file holds, printing nothing, through the one translation
+  the command line itself now runs (#1128).
+
 ## 0.4.0 - 2026-09-29
 
 - Name the file its caller spelled in `circular-import` and

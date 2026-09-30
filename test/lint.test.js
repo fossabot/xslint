@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-const {lint, fixed} = require('../src/xslint')
+const {lint, fixed, settingsOf} = require('../src/xslint')
 const fs = require('fs')
+const os = require('os')
 const path = require('path')
 const assert = require('assert')
 
@@ -209,6 +210,55 @@ const SPELLED = [
   ],
 ]
 
+/**
+ * A project directory holding one committed configuration as its
+ * `.xslint.yml`, written under a temporary directory of its own so that no
+ * walk over the working tree meets it.
+ * @param {string} name - Fixture path under test/resources
+ * @return {string} - The directory the configuration stands in
+ */
+const configured = function(name) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xslint-settings-'))
+  fs.copyFileSync(
+    path.resolve(__dirname, 'resources', name), path.join(dir, '.xslint.yml'),
+  )
+  return dir
+}
+
+/**
+ * What a run over one stylesheet reports under the settings a configuration
+ * and the flags beside it make: the configuration, the flags, each defect as
+ * its check and severity, and the way. An exact name in `rules` adds its
+ * check to the preset while a glob re-grades only what already runs, `off`
+ * suppresses, and a flag outranks the file, as the command line does (#1128).
+ * @type {Array.<Array>}
+ */
+const SETTLED = [
+  [
+    'presets/regraded.yml', {},
+    ['unused-function warning', 'short-names error'], 'the file alone',
+  ],
+  [
+    'presets/regraded.yml', {preset: 'all'},
+    ['unused-function warning', 'short-names error', 'unused-variable error'],
+    'a preset flag over the file',
+  ],
+  [
+    'presets/regraded.yml', {only: ['unused']},
+    ['unused-function warning', 'unused-variable error'],
+    'a choice flag over the file',
+  ],
+  [
+    'presets/regraded.yml', {suppress: ['short']},
+    ['unused-function warning'], 'a suppression flag beside the file',
+  ],
+  [
+    'presets/disabled.yml', {},
+    ['unused-function warning', 'short-names warning'],
+    'a check the file turns off under the preset it names',
+  ],
+]
+
 describe('lint (programmatic API)', function() {
   PRESETED.forEach(([options, expected, what]) => {
     it(`reports what ${what} runs`, function() {
@@ -224,6 +274,57 @@ describe('lint (programmatic API)', function() {
         ].join(' '),
       )
     })
+  })
+  SETTLED.forEach(([config, flags, expected, what]) => {
+    it(`reports what the settings of ${what} run`, function() {
+      assert.deepEqual(
+        lint(
+          [source('presets/a-short-name-beside-dead-code.xsl')],
+          settingsOf(configured(config), flags),
+        ).map((defect) => `${defect.name} ${defect.severity}`),
+        expected,
+        [
+          `cannot report anything but ${expected.join(', ') || 'nothing'}`,
+          `under ${what}, the settings being what the command line hands lint`,
+        ].join(' '),
+      )
+    })
+  })
+  it('excludes a file the configuration excludes', function() {
+    const dir = configured('presets/regraded.yml')
+    assert.ok(
+      settingsOf(dir).excluded(path.join(dir, 'vendor', 'kept.xsl')),
+      'did not exclude a stylesheet under a directory the exclusions name',
+    )
+  })
+  it('keeps a file the configuration does not exclude', function() {
+    const dir = configured('presets/regraded.yml')
+    assert.ok(
+      !settingsOf(dir).excluded(path.join(dir, 'own', 'kept.xsl')),
+      'excluded a stylesheet under a directory no exclusion names',
+    )
+  })
+  it('answers the problems a troubled configuration holds', function() {
+    assert.deepEqual(
+      settingsOf(configured('presets/troubled.yml')).problems,
+      [
+        `Unknown key 'bogus' in .xslint.yml`,
+        [
+          `Invalid severity 'loud' for rule 'short-names' in .xslint.yml,`,
+          'use one of off, warning, error',
+        ].join(' '),
+        `Value of 'exclude' in .xslint.yml must be a list of strings, ignoring it`,
+        `Rule 'no-such-rule' in configuration does not exist`,
+      ],
+      'did not hand back every problem the configuration holds, in the order the command line prints them',
+    )
+  })
+  it('writes nothing while reading a troubled configuration', function() {
+    assert.deepEqual(
+      noted(() => settingsOf(configured('presets/troubled.yml'))),
+      [],
+      'wrote a problem of the configuration where no caller can read it back',
+    )
   })
   it('refuses a preset that does not exist', function() {
     assert.throws(

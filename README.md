@@ -470,6 +470,24 @@ sources, honors inline `xslint-disable` directives, runs every check
 the defects back in the order the reports print them — file, line, column, rule;
 `fixed(sources, defects, suggestions)` returns the rewritten content per file.
 
+`settingsOf(dir, flags)` reads the `.xslint.yml` nearest to `dir` the way the
+command line does, `flags` taking `config`, `preset`, `only` and `suppress`
+over it, and answers options to hand straight to `lint`, plus `excluded(path)`,
+whether `exclude:` keeps the stylesheet at that absolute path out, and
+`problems`, one sentence per
+unknown key, mistyped value or rule naming no check. It prints nothing, and
+throws rather than answering a problem where the preset names no check list or
+the file is not YAML at all, as the command line fails on both:
+
+```js
+const {lint, settingsOf} = require('@maxonfjvipon/xslint')
+
+const settings = settingsOf('/path/to/project')
+const defects = lint(
+  sources.filter((source) => !settings.excluded(source.file)), settings,
+)
+```
+
 ## Editors
 
 xslint runs inside your editor through the

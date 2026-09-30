@@ -769,30 +769,32 @@ const lint = function(
 }
 
 /**
- * Entry point for the command line.
- * @param {Array.<string>} pths - Files or directories with .xsl to lint
- * @param {object} options - CLI options: `logLevel`, `quiet`, `suppress`,
- *  `maxWarnings`, `config`, `format`, `only`, `preset`, `fix`, `fixDryRun`,
- *  `fixSuggestions`
+ * What a run under one configuration hands `lint`: the preset, the choice, the
+ * suppressions and the re-grades it spells with the flags laid over it,
+ * whether its `exclude:` keeps a file out, and a rule naming no check as a
+ * problem rather than a warning. An exact name in `rules` adds its check to
+ * the run while a glob re-grades only what already runs (#1094, #1128).
+ * @param {object} config - The configuration, as `configFrom` resolves it
+ * @param {{preset: string, only: Array.<string>, suppress: Array.<string>}}
+ *  flags - What the caller says over the file
+ * @return {{suppress: Array.<string>, overrides: {[check: string]: string},
+ *  only: Array.<string>, preset: string, excluded: function(string): boolean,
+ *  problems: Array.<string>}} - The options `lint` takes, and the rest
  */
-const xslint = function(pths, options) {
-  logger.setLevel(leveled(options.quiet, options.logLevel))
-  const config = configFrom(options.config)
-  if (options.quiet == null && options.logLevel == null) {
-    logger.setLevel(leveled(config.quiet, config.logLevel))
-  }
-  const preset = options.preset ?? config.preset ?? PRESET
+const settingsFrom = function(config, flags = {}) {
+  const preset = flags.preset ?? config.preset ?? PRESET
   const listed = presetted(preset)
   let only = config.only
-  if (options.only?.length > 0) {
-    only = options.only
+  if (flags.only?.length > 0) {
+    only = flags.only
   }
   const disabled = []
   const overrides = {}
+  const problems = []
   for (const [pattern, severity] of Object.entries(config.rules)) {
     const matched = CHECKS.filter((check) => minimatch(check, pattern))
     if (matched.length === 0) {
-      logger.warn(`Rule '${pattern}' in configuration does not exist`)
+      problems.push(`Rule '${pattern}' in configuration does not exist`)
     }
     for (const check of matched) {
       if (severity === 'off') {
@@ -804,6 +806,52 @@ const xslint = function(pths, options) {
       }
     }
   }
+  return {
+    suppress: [...flags.suppress ?? [], ...disabled],
+    overrides: overrides,
+    only: only,
+    preset: preset,
+    excluded: (file) => excluded(file, config.exclude, config.base),
+    problems: problems,
+  }
+}
+
+/**
+ * What a run over one project hands `lint`, read off the `.xslint.yml`
+ * nearest to it the way the command line reads it, the problems of the file
+ * standing in front of those of its rules. Nothing is printed, so an editor
+ * asking once a keystroke shows the problems where it will (#1128).
+ * @param {string} from - Directory the search for `.xslint.yml` starts in
+ * @param {{config: string, preset: string, only: Array.<string>,
+ *  suppress: Array.<string>}} flags - What the caller says over the file
+ * @return {{suppress: Array.<string>, overrides: {[check: string]: string},
+ *  only: Array.<string>, preset: string, excluded: function(string): boolean,
+ *  problems: Array.<string>}} - The options `lint` takes, and the rest
+ * @throws {Error} - On a preset naming no check list, or a file no YAML parser
+ *  reads, as the command line fails on both before it lints
+ */
+const settingsOf = function(from, flags = {}) {
+  const config = configFrom(flags.config, from)
+  const settings = settingsFrom(config, flags)
+  return {...settings, problems: [...config.problems, ...settings.problems]}
+}
+
+/**
+ * Entry point for the command line.
+ * @param {Array.<string>} pths - Files or directories with .xsl to lint
+ * @param {object} options - CLI options: `logLevel`, `quiet`, `suppress`,
+ *  `maxWarnings`, `config`, `format`, `only`, `preset`, `fix`, `fixDryRun`,
+ *  `fixSuggestions`
+ */
+const xslint = function(pths, options) {
+  logger.setLevel(leveled(options.quiet, options.logLevel))
+  const config = configFrom(options.config)
+  config.problems.forEach((problem) => logger.warn(problem))
+  if (options.quiet == null && options.logLevel == null) {
+    logger.setLevel(leveled(config.quiet, config.logLevel))
+  }
+  const settings = settingsFrom(config, options)
+  settings.problems.forEach((problem) => logger.warn(problem))
   const maxWarnings = options.maxWarnings ?? config.maxWarnings ?? -1
   logger.info(`Directories and files to process: ${pths.join(', ')}`)
   pths = pths.map((pth) => path.resolve(process.cwd(), pth))
@@ -836,12 +884,7 @@ const xslint = function(pths, options) {
       subsets: subsetsOf(stylesheet, content),
       absent: absentOf(stylesheet, content),
     }))
-  let reported = lint(sources, {
-    suppress: [...options.suppress, ...disabled],
-    overrides: overrides,
-    only: only,
-    preset: preset,
-  })
+  let reported = lint(sources, settings)
   if (options.fix || options.fixDryRun || options.fixSuggestions) {
     /**
      * @todo #571:60min Fix over several passes until nothing changes: a fix
@@ -892,6 +935,7 @@ const xslint = function(pths, options) {
 module.exports = xslint
 module.exports.lint = lint
 module.exports.fixed = fixed
+module.exports.settingsOf = settingsOf
 module.exports.STAGES = STAGES
 module.exports.PRESETS = PRESETS
 module.exports.SUFFIXES = SUFFIXES

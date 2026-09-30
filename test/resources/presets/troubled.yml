@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Max Trunnikov
+# SPDX-License-Identifier: MIT
+---
+bogus: 1
+exclude: nope
+rules:
+  no-such-rule: error
+  short-names: loud
