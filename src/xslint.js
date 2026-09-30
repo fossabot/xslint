@@ -827,6 +827,8 @@ const settingsFrom = function(config, flags = {}) {
  * @return {{suppress: Array.<string>, overrides: {[check: string]: string},
  *  only: Array.<string>, preset: string, excluded: function(string): boolean,
  *  problems: Array.<string>}} - The options `lint` takes, and the rest
+ * @throws {Error} - On a preset naming no check list, or a file no YAML parser
+ *  reads, as the command line fails on both before it lints
  */
 const settingsOf = function(from, flags = {}) {
   const config = configFrom(flags.config, from)
