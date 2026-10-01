@@ -4,7 +4,7 @@
  */
 
 const {lintByImports} = require('../src/linters/import-linter')
-const {chained, judged} = require('./chains')
+const {STEP, grown} = require('./chains')
 const {harness} = require('./packs')
 const assert = require('assert')
 
@@ -48,12 +48,6 @@ const assert = require('assert')
 const CHAIN = 200
 
 /**
- * How many times longer the long chain is than the short one.
- * @type {number}
- */
-const STEP = 4
-
-/**
  * How many times over the check runs inside one timed window, over the short
  * chain — a quarter as often over the long one, so both come out the same size
  * while the check is linear in the edges. A window has to clear the clock's
@@ -73,7 +67,6 @@ const PASSES = 64
  */
 const GROWTH = 8
 
-
 describe('import-linter', function() {
   harness({
     dir: 'import-packs',
@@ -81,15 +74,7 @@ describe('import-linter', function() {
     run: (corpus, off) => lintByImports(corpus, off),
   })
   it('cannot cost the square of the chain it is handed', function() {
-    const chains = [
-      {corpus: chained(0, CHAIN), passes: PASSES, lint: lintByImports},
-      {
-        corpus: chained(CHAIN, CHAIN * STEP),
-        passes: PASSES / STEP,
-        lint: lintByImports,
-      },
-    ]
-    const readings = judged(chains)
+    const readings = grown(lintByImports, CHAIN, PASSES)
     const grew = readings[1] / readings[0]
     assert.ok(
       grew < GROWTH,

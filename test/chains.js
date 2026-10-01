@@ -16,6 +16,12 @@ const fs = require('fs')
 const path = require('path')
 
 /**
+ * How many times longer the long chain is than the short one.
+ * @type {number}
+ */
+const STEP = 4
+
+/**
  * How many times each chain is timed, the lowest reading answering. Noise only
  * ever inflates a reading, so the floor of several is the honest one — of the
  * noise it reaches, the note atop `test/import-linter.test.js` naming the
@@ -72,15 +78,21 @@ const spentOn = function(chain) {
 }
 
 /**
- * The lowest reading each corpus gives over `ATTEMPTS` rounds, the rounds
- * interleaved so the two meet the same machine rather than one of them meeting
- * it first.
- * @param {Array.<{corpus: Array.<{file: string, content: string,
- *  xsl: Document}>, passes: number, lint: function(Array): Array}>} chains -
- *  The chains to time
- * @return {Array.<number>} - Microseconds a pass, one reading per chain
+ * The lowest reading a short chain and one `STEP` times longer give over
+ * `ATTEMPTS` rounds, the rounds interleaved so the two meet the same machine
+ * rather than one of them meeting it first. The long chain runs a `STEP`th as
+ * many passes, so both windows come out the same size while the check is
+ * linear in the edges.
+ * @param {function(Array): Array} lint - What lints a corpus
+ * @param {number} files - Stylesheets in the short chain
+ * @param {number} passes - Passes in a window over the short chain
+ * @return {Array.<number>} - Microseconds a pass, short chain then long
  */
-const judged = function(chains) {
+const grown = function(lint, files, passes) {
+  const chains = [
+    {corpus: chained(0, files), passes: passes, lint: lint},
+    {corpus: chained(files, files * STEP), passes: passes / STEP, lint: lint},
+  ]
   const low = chains.map(() => Infinity)
   for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
     chains.forEach((chain, at) => {
@@ -90,4 +102,4 @@ const judged = function(chains) {
   return low
 }
 
-module.exports = {chained, judged}
+module.exports = {STEP, grown}

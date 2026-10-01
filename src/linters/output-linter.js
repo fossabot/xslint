@@ -149,9 +149,9 @@ const reaching = function(files, links) {
  * @return {Map.<string, Array.<string>>} - Neighbours by file
  */
 const linked = function(edges, side, other) {
-  const links = new Map()
+  const links = new Map(edges.map((edge) => [edge[side], []]))
   for (const edge of edges) {
-    links.set(edge[side], (links.get(edge[side]) ?? []).concat([edge[other]]))
+    links.get(edge[side]).push(edge[other])
   }
   return links
 }

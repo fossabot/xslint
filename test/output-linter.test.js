@@ -4,7 +4,7 @@
  */
 
 const {lintByOutput} = require('../src/linters/output-linter')
-const {chained, judged} = require('./chains')
+const {STEP, grown} = require('./chains')
 const {harness} = require('./packs')
 const assert = require('assert')
 
@@ -19,28 +19,23 @@ const assert = require('assert')
 const CHAIN = 100
 
 /**
- * How many times longer the long chain is than the short one.
- * @type {number}
- */
-const STEP = 4
-
-/**
  * How many times over the check runs inside one timed window, over the short
- * chain — a quarter as often over the long one, so both come out the same size
- * while the check is linear in the edges, and clear the clock's granularity.
+ * chain, and a quarter as often over the long one. A pass costs some 0.4 ms
+ * here, so 192 make a window of some 75, four of the sixteen-millisecond
+ * ticks Windows charges in, where 64 made one tick and a half.
  * @type {number}
  */
-const PASSES = 64
+const PASSES = 192
 
 /**
  * How many times more a pass over the long chain may cost than one over the
  * short. The bar stands at the geometric middle of two measured distributions:
- * a walk from every file, scanning every edge at each step, reads 50.01 to
- * 51.25 over eight runs, where one walk back and one forward reads 3.94 to
- * 4.51 over eight more.
+ * a walk per file over indexed edges costs the square of a chain and reads
+ * 12.19 to 12.75 over eight runs, where one walk back and one forward reads
+ * 4.07 to 4.26 over eight more; the walk scanning every edge read some 50.
  * @type {number}
  */
-const GROWTH = 15
+const GROWTH = 7
 
 describe('output-linter', function() {
   harness({
@@ -49,14 +44,7 @@ describe('output-linter', function() {
     run: (corpus, off) => lintByOutput(corpus, off),
   })
   it('cannot walk the chain it is handed once for every file', function() {
-    const readings = judged([
-      {corpus: chained(0, CHAIN), passes: PASSES, lint: lintByOutput},
-      {
-        corpus: chained(CHAIN, CHAIN * STEP),
-        passes: PASSES / STEP,
-        lint: lintByOutput,
-      },
-    ])
+    const readings = grown(lintByOutput, CHAIN, PASSES)
     const grew = readings[1] / readings[0]
     assert.ok(
       grew < GROWTH,
