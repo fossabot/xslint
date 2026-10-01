@@ -4,12 +4,9 @@
  */
 
 const {lintByImports} = require('../src/linters/import-linter')
-const {xml} = require('../src/helpers')
-const {clocked} = require('./clock')
+const {chained, judged} = require('./chains')
 const {harness} = require('./packs')
 const assert = require('assert')
-const fs = require('fs')
-const path = require('path')
 
 /*
  * `capped` in `test/clock.js` is why a window here is charged the smaller of
@@ -67,14 +64,6 @@ const STEP = 4
 const PASSES = 64
 
 /**
- * How many times each chain is timed, the lowest reading answering. Noise only
- * ever inflates a reading, so the floor of several is the honest one — of the
- * noise it reaches, the note above naming the inflation it does not.
- * @type {number}
- */
-const ATTEMPTS = 3
-
-/**
  * How many times more a pass over the long chain may cost than one over the
  * short. The bar stands at the geometric middle of two measured distributions:
  * a cycle check walking the whole graph per edge costs the square of a chain
@@ -85,70 +74,6 @@ const ATTEMPTS = 3
 const GROWTH = 8
 
 
-/**
- * The one stylesheet the chain is built out of, read once. It is a committed
- * resource rather than a string spelled here, the way every test stylesheet in
- * this repository is.
- * @type {string}
- */
-const SHEET = fs.readFileSync(
-  path.join(__dirname, 'resources', 'imports', 'stylesheet.xsl'), 'utf-8',
-)
-
-/**
- * A chain of stylesheets numbered from one file on, each importing the one
- * before it. The first one's import resolves to a file the corpus does not
- * hold, so it is external and yields no edge, which is what leaves the chain
- * open rather than closed into a cycle.
- * @param {number} from - Number of the first stylesheet
- * @param {number} files - How many to build
- * @return {Array.<{file: string, content: string, xsl: Document}>} - Corpus
- */
-const chained = function(from, files) {
-  const corpus = []
-  for (let at = 0; at < files; at++) {
-    const content = SHEET
-      .replaceAll('PREVIOUS', String(from + at - 1))
-      .replaceAll('SEED', String(from + at))
-    corpus.push({
-      file: `s${from + at}.xsl`,
-      content: content,
-      xsl: xml.parsedFromString(content),
-    })
-  }
-  return corpus
-}
-
-/**
- * Processor time one import linting of a corpus costs.
- * @param {{corpus: Array.<{file: string, content: string, xsl: Document}>,
- *  passes: number}} chain - Parsed stylesheets, and how many passes to time
- * @return {number} - Microseconds spent on one pass
- */
-const spentOn = function(chain) {
-  return clocked(() => Array.from(
-    {length: chain.passes}, () => lintByImports(chain.corpus),
-  )).span / chain.passes
-}
-
-/**
- * The lowest reading each corpus gives over `ATTEMPTS` rounds, the rounds
- * interleaved so the two meet the same machine rather than one of them meeting
- * it first.
- * @param {Array.<{corpus: Array.<{file: string, content: string,
- *  xsl: Document}>, passes: number}>} chains - The chains to time
- * @return {Array.<number>} - Microseconds a pass, one reading per chain
- */
-const judged = function(chains) {
-  const low = chains.map(() => Infinity)
-  for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
-    chains.forEach((chain, at) => {
-      low[at] = Math.min(low[at], spentOn(chain))
-    })
-  }
-  return low
-}
-
 describe('import-linter', function() {
   harness({
     dir: 'import-packs',
@@ -157,8 +82,12 @@ describe('import-linter', function() {
   })
   it('cannot cost the square of the chain it is handed', function() {
     const chains = [
-      {corpus: chained(0, CHAIN), passes: PASSES},
-      {corpus: chained(CHAIN, CHAIN * STEP), passes: PASSES / STEP},
+      {corpus: chained(0, CHAIN), passes: PASSES, lint: lintByImports},
+      {
+        corpus: chained(CHAIN, CHAIN * STEP),
+        passes: PASSES / STEP,
+        lint: lintByImports,
+      },
     ]
     const readings = judged(chains)
     const grew = readings[1] / readings[0]

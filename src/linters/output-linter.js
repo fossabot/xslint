@@ -118,34 +118,50 @@ const serializes = function(xsl) {
 }
 
 /**
- * Every file reachable from one through the import graph, itself included.
+ * Every file reachable from some of them along the import graph, themselves
+ * included, walking each edge once however many walks would have crossed it.
  * `graphOf` yields an edge only where the target is in the corpus, so a library
  * nobody handed us settles nothing either way, which is the guardrail #468 asks
  * for: a subset lint stays quiet rather than inventing an answer.
- * @param {string} file - Where the walk starts
- * @param {Array.<{from: string, to: string}>} edges - The import graph
- * @return {Set.<string>} - Files reachable from it
+ * @param {Set.<string>} files - Where the walk starts
+ * @param {Map.<string, Array.<string>>} links - Each file's neighbours
+ * @return {Set.<string>} - Files reachable from any of them
  */
-const reaching = function(file, edges) {
-  const seen = new Set([path.normalize(file)])
-  const queue = [path.normalize(file)]
-  while (queue.length > 0) {
-    const here = queue.shift()
-    edges
-      .filter((edge) => edge.from === here && !seen.has(edge.to))
-      .forEach((edge) => {
-        seen.add(edge.to)
-        queue.push(edge.to)
+const reaching = function(files, links) {
+  const seen = new Set(files)
+  const queue = Array.from(files)
+  for (let at = 0; at < queue.length; at++) {
+    (links.get(queue[at]) ?? [])
+      .filter((one) => !seen.has(one))
+      .forEach((one) => {
+        seen.add(one)
+        queue.push(one)
       })
   }
   return seen
 }
 
 /**
+ * The import graph as each file's neighbours, read in one direction.
+ * @param {Array.<{from: string, to: string}>} edges - The import graph
+ * @param {string} side - Which end an edge is read from, `from` or `to`
+ * @param {string} other - Which end it leads to
+ * @return {Map.<string, Array.<string>>} - Neighbours by file
+ */
+const linked = function(edges, side, other) {
+  const links = new Map()
+  for (const edge of edges) {
+    links.set(edge[side], (links.get(edge[side]) ?? []).concat([edge[other]]))
+  }
+  return links
+}
+
+/**
  * Every file an `xsl:output` governs: each import tree that declares one, or
  * that reaches past the linted set, taken whole. A tree serializes together,
  * so a module is answered by the sheets importing it as much as by the ones it
- * imports (#548, #468).
+ * imports. One walk back from the settling files and one forward, never one
+ * per file, which cost the cube of an import chain (#548, #468, #1141).
  * @param {Array.<{file: string, xsl: Document}>} corpus - Parsed stylesheets
  * @param {Array.<{from: string, to: string}>} edges - The import graph
  * @return {Set.<string>} - The files a serialization already covers
@@ -162,16 +178,15 @@ const covered = function(corpus, edges) {
       .filter((edge) => !held.has(edge.to))
       .map((edge) => path.normalize(edge.file)),
   )
-  const settled = new Set()
-  for (const {file} of corpus) {
-    const reach = reaching(file, edges)
-    if (Array.from(reach).some(
-      (one) => supplying.has(one) || outward.has(one),
-    )) {
-      reach.forEach((one) => settled.add(one))
-    }
-  }
-  return settled
+  return reaching(
+    reaching(
+      new Set(Array.from(held).filter(
+        (one) => supplying.has(one) || outward.has(one),
+      )),
+      linked(edges, 'to', 'from'),
+    ),
+    linked(edges, 'from', 'to'),
+  )
 }
 
 /**
