@@ -9,8 +9,12 @@ stylistic defects before they ship.
 [![grunt](https://github.com/xslint/xslint/actions/workflows/grunt.yml/badge.svg)](https://github.com/xslint/xslint/actions/workflows/grunt.yml)
 [![codecov](https://codecov.io/gh/xslint/xslint/branch/master/graph/badge.svg)](https://codecov.io/gh/xslint/xslint)
 [![PDD status](http://www.0pdd.com/svg?name=xslint/xslint)](http://www.0pdd.com/p?name=xslint/xslint)
+[![Maintainability](https://qlty.sh/gh/xslint/projects/xslint/maintainability.svg)](https://qlty.sh/gh/xslint/projects/xslint)
+![Lines-of-Code](https://raw.githubusercontent.com/xslint/xslint/gh-pages/loc-badge.svg)
 [![Hits-of-Code](https://hitsofcode.com/github/xslint/xslint)](https://hitsofcode.com/view/github/xslint/xslint)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/xslint/xslint/blob/master/LICENSE.txt)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fxslint%2Fxslint.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fxslint%2Fxslint)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=xslint_xslint&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=xslint_xslint)
 
 `xslint` is a CLI linter for XSL stylesheets. It first checks that every
 stylesheet is well-formed and every XPath expression compiles, then runs its
