@@ -134,9 +134,8 @@ how long it took — including every defect it drew since #638, diffed by
 `scripts/snapshot.js` against a report committed per corpus, since a check that
 changes what it reports over a real stylesheet is a change nothing else here
 notices. What a gate measured at one size cannot see is a quadratic whose
-constant is still small there, so `test/import-linter.test.js` is a third
-instrument, timing one check over a chain of 200 stylesheets and again over 800
-and failing past a growth of 8 (#769).
+constant is still small there, so `test/import-linter.test.js` and
+`test/output-linter.test.js` time a check on two chains, past 8 and 7 (#769, #1141).
 
 Every one of those tables is a **ratchet and not a licence**, red from both
 sides: past the bar, or so far under it that `SLACK` (four) says the bar has
@@ -1087,7 +1086,8 @@ one of them.
 | `test/helpers.js` | The only door to a child process in the suite: `runXslint`, `xslintStatus`, `xslintStreams`, `xslintUnread`, `xcopped`, `walkedWith` |
 | `test/predicates.test.js` | The vocabulary held from both sides: every spelling it answers, and every one it refuses beside what puts that out of reach |
 | `test/tiers.test.js` | The tiers a check declares, held to the ones a run over `test/resources/fix` offers, and the README held to naming none of them |
-| `test/clock.js` | The one clock both speed instruments read: processor time, capped at the wall a window spanned |
+| `test/clock.js` | The one clock each timing test reads: processor time capped at the wall |
+| `test/chains.js` | `grown`: a linter timed over two chains |
 | `test/packs.js` | The one harness every pack directory is read through |
 | `test/scaling.test.js` | The speed gate: every stage's own processor time as a share of the run, at two corpus sizes |
 | `test/xcop.deep.test.js` | Writes every pack's inline XSL to one directory and runs xcop over it |
